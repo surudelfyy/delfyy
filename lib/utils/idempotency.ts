@@ -1,15 +1,15 @@
-import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
-export type IdempotencyResult =
+type IdempotencyResult =
   | { action: 'process' }
   | { action: 'return'; response: unknown }
   | { action: 'in_progress' }
   | { action: 'retry' }
   | { action: 'error'; message: string }
 
-type IdempotencyRow = {
+interface IdempotencyRow {
   status: 'processing' | 'complete' | 'failed'
-  response: unknown | null
+  response: unknown
 }
 
 export async function beginIdempotentRequest(
@@ -17,45 +17,45 @@ export async function beginIdempotentRequest(
   userId: string,
   key: string
 ): Promise<IdempotencyResult> {
-  const { error: insertError } = await supabase.from('idempotency_keys').insert({
-    user_id: userId,
-    idempotency_key: key,
-    status: 'processing',
-  })
+  const { error: insertError } = await supabase
+    .from('idempotency_keys')
+    .insert({
+      user_id: userId,
+      idempotency_key: key,
+      status: 'processing',
+    })
 
   if (!insertError) {
     return { action: 'process' }
   }
 
-  const maybePgError = insertError as PostgrestError
-  if (maybePgError.code !== '23505') {
-    return { action: 'error', message: insertError.message }
+  // Unique violation — key already exists
+  if (insertError.code === '23505') {
+    const { data: existing, error: fetchError } = await supabase
+      .from('idempotency_keys')
+      .select('status, response')
+      .eq('user_id', userId)
+      .eq('idempotency_key', key)
+      .single<IdempotencyRow>()
+
+    if (fetchError || !existing) {
+      return { action: 'error', message: fetchError?.message ?? 'Failed to fetch existing key' }
+    }
+
+    if (existing.status === 'complete') {
+      return { action: 'return', response: existing.response }
+    }
+
+    if (existing.status === 'processing') {
+      return { action: 'in_progress' }
+    }
+
+    if (existing.status === 'failed') {
+      return { action: 'retry' }
+    }
   }
 
-  const { data: row, error: fetchError } = await supabase
-    .from('idempotency_keys')
-    .select('status,response')
-    .eq('user_id', userId)
-    .eq('idempotency_key', key)
-    .maybeSingle<IdempotencyRow>()
-
-  if (fetchError) {
-    return { action: 'error', message: fetchError.message }
-  }
-
-  if (!row) {
-    return { action: 'error', message: 'Idempotency key exists but row not found' }
-  }
-
-  if (row.status === 'complete') {
-    return { action: 'return', response: row.response }
-  }
-
-  if (row.status === 'processing') {
-    return { action: 'in_progress' }
-  }
-
-  return { action: 'retry' }
+  return { action: 'error', message: insertError.message }
 }
 
 export async function completeIdempotentRequest(
@@ -91,3 +91,5 @@ export async function failIdempotentRequest(
     .eq('user_id', userId)
     .eq('idempotency_key', key)
 }
+
+

@@ -39,3 +39,17 @@ export function rateLimitError() {
   return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 }
 
+export function idempotencyInProgressError() {
+  return NextResponse.json({ error: 'Request already in progress' }, { status: 409 })
+}
+
+export function internalServerError(message?: string) {
+  if (message) {
+    console.error('[Internal Server Error]', message)
+  }
+  return NextResponse.json(
+    { error: isDev && message ? message : 'Internal server error' },
+    { status: 500 }
+  )
+}
+
