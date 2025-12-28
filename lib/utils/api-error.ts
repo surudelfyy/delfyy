@@ -39,6 +39,10 @@ export function rateLimitError() {
   return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 }
 
+export function csrfError() {
+  return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+}
+
 export function idempotencyInProgressError() {
   return NextResponse.json({ error: 'Request already in progress' }, { status: 409 })
 }

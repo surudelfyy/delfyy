@@ -9,6 +9,7 @@ import {
   payloadTooLargeError,
   badRequestError,
   rateLimitError,
+  csrfError,
   idempotencyInProgressError,
   internalServerError,
 } from '@/lib/utils/api-error'
@@ -23,6 +24,7 @@ import {
   logValidationFailure,
   logDecisionStarted,
 } from '@/lib/utils/audit-log'
+import { verifyOrigin } from '@/lib/utils/csrf'
 
 const MAX_PAYLOAD_SIZE = 20_000
 const uuidSchema = z.string().uuid()
@@ -53,6 +55,14 @@ export async function POST(request: NextRequest) {
   if (!success) {
     logRateLimitHit(user.id, request, { requestId })
     const response = rateLimitError()
+    response.headers.set('X-Request-Id', requestId)
+    return response
+  }
+
+  // 4. CSRF check
+  const originCheck = verifyOrigin(request)
+  if (!originCheck.ok) {
+    const response = csrfError()
     response.headers.set('X-Request-Id', requestId)
     return response
   }
