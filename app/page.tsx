@@ -4,9 +4,6 @@ export default function HomePage() {
       <div className="text-center space-y-3">
         <h1 className="text-3xl font-semibold">AskDelfyy</h1>
         <p className="text-gray-600">Coming soon.</p>
-        <a href="/login" className="text-sm text-blue-600 underline">
-          Sign in
-        </a>
       </div>
     </main>
   )
