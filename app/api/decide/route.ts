@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
@@ -17,6 +18,11 @@ import {
   completeIdempotentRequest,
   failIdempotentRequest,
 } from '@/lib/utils/idempotency'
+import {
+  logRateLimitHit,
+  logValidationFailure,
+  logDecisionStarted,
+} from '@/lib/utils/audit-log'
 
 const MAX_PAYLOAD_SIZE = 20_000
 const uuidSchema = z.string().uuid()
@@ -29,6 +35,8 @@ export async function POST(request: NextRequest) {
   if (Number.isFinite(size) && size > MAX_PAYLOAD_SIZE) {
     return payloadTooLargeError()
   }
+
+  const requestId = randomUUID()
 
   // 2. Auth check
   const supabase = await createClient()
@@ -43,7 +51,10 @@ export async function POST(request: NextRequest) {
   // 3. Rate limit
   const { success } = rateLimit(user.id, 10, 60_000)
   if (!success) {
-    return rateLimitError()
+    logRateLimitHit(user.id, request, { requestId })
+    const response = rateLimitError()
+    response.headers.set('X-Request-Id', requestId)
+    return response
   }
 
   // 4. Parse JSON
@@ -57,7 +68,10 @@ export async function POST(request: NextRequest) {
   // 5. Zod validation
   const parsed = decideRequestSchema.safeParse(body)
   if (!parsed.success) {
-    return validationError(parsed.error)
+    logValidationFailure(request, parsed.error, { requestId })
+    const response = validationError(parsed.error)
+    response.headers.set('X-Request-Id', requestId)
+    return response
   }
 
   const { question, context } = parsed.data
@@ -81,19 +95,28 @@ export async function POST(request: NextRequest) {
     const result = await beginIdempotentRequest(supabase, user.id, idempotencyKey)
 
     if (result.action === 'return') {
-      return NextResponse.json(result.response, { status: 200 })
+      const response = NextResponse.json(result.response, { status: 200 })
+      response.headers.set('X-Request-Id', requestId)
+      return response
     }
 
     if (result.action === 'in_progress') {
-      return idempotencyInProgressError()
+      const response = idempotencyInProgressError()
+      response.headers.set('X-Request-Id', requestId)
+      return response
     }
 
     if (result.action === 'error') {
-      return internalServerError(result.message)
+      const response = internalServerError(result.message)
+      response.headers.set('X-Request-Id', requestId)
+      return response
     }
 
     // result.action === 'retry' or 'process': continue to business logic
   }
+
+  const decisionId = idempotencyKey ?? 'unknown'
+  logDecisionStarted(user.id, decisionId, { requestId })
 
   // 7. Business logic (TODO: implement decision pipeline)
   try {
@@ -108,7 +131,9 @@ export async function POST(request: NextRequest) {
       await completeIdempotentRequest(supabase, user.id, idempotencyKey, responseData)
     }
 
-    return NextResponse.json(responseData, { status: 501 })
+    const response = NextResponse.json(responseData, { status: 501 })
+    response.headers.set('X-Request-Id', requestId)
+    return response
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error'
 
@@ -117,6 +142,8 @@ export async function POST(request: NextRequest) {
       await failIdempotentRequest(supabase, user.id, idempotencyKey, errorMessage)
     }
 
-    return internalServerError(errorMessage)
+    const response = internalServerError(errorMessage)
+    response.headers.set('X-Request-Id', requestId)
+    return response
   }
 }
