@@ -35,3 +35,7 @@ export function badRequestError(message: string = 'Bad request') {
   )
 }
 
+export function rateLimitError() {
+  return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+}
+

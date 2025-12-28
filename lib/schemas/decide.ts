@@ -7,6 +7,7 @@ export const decideRequestSchema = z.object({
     .min(10, 'Question must be at least 10 characters')
     .max(1000, 'Question must be at most 1000 characters'),
   context: contextSchema,
+  idempotency_key: z.string().uuid().optional(),
 })
 
 export type DecideRequest = z.infer<typeof decideRequestSchema>

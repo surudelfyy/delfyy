@@ -6,7 +6,9 @@ import {
   unauthorizedError,
   payloadTooLargeError,
   badRequestError,
+  rateLimitError,
 } from '@/lib/utils/api-error'
+import { rateLimit } from '@/lib/utils/rate-limit'
 
 const MAX_PAYLOAD_SIZE = 20_000
 
@@ -25,6 +27,11 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return unauthorizedError()
+  }
+
+  const { success } = rateLimit(user.id, 10, 60_000)
+  if (!success) {
+    return rateLimitError()
   }
 
   let body: unknown
