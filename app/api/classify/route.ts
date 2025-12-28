@@ -9,6 +9,7 @@ import {
   rateLimitError,
 } from '@/lib/utils/api-error'
 import { rateLimit } from '@/lib/utils/rate-limit'
+import { logRateLimitHit } from '@/lib/utils/audit-log'
 
 const MAX_PAYLOAD_SIZE = 20_000
 
@@ -29,8 +30,9 @@ export async function POST(request: NextRequest) {
     return unauthorizedError()
   }
 
-  const { success } = rateLimit(user.id, 10, 60_000)
+  const { success } = await rateLimit(user.id, 10, 60_000)
   if (!success) {
+    logRateLimitHit(user.id, request)
     return rateLimitError()
   }
 

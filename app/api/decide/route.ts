@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
   }
 
   // 3. Rate limit
-  const { success } = rateLimit(user.id, 10, 60_000)
+  const { success } = await rateLimit(user.id, 10, 60_000)
   if (!success) {
     logRateLimitHit(user.id, request, { requestId })
     const response = rateLimitError()
