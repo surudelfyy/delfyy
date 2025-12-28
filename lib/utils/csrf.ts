@@ -17,8 +17,9 @@ function getAllowedOrigins(): string[] {
   const appUrl = normalizeOrigin(process.env.NEXT_PUBLIC_APP_URL)
   if (appUrl) origins.add(appUrl)
 
+  // VERCEL_URL is auto-set by Vercel on all deployments (preview + prod)
   const vercelUrl = normalizeOrigin(
-    process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : null
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null
   )
   if (vercelUrl) origins.add(vercelUrl)
 
