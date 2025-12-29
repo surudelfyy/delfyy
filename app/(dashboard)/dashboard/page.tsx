@@ -1,20 +1,40 @@
 import { logout } from '@/app/(auth)/actions'
+import { Page } from '@/components/layout/page'
+import { Stack } from '@/components/layout/stack'
+import { Inline } from '@/components/layout/inline'
+import { SectionTitle } from '@/components/layout/section-title'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { H1, Muted } from '@/components/typography'
 
 export default function DashboardPage() {
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+    <Page width="narrow">
+      <Inline className="justify-between">
+        <H1>Dashboard</H1>
         <form>
-          <button
-            formAction={logout}
-            className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
-          >
+          <Button formAction={logout} variant="secondary" size="sm">
             Logout
-          </button>
+          </Button>
         </form>
+      </Inline>
+
+      <Stack size={6}>
+        <Card className="p-6 space-y-4">
+          <CardHeader className="p-0">
+            <CardTitle>
+              <SectionTitle>Recent decisions</SectionTitle>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Muted>No decisions yet. Create your first decision to see it here.</Muted>
+          </CardContent>
+        </Card>
+      </Stack>
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <Button>New decision</Button>
       </div>
-      <p className="text-gray-600 mt-2">No decisions yet.</p>
-    </div>
+    </Page>
   )
 }
