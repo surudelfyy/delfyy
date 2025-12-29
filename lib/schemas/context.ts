@@ -12,6 +12,7 @@ export const contextSchema = z
     risk_tolerance: z.enum(['low', 'medium', 'high']).optional(),
     what_tried: z.string().max(500).optional(),
     deadline: z.string().max(100).optional(),
+    bad_decision_signal: z.string().max(200).optional(),
   })
   .strict()
   .default({})
