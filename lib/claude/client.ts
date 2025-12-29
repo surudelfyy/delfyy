@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { type ZodSchema } from 'zod'
+import { extractJSON } from '@/lib/utils/json-parser'
 
 export class ClaudeTimeoutError extends Error {
   constructor() {
@@ -51,42 +52,8 @@ type ClaudeCallParams<T> = {
   schema: ZodSchema<T>
   temperature?: number
   maxTokens?: number
+  maxRetries?: number
   timeoutMs?: number
-}
-
-function extractJSON(text: string): string | null {
-  const fencedMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i)
-  const withoutFences = fencedMatch ? fencedMatch[1].trim() : text.trim()
-
-  const objectStart = withoutFences.indexOf('{')
-  const objectEnd = withoutFences.lastIndexOf('}')
-  if (objectStart !== -1 && objectEnd !== -1 && objectEnd > objectStart) {
-    return withoutFences.slice(objectStart, objectEnd + 1)
-  }
-
-  const arrayStart = withoutFences.indexOf('[')
-  const arrayEnd = withoutFences.lastIndexOf(']')
-  if (arrayStart !== -1 && arrayEnd !== -1 && arrayEnd > arrayStart) {
-    return withoutFences.slice(arrayStart, arrayEnd + 1)
-  }
-
-  return null
-}
-
-function parseWithFallback(text: string): unknown {
-  try {
-    return JSON.parse(text)
-  } catch {
-    const extracted = extractJSON(text)
-    if (extracted) {
-      try {
-        return JSON.parse(extracted)
-      } catch {
-        throw new ClaudeParseError()
-      }
-    }
-    throw new ClaudeParseError()
-  }
 }
 
 async function backoff(attempt: number): Promise<void> {
@@ -94,9 +61,16 @@ async function backoff(attempt: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, delay))
 }
 
-export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
+async function callClaudeOnce<T>(
+  model: string,
+  system: string,
+  messages: ClaudeMessage[],
+  schema: ZodSchema<T>,
+  temperature: number | undefined,
+  maxTokens: number,
+  timeoutMs: number
+): Promise<{ data: T } | { error: 'parse' | 'validation' | 'timeout' | 'api'; rawText?: string; message?: string; status?: number }> {
   const controller = new AbortController()
-  const timeoutMs = params.timeoutMs ?? CLAUDE_TIMEOUT_MS
   let rejectTimeout: ((reason?: unknown) => void) | undefined
   const timeoutPromise = new Promise<never>((_, reject) => {
     rejectTimeout = reject
@@ -109,11 +83,11 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
   try {
     const responsePromise = anthropic.messages.create(
       {
-        model: params.model,
-        system: params.system,
-        messages: params.messages,
-        temperature: params.temperature,
-        max_tokens: params.maxTokens ?? DEFAULT_MAX_TOKENS,
+        model,
+        system,
+        messages,
+        temperature,
+        max_tokens: maxTokens,
       },
       { signal: controller.signal }
     )
@@ -128,27 +102,23 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
       .trim()
 
     if (!textContent) {
-      throw new ClaudeParseError()
+      return { error: 'parse', rawText: '' }
     }
 
-    const parsed = params.schema.safeParse(parseWithFallback(textContent))
-    if (!parsed.success) {
-      throw new ClaudeValidationError()
+    const parsed = extractJSON(textContent, schema)
+    if (parsed === null) {
+      return { error: 'validation', rawText: textContent }
     }
 
-    return parsed.data
+    return { data: parsed }
   } catch (error) {
     if (error instanceof ClaudeTimeoutError) {
-      throw error
-    }
-
-    if (error instanceof ClaudeParseError || error instanceof ClaudeValidationError) {
-      throw error
+      return { error: 'timeout' }
     }
 
     const isAbortError = error instanceof Error && error.name === 'AbortError'
     if (isAbortError) {
-      throw new ClaudeTimeoutError()
+      return { error: 'timeout' }
     }
 
     const status =
@@ -157,46 +127,106 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
         : undefined
     const message = error instanceof Error ? error.message : 'Claude API error'
 
-    throw new ClaudeApiError(message, status)
+    return { error: 'api', message, status }
   } finally {
     clearTimeout(timeoutId)
   }
 }
 
-export async function callClaudeWithRetry<T>(
-  params: ClaudeCallParams<T>,
-  maxRetries: number = 1
-): Promise<T> {
+/**
+ * Call Claude with automatic retry and repair message on parse/validation failure.
+ * On failure, appends a repair message asking the model to fix its output.
+ */
+export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
+  const {
+    model,
+    system,
+    messages,
+    schema,
+    temperature,
+    maxTokens = DEFAULT_MAX_TOKENS,
+    maxRetries = 1,
+    timeoutMs = CLAUDE_TIMEOUT_MS,
+  } = params
+
+  let currentMessages = [...messages]
+  let lastRawText: string | undefined
+
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
-    try {
-      return await callClaude(params)
-    } catch (error) {
-      console.error({
-        model: params.model,
-        attempt,
-        errorType: error instanceof Error ? error.name : 'UnknownError',
-        timestamp: new Date().toISOString(),
-      })
+    const result = await callClaudeOnce(
+      model,
+      system,
+      currentMessages,
+      schema,
+      temperature,
+      maxTokens,
+      timeoutMs
+    )
 
-      const isTimeout = error instanceof ClaudeTimeoutError
-      const isParse = error instanceof ClaudeParseError
-      const isValidation = error instanceof ClaudeValidationError
-      const isApiError = error instanceof ClaudeApiError
+    if ('data' in result) {
+      return result.data
+    }
 
-      const retryableApiStatus =
-        isApiError &&
-        typeof error.status === 'number' &&
-        [429, 500, 502, 503, 504].includes(error.status)
+    console.error({
+      model,
+      attempt,
+      errorType: result.error,
+      timestamp: new Date().toISOString(),
+    })
 
-      const shouldRetry = isTimeout || isParse || isValidation || retryableApiStatus
+    // On parse/validation failure, try repair by appending the bad output + repair instruction
+    if ((result.error === 'parse' || result.error === 'validation') && result.rawText) {
+      lastRawText = result.rawText
 
-      if (!shouldRetry || attempt === maxRetries) {
-        throw error
+      if (attempt < maxRetries) {
+        // Append assistant's bad response and a user repair message
+        currentMessages = [
+          ...currentMessages,
+          { role: 'assistant' as const, content: result.rawText },
+          {
+            role: 'user' as const,
+            content:
+              'Your previous response was not valid JSON matching the required schema. Please output ONLY valid JSON with no additional text, markdown, or explanation. Fix any issues and try again.',
+          },
+        ]
+        await backoff(attempt)
+        continue
+      }
+    }
+
+    // On timeout or API error, retry with backoff
+    if (result.error === 'timeout' || result.error === 'api') {
+      const retryableStatus =
+        result.status !== undefined && [429, 500, 502, 503, 504].includes(result.status)
+
+      if (result.error === 'timeout' || retryableStatus) {
+        if (attempt < maxRetries) {
+          await backoff(attempt)
+          continue
+        }
       }
 
-      await backoff(attempt)
+      if (result.error === 'api') {
+        throw new ClaudeApiError(result.message ?? 'Claude API error', result.status)
+      }
+      throw new ClaudeTimeoutError()
+    }
+
+    // If we get here on last attempt, throw appropriate error
+    if (attempt === maxRetries) {
+      if (result.error === 'parse') {
+        throw new ClaudeParseError()
+      }
+      if (result.error === 'validation') {
+        throw new ClaudeValidationError(
+          lastRawText ? `Validation failed. Raw: ${lastRawText.slice(0, 200)}...` : undefined
+        )
+      }
     }
   }
-  throw new ClaudeApiError('Failed to call Claude')
+
+  throw new ClaudeApiError('Failed to call Claude after retries')
 }
 
+// Re-export for backwards compatibility
+export { callClaude as callClaudeWithRetry }
