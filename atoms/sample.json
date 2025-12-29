@@ -1,0 +1,57 @@
+[
+  {
+    "id": "atom-001",
+    "source": "The Mom Test",
+    "version": 1,
+    "type": "Heuristic",
+    "purpose": "Evaluate",
+    "claim": "Never ask customers if they would buy your product. Ask what they currently do to solve the problem.",
+    "rationale": "Hypothetical questions yield hypothetical answers. Past behavior predicts future behavior.",
+    "lens": ["Customer"],
+    "level": "Product",
+    "dimension": "Scope",
+    "applies_when": ["Validating demand", "Early customer discovery"],
+    "breaks_when": ["B2B with long sales cycles where intent signals matter"],
+    "strength": "High",
+    "evidence_grade": "Primary",
+    "context": ["startups", "customer-discovery"]
+  },
+  {
+    "id": "atom-002",
+    "source": "Zero to One",
+    "version": 1,
+    "type": "Pattern",
+    "purpose": "Detect",
+    "claim": "Successful companies start by dominating a small market before expanding.",
+    "rationale": "It's easier to be a big fish in a small pond. Market dominance creates defensibility.",
+    "lens": ["Business", "Customer"],
+    "level": "Strategy",
+    "dimension": "Audience",
+    "applies_when": ["Entering new markets", "Resource-constrained startups"],
+    "strength": "High",
+    "evidence_grade": "Secondary",
+    "timeframe": {
+      "start_year": 2000,
+      "end_year": 2024
+    },
+    "outcome": "Worked",
+    "context": ["growth-strategy", "market-entry"]
+  },
+  {
+    "id": "atom-003",
+    "source": "Lean Startup",
+    "version": 1,
+    "type": "FailureMode",
+    "purpose": "Warn",
+    "claim": "Building features nobody asked for is the most common startup failure mode.",
+    "lens": ["Customer", "Feasibility"],
+    "level": "Feature",
+    "dimension": null,
+    "breaks_when": ["Platform plays where ecosystem matters more than individual features"],
+    "strength": "High",
+    "evidence_grade": "Primary",
+    "outcome": "Failed",
+    "context": ["product-development", "feature-prioritization"]
+  }
+]
+
