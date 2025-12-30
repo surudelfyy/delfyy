@@ -39,7 +39,17 @@ export const CLAUDE_MODEL_HAIKU =
 export const CLAUDE_MODEL_SONNET =
   process.env.CLAUDE_MODEL_SONNET || 'claude-3-5-sonnet-20241022'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+let anthropicClient: Anthropic | null = null
+
+function getAnthropic(): Anthropic {
+  if (!anthropicClient) {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY is missing. Add it to .env.local')
+    }
+    anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  }
+  return anthropicClient
+}
 
 const DEFAULT_MAX_TOKENS = 2048
 
@@ -81,7 +91,7 @@ async function callClaudeOnce<T>(
   }, timeoutMs)
 
   try {
-    const responsePromise = anthropic.messages.create(
+    const responsePromise = getAnthropic().messages.create(
       {
         model,
         system,
@@ -94,10 +104,10 @@ async function callClaudeOnce<T>(
     const response = (await Promise.race([
       responsePromise,
       timeoutPromise,
-    ])) as Awaited<ReturnType<typeof anthropic.messages.create>>
+    ])) as Awaited<ReturnType<ReturnType<typeof getAnthropic>['messages']['create']>>
 
     const textContent = response.content
-      .map((block) => (block.type === 'text' ? block.text : ''))
+      .map((block: { type: string; text?: string }) => (block.type === 'text' ? block.text ?? '' : ''))
       .join('')
       .trim()
 

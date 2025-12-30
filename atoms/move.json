@@ -179,7 +179,6 @@
     "dimension": "Channel",
     "outcome": "Worked",
     "context": ["B2B SaaS", "marketing automation"],
-    "timeframe": { "end_year": 2021 },
     "strength": "Medium",
     "evidence_grade": "Secondary"
   },

@@ -312,7 +312,6 @@
     "dimension": "Process",
     "outcome": "Worked",
     "context": ["e-commerce", "retail"],
-    "timeframe": { "start_year": 2000 },
     "strength": "Medium",
     "evidence_grade": "Secondary"
   },
@@ -328,7 +327,6 @@
     "dimension": "Model",
     "outcome": "Worked",
     "context": ["streaming", "subscription", "media"],
-    "timeframe": { "start_year": 1997 },
     "strength": "Medium",
     "evidence_grade": "Secondary"
   },
@@ -344,7 +342,6 @@
     "dimension": "Model",
     "outcome": "Worked",
     "context": ["B2B SaaS", "freemium", "marketing-software"],
-    "timeframe": { "start_year": 2006 },
     "strength": "Medium",
     "evidence_grade": "Secondary"
   },
@@ -360,7 +357,6 @@
     "dimension": "Positioning",
     "outcome": "Worked",
     "context": ["luxury", "fashion", "watches"],
-    "timeframe": { "start_year": 1900 },
     "strength": "Medium",
     "evidence_grade": "Secondary"
   },
@@ -376,7 +372,6 @@
     "dimension": "Process",
     "outcome": "Mixed",
     "context": ["ride-sharing", "marketplace", "gig-economy"],
-    "timeframe": { "start_year": 2009 },
     "strength": "Medium",
     "evidence_grade": "Secondary"
   },

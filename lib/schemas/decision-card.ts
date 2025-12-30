@@ -1,25 +1,24 @@
-// Zod schema for Decision Card (display schema). Validates renderer output.
 import { z } from 'zod'
 
-const nonEmpty = z.string().min(1)
+// This is the DISPLAY schema stored in decision_card JSONB
+// Word limits enforced by renderer, not Zod
+export const DecisionCardSchema = z.object({
+  // Layer 1: The Decision
+  decision: z.string(), // 30 words
+  confidence: z.string(), // 20 words
+  assumptions: z.string(), // 60 words
+  trade_offs: z.string(), // 50 words
+  risks: z.string(), // 40 words
+  next_step: z.string(), // 35 words
+  review_trigger: z.string(), // 35 words
+  escape_hatch: z.string(), // 35 words
+  approach: z.string().optional(), // 30 words (only if contested)
 
-export const decisionCardSchema = z.object({
-  // Layer 1
-  decision: nonEmpty,
-  confidence: nonEmpty,
-  assumptions: nonEmpty,
-  trade_offs: nonEmpty,
-  risks: nonEmpty,
-  next_step: nonEmpty,
-  review_trigger: nonEmpty,
-  escape_hatch: nonEmpty,
-  approach: nonEmpty.optional(),
-  // Layer 2
-  principle: nonEmpty,
-  where_worked: nonEmpty,
-  where_failed: nonEmpty,
-  mechanism: nonEmpty,
+  // Layer 2: The Learning
+  principle: z.string(), // 35 words
+  where_worked: z.string(), // 50 words
+  where_failed: z.string(), // 50 words
+  mechanism: z.string(), // 40 words
 })
 
-export type DecisionCardSchema = z.infer<typeof decisionCardSchema>
-
+export type DecisionCard = z.infer<typeof DecisionCardSchema>

@@ -18,6 +18,7 @@ HARD RULES:
 - confidence_reason: max 100 characters
 - contest_summary: max 150 characters (only if views disagreed)
 - One complete sentence per item
+- four_views_summary must map to: customer_view, business_view, build_view, evidence_view
 
 FORBIDDEN WORDS: lens, lens pack, compiler, governor, deterministic, routing, taxonomy, schema, atoms, retrieval, classifier
 

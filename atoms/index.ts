@@ -39,6 +39,8 @@ import gtmStrategyGuideAtoms from './go-to-market-strategy-guide.json'
 import obviouslyAwesomeAtoms from './obviously-awesome.json'
 import thinkLikeUxResearcherAtoms from './think-like-ux-researcher.json'
 import designEverydayThingsAtoms from './design-everyday-things.json'
+import designThinkingAtoms from './design-thinking.json'
+import usabilityTestingGuideAtoms from './usability-testing-guide.json'
 import innovatorsDilemmaAtoms from './innovators-dilemma.json'
 import innovatorsSolutionAtoms from './innovators-solution.json'
 import workingBackwardsAtoms from './working-backwards.json'
@@ -95,6 +97,8 @@ export const atoms = loadAtoms([
   ...obviouslyAwesomeAtoms,
   ...thinkLikeUxResearcherAtoms,
   ...designEverydayThingsAtoms,
+  ...designThinkingAtoms,
+  ...usabilityTestingGuideAtoms,
   ...innovatorsDilemmaAtoms,
   ...innovatorsSolutionAtoms,
   ...workingBackwardsAtoms,
