@@ -1,7 +1,11 @@
-import { callClaude, CLAUDE_MODEL_HAIKU } from '@/lib/claude/client'
+import { callClaudeJSON, CLAUDE_MODEL_HAIKU } from '@/lib/claude/client'
 import type { ConceptAtom } from '@/lib/schemas/atoms'
 import type { ClassifierOutput } from '@/lib/schemas/classifier'
-import { PatternMatcherOutputSchema, type PatternMatcherOutput } from '@/lib/schemas/pattern-matcher'
+import {
+  PatternMatcherOutputSchema,
+  PatternMatcherJsonSchema,
+  type PatternMatcherOutput,
+} from '@/lib/schemas/pattern-matcher'
 import { PATTERN_MATCHER_SYSTEM_PROMPT } from '@/prompts/pattern-matcher'
 
 type TopReason = { reason: string; because: string }
@@ -47,14 +51,12 @@ export async function matchPatterns(input: MatchPatternsInput): Promise<PatternM
     JSON.stringify(referenceNotes, null, 2),
   ].join('\n\n')
 
-  const result = await callClaude<PatternMatcherOutput>({
-    model: CLAUDE_MODEL_HAIKU,
+  const result = await callClaudeJSON<PatternMatcherOutput>({
+    model: process.env.CLAUDE_MODEL_HAIKU ?? CLAUDE_MODEL_HAIKU,
+    max_tokens: 1400,
     system: PATTERN_MATCHER_SYSTEM_PROMPT,
     messages: [{ role: 'user', content: userContent }],
-    schema: PatternMatcherOutputSchema,
-    temperature: 0,
-    maxTokens: 1000,
-    maxRetries: 1,
+    schema: PatternMatcherJsonSchema,
   })
 
   if (countWords(result.principle) > 35) {

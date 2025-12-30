@@ -28,7 +28,7 @@ export async function classify(input: ClassifyInput): Promise<ClassifierOutput> 
     messages: [{ role: 'user', content: JSON.stringify(userPayload) }],
     schema: ClassifierOutputSchema,
     temperature: 0,
-    maxTokens: 1000,
+    maxTokens: 800,
     maxRetries: 1,
   })
 }

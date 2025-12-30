@@ -104,25 +104,52 @@ export async function POST(request: NextRequest) {
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
   const heartbeat = startHeartbeat(writer)
+  let closed = false
+  const closeWriter = () => {
+    if (closed) return
+    closed = true
+    try {
+      writer.close()
+    } catch {
+      // ignore
+    }
+  }
+  request.signal.addEventListener('abort', () => {
+    clearInterval(heartbeat)
+    closeWriter()
+  })
+  const encoder = new TextEncoder()
+  const safeWrite = async (chunk: string) => {
+    if (request.signal.aborted) return
+    try {
+      await writer.write(encoder.encode(chunk))
+    } catch {
+      // ignore
+    }
+  }
 
   // 9. Run pipeline background
   ;(async () => {
     try {
       const result = await runPipeline(decision.id, serviceClient, (step, message) => {
-        sendProgress(writer, step, message)
+        void sendProgress(writer, step, message)
       })
 
-      sendResult(writer, {
-        decision_id: result.id,
-        decision_card: result.decision_card,
-        confidence_tier: result.confidence_tier,
-      })
+      await safeWrite(
+        `event: result\ndata: ${JSON.stringify({
+          decision_id: result.id,
+          decision_card: result.decision_card,
+          confidence_tier: result.confidence_tier,
+        })}\n\n`
+      )
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Pipeline failed'
-      sendError(writer, 'PIPELINE_FAILED', message)
+      await safeWrite(
+        `event: error\ndata: ${JSON.stringify({ code: 'PIPELINE_FAILED', message })}\n\n`
+      )
     } finally {
       clearInterval(heartbeat)
-      writer.close()
+      closeWriter()
     }
   })()
 

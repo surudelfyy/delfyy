@@ -35,9 +35,9 @@ export class ClaudeApiError extends Error {
 
 export const CLAUDE_TIMEOUT_MS = 60_000
 export const CLAUDE_MODEL_HAIKU =
-  process.env.CLAUDE_MODEL_HAIKU || 'claude-3-haiku-20240307'
+  process.env.CLAUDE_MODEL_HAIKU || 'claude-haiku-4-5'
 export const CLAUDE_MODEL_SONNET =
-  process.env.CLAUDE_MODEL_SONNET || 'claude-3-5-sonnet-20241022'
+  process.env.CLAUDE_MODEL_SONNET || 'claude-sonnet-4-5'
 
 let anthropicClient: Anthropic | null = null
 
@@ -49,6 +49,10 @@ function getAnthropic(): Anthropic {
     anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   }
   return anthropicClient
+}
+
+export function getAnthropicClient(): Anthropic {
+  return getAnthropic()
 }
 
 const DEFAULT_MAX_TOKENS = 2048
@@ -64,6 +68,14 @@ type ClaudeCallParams<T> = {
   maxTokens?: number
   maxRetries?: number
   timeoutMs?: number
+}
+
+function stripCodeFences(s: string): string {
+  const t = s.trim()
+  if (t.startsWith('```')) {
+    return t.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim()
+  }
+  return t
 }
 
 async function backoff(attempt: number): Promise<void> {
@@ -91,6 +103,9 @@ async function callClaudeOnce<T>(
   }, timeoutMs)
 
   try {
+    if (!model) {
+      throw new Error('Claude model is not configured')
+    }
     const responsePromise = getAnthropic().messages.create(
       {
         model,
@@ -115,7 +130,21 @@ async function callClaudeOnce<T>(
       return { error: 'parse', rawText: '' }
     }
 
-    const parsed = extractJSON(textContent, schema)
+    const cleanedText = textContent
+      .replace(/^```json\s*\n?/i, '')
+      .replace(/\n?```\s*$/i, '')
+    const cleaned = stripCodeFences(cleanedText)
+    try {
+      const json = JSON.parse(cleaned)
+      const parsedDirect = schema.safeParse(json)
+      if (parsedDirect.success) {
+        return { data: parsedDirect.data }
+      }
+    } catch {
+      // fall through to extractor
+    }
+
+    const parsed = extractJSON(cleaned, schema)
     if (parsed === null) {
       return { error: 'validation', rawText: textContent }
     }
@@ -188,6 +217,11 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
     if ((result.error === 'parse' || result.error === 'validation') && result.rawText) {
       lastRawText = result.rawText
 
+      if (result.error === 'validation') {
+        // eslint-disable-next-line no-console
+        console.log('Raw response:', result.rawText)
+      }
+
       if (attempt < maxRetries) {
         // Append assistant's bad response and a user repair message
         currentMessages = [
@@ -240,3 +274,32 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
 
 // Re-export for backwards compatibility
 export { callClaude as callClaudeWithRetry }
+
+// Structured outputs helper (beta)
+export async function callClaudeJSON<T>(args: {
+  model: string
+  max_tokens: number
+  system?: string
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>
+  schema: any
+}): Promise<T> {
+  if (!args.model) throw new Error('Claude model is not configured')
+  const client = getAnthropic() as any
+  const res = await client.beta.messages.create({
+    model: args.model,
+    max_tokens: args.max_tokens,
+    betas: ['structured-outputs-2025-11-13'],
+    system: args.system,
+    messages: args.messages,
+    output_format: {
+      type: 'json_schema',
+      schema: args.schema,
+    },
+  })
+
+  const text = res.content?.[0]?.type === 'text' ? res.content[0].text : ''
+  if (!text) {
+    throw new Error('Empty response from Claude structured output')
+  }
+  return JSON.parse(text) as T
+}

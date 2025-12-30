@@ -1,51 +1,169 @@
 import { z } from 'zod'
 
+const string = (max: number) => z.string().max(max)
+
 export const LensOutputSchema = z.object({
   lens: z.enum(['Customer', 'Business', 'Feasibility']),
   stance: z.enum(['support', 'oppose', 'mixed', 'unclear']),
-  summary: z.string(),
-  supporting_points: z.array(
-    z.object({
-      point: z.string(),
-      atom_ids: z.array(z.string()),
-    })
-  ),
-  counterpoints: z.array(
-    z.object({
-      point: z.string(),
-      atom_ids: z.array(z.string()),
-    })
-  ),
-  assumptions: z.array(
-    z.object({
-      assumption: z.string(),
-      why_it_matters: z.string(),
-    })
-  ),
+  summary: string(600),
+  supporting_points: z
+    .array(
+      z.object({
+        point: string(240),
+        atom_ids: z.array(z.string()).max(6),
+      })
+    )
+    .max(3),
+  counterpoints: z
+    .array(
+      z.object({
+        point: string(240),
+        atom_ids: z.array(z.string()).max(6),
+      })
+    )
+    .max(3),
+  assumptions: z
+    .array(
+      z.object({
+        assumption: string(200),
+        why_it_matters: string(240),
+      })
+    )
+    .max(3),
   disconfirming_tests: z
     .array(
       z.object({
-        test: z.string(),
-        pass_signal: z.string(),
-        fail_signal: z.string(),
+        test: string(240),
+        pass_signal: string(180),
+        fail_signal: string(180),
       })
     )
-    .min(1), // Required, Evidence Governor checks presence
-  open_questions: z.array(
-    z.object({
-      question: z.string(),
-      why_it_matters: z.string(),
-    })
-  ),
-  examples_in_pack: z.array(
-    z.object({
-      example: z.string(),
-      lesson: z.string(),
-      atom_ids: z.array(z.string()),
-    })
-  ),
+    .min(1)
+    .max(2),
+  open_questions: z
+    .array(
+      z.object({
+        question: string(180),
+        why_it_matters: string(220),
+      })
+    )
+    .max(3),
+  examples_in_pack: z
+    .array(
+      z.object({
+        example: string(260),
+        lesson: string(220),
+        atom_ids: z.array(z.string()).max(6),
+      })
+    )
+    .max(2),
   confidence: z.enum(['high', 'medium', 'low']),
 })
 
 export type LensOutput = z.infer<typeof LensOutputSchema>
+
+// JSON Schema for structured outputs (kept in sync with LensOutputSchema)
+export const LensOutputJsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: [
+    'lens',
+    'stance',
+    'summary',
+    'supporting_points',
+    'counterpoints',
+    'assumptions',
+    'disconfirming_tests',
+    'open_questions',
+    'examples_in_pack',
+    'confidence',
+  ],
+  properties: {
+    lens: { enum: ['Customer', 'Business', 'Feasibility'] },
+    stance: { enum: ['support', 'oppose', 'mixed', 'unclear'] },
+    summary: { type: 'string', maxLength: 600 },
+    supporting_points: {
+      type: 'array',
+      maxItems: 3,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['point', 'atom_ids'],
+        properties: {
+          point: { type: 'string', maxLength: 240 },
+          atom_ids: { type: 'array', maxItems: 6, items: { type: 'string' } },
+        },
+      },
+    },
+    counterpoints: {
+      type: 'array',
+      maxItems: 3,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['point', 'atom_ids'],
+        properties: {
+          point: { type: 'string', maxLength: 240 },
+          atom_ids: { type: 'array', maxItems: 6, items: { type: 'string' } },
+        },
+      },
+    },
+    assumptions: {
+      type: 'array',
+      maxItems: 3,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['assumption', 'why_it_matters'],
+        properties: {
+          assumption: { type: 'string', maxLength: 200 },
+          why_it_matters: { type: 'string', maxLength: 240 },
+        },
+      },
+    },
+    disconfirming_tests: {
+      type: 'array',
+      minItems: 1,
+      maxItems: 2,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['test', 'pass_signal', 'fail_signal'],
+        properties: {
+          test: { type: 'string', maxLength: 240 },
+          pass_signal: { type: 'string', maxLength: 180 },
+          fail_signal: { type: 'string', maxLength: 180 },
+        },
+      },
+    },
+    open_questions: {
+      type: 'array',
+      maxItems: 3,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['question', 'why_it_matters'],
+        properties: {
+          question: { type: 'string', maxLength: 180 },
+          why_it_matters: { type: 'string', maxLength: 220 },
+        },
+      },
+    },
+    examples_in_pack: {
+      type: 'array',
+      maxItems: 2,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['example', 'lesson', 'atom_ids'],
+        properties: {
+          example: { type: 'string', maxLength: 260 },
+          lesson: { type: 'string', maxLength: 220 },
+          atom_ids: { type: 'array', maxItems: 6, items: { type: 'string' } },
+        },
+      },
+    },
+    confidence: { enum: ['high', 'medium', 'low'] },
+  },
+}
 

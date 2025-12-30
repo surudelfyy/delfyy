@@ -1,8 +1,8 @@
-import { callClaude, CLAUDE_MODEL_HAIKU } from '@/lib/claude/client'
+import { callClaudeJSON, CLAUDE_MODEL_HAIKU } from '@/lib/claude/client'
 import type { LensPack } from '@/lib/delphi/lenspack-compiler'
 import { LENS_EVALUATOR_SYSTEM_PROMPT } from '@/prompts/lens-evaluator'
 import type { ClassifierOutput } from '@/lib/schemas/classifier'
-import { LensOutputSchema, type LensOutput } from '@/lib/schemas/lens'
+import { LensOutputSchema, LensOutputJsonSchema, type LensOutput } from '@/lib/schemas/lens'
 
 type DecisionInput = {
   question: string
@@ -67,14 +67,12 @@ export async function evaluateLenses(
       JSON.stringify(notes, null, 2),
     ].join('\n')
 
-    return callClaude<LensOutput>({
-      model: CLAUDE_MODEL_HAIKU,
+    return callClaudeJSON<LensOutput>({
+      model: process.env.CLAUDE_MODEL_HAIKU ?? CLAUDE_MODEL_HAIKU,
+      max_tokens: 1400,
       system: LENS_EVALUATOR_SYSTEM_PROMPT(lens),
       messages: [{ role: 'user', content: userContent }],
-      schema: LensOutputSchema,
-      temperature: 0,
-      maxTokens: 1500,
-      maxRetries: 1,
+      schema: LensOutputJsonSchema,
     })
   })
 

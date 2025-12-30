@@ -77,9 +77,23 @@ export function extractFirstBalancedJSON(text: string): string | null {
  * Returns null if all strategies fail. Does not throw.
  */
 export function extractJSON<T>(text: string, schema: ZodSchema<T>): T | null {
-  // Strategy 1: Direct parse
+  // Strip markdown code fences first
+  let cleaned = text.trim()
+
+  // Remove opening fence
+  const fenceMatch = cleaned.match(/^```(?:json)?\s*\n?/i)
+  if (fenceMatch) {
+    cleaned = cleaned.slice(fenceMatch[0].length)
+  }
+
+  // Remove closing fence
+  if (cleaned.endsWith('```')) {
+    cleaned = cleaned.slice(0, -3).trim()
+  }
+
+  // Strategy 1: Direct parse on cleaned
   try {
-    const direct = JSON.parse(text)
+    const direct = JSON.parse(cleaned)
     const parsed = schema.safeParse(direct)
     if (parsed.success) return parsed.data
   } catch {
@@ -87,7 +101,7 @@ export function extractJSON<T>(text: string, schema: ZodSchema<T>): T | null {
   }
 
   // Strategy 2: Markdown fenced block extraction
-  const fenced = extractFromCodeFence(text)
+  const fenced = extractFromCodeFence(cleaned)
   if (fenced) {
     try {
       const obj = JSON.parse(fenced)
@@ -99,7 +113,7 @@ export function extractJSON<T>(text: string, schema: ZodSchema<T>): T | null {
   }
 
   // Strategy 3: Balanced JSON extraction
-  const balanced = extractFirstBalancedJSON(text)
+  const balanced = extractFirstBalancedJSON(cleaned)
   if (balanced) {
     try {
       const obj = JSON.parse(balanced)
