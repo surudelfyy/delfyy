@@ -1,9 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { DecisionCardDisplay } from '@/components/decision-card-display'
+import { createClient } from '@/lib/supabase/server'
+import { notFound } from 'next/navigation'
 import { DecisionActions } from '@/components/decision-actions'
+import { DecisionCardDisplay } from '@/components/decision-card-display'
 import { ProvisionalBanner } from '@/components/provisional-banner'
 
 interface PageProps {
@@ -16,28 +17,18 @@ export default async function DecisionPage({ params }: PageProps) {
 
   const { data: decision, error } = await supabase
     .from('decisions')
-    .select('id, status, question, decision_card, confidence_tier, created_at')
+    .select('id, status, question, decision_card, confidence_tier, created_at, input_context')
     .eq('id', id)
     .single()
 
   if (error || !decision) {
-    return (
-      <main className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-          <p className="text-red-600 mb-4">This decision could not be found.</p>
-          <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 underline">
-            ← Back to dashboard
-          </Link>
-        </div>
-      </main>
-    )
+    notFound()
   }
 
-  // Running state
   if (decision.status === 'running') {
     return (
       <main className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+        <div className="max-w-2xl mx-auto px-4 py-16 text-center">
           <div className="inline-flex items-center gap-2 text-gray-500">
             <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
             <span>This decision is still processing...</span>
@@ -52,12 +43,11 @@ export default async function DecisionPage({ params }: PageProps) {
     )
   }
 
-  // Failed state
   if (decision.status === 'failed') {
     return (
       <main className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-          <p className="text-red-600 mb-4">This decision couldn&apos;t be completed.</p>
+        <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+          <p className="text-red-600 mb-4">This decision could not be completed.</p>
           <Link href="/decide" className="text-sm text-gray-500 hover:text-gray-700 underline">
             ← Try again
           </Link>
@@ -68,67 +58,72 @@ export default async function DecisionPage({ params }: PageProps) {
 
   const isProvisional = decision.confidence_tier === 'exploratory'
   const card = decision.decision_card || {}
+  const stage = decision.input_context?.stage
 
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="text-xl font-bold text-gray-900">
-            Delfyy
-          </Link>
-
-          {/* Desktop actions in header */}
-          <div className="hidden md:flex items-center gap-2">
-            <DecisionActions
-              question={decision.question}
-              card={card}
-              confidenceTier={decision.confidence_tier}
+      <header className="bg-white border-b border-gray-100">
+        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <Image
+              src="/delfyylogo.svg"
+              alt="Delfyy"
+              width={120}
+              height={40}
+              className="h-auto"
+              priority
             />
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Back link */}
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          All decisions
-        </Link>
-
-        {/* Hero intro */}
-        <div className="mb-8">
-          <p className="text-sm text-gray-500 mb-2">That&apos;s one less thing living in your head.</p>
-          <h1 className="text-2xl font-semibold text-gray-900">{decision.question}</h1>
-          <p className="text-sm text-gray-400 mt-2">
-            {new Date(decision.created_at).toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </p>
-        </div>
-
-        {/* Provisional banner if exploratory */}
-        {isProvisional && <ProvisionalBanner />}
-
-        {/* Mobile actions */}
-        <div className="md:hidden mb-6 flex gap-2">
+          </Link>
           <DecisionActions
             question={decision.question}
             card={card}
             confidenceTier={decision.confidence_tier}
           />
         </div>
+      </header>
+
+      <div className="max-w-3xl mx-auto px-6 py-12">
+        {/* Back link */}
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 mb-8"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          All decisions
+        </Link>
+
+        {/* Question as headline */}
+        <h1 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-8">
+          {decision.question}
+        </h1>
+
+        {/* Provisional banner */}
+        {isProvisional && <ProvisionalBanner />}
 
         {/* The Decision Card */}
         <DecisionCardDisplay card={card} confidenceTier={decision.confidence_tier} />
+
+        {/* Footer */}
+        <footer className="mt-16 pt-8 border-t border-gray-200 flex items-center justify-between text-sm text-gray-400">
+          <DecisionActions
+            question={decision.question}
+            card={card}
+            confidenceTier={decision.confidence_tier}
+          />
+          <div className="flex items-center gap-3">
+            {stage && <span className="capitalize">{stage}</span>}
+            <span>
+              {new Date(decision.created_at).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })}
+            </span>
+          </div>
+        </footer>
       </div>
     </main>
   )
 }
-
 

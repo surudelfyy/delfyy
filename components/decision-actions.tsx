@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Copy, FileText, Check } from 'lucide-react'
+import { Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { decisionCardToMarkdown, decisionCardToPlainText } from '@/lib/utils/decision-card-to-markdown'
+import { decisionCardToMarkdown } from '@/lib/utils/decision-card-to-markdown'
 
 interface DecisionCard {
   decision?: string
@@ -28,20 +28,16 @@ interface DecisionActionsProps {
 }
 
 export function DecisionActions({ question, card, confidenceTier }: DecisionActionsProps) {
-  const [copiedType, setCopiedType] = useState<'markdown' | 'text' | null>(null)
+  const [copied, setCopied] = useState(false)
 
-  const copyToClipboard = async (type: 'markdown' | 'text') => {
-    const content =
-      type === 'markdown'
-        ? decisionCardToMarkdown(question, card, confidenceTier)
-        : decisionCardToPlainText(question, card, confidenceTier)
+  const copyDecision = async () => {
+    const content = decisionCardToMarkdown(question, card, confidenceTier)
 
     try {
       await navigator.clipboard.writeText(content)
-      setCopiedType(type)
-      setTimeout(() => setCopiedType(null), 2000)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     } catch {
-      // Fallback for older browsers
       const textarea = document.createElement('textarea')
       textarea.value = content
       textarea.style.position = 'fixed'
@@ -50,43 +46,31 @@ export function DecisionActions({ question, card, confidenceTier }: DecisionActi
       textarea.select()
       document.execCommand('copy')
       document.body.removeChild(textarea)
-      setCopiedType(type)
-      setTimeout(() => setCopiedType(null), 2000)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     }
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => copyToClipboard('markdown')}
-        className="justify-start gap-2"
-      >
-        {copiedType === 'markdown' ? (
-          <Check className="h-4 w-4 text-green-600" />
+    <div className="relative group inline-block">
+      <Button variant="outline" size="sm" onClick={copyDecision} className="gap-2">
+        {copied ? (
+          <>
+            <Check className="h-4 w-4 text-green-600" />
+            Copied!
+          </>
         ) : (
-          <Copy className="h-4 w-4" />
+          <>
+            <Copy className="h-4 w-4" />
+            Copy decision
+          </>
         )}
-        {copiedType === 'markdown' ? 'Copied!' : 'Copy Markdown'}
       </Button>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => copyToClipboard('text')}
-        className="justify-start gap-2 text-gray-600"
-      >
-        {copiedType === 'text' ? (
-          <Check className="h-4 w-4 text-green-600" />
-        ) : (
-          <FileText className="h-4 w-4" />
-        )}
-        {copiedType === 'text' ? 'Copied!' : 'Copy Plain Text'}
-      </Button>
-
-      {copiedType && (
-        <p className="text-xs text-gray-500 mt-1">Paste into Notion, Confluence, or any doc</p>
+      {!copied && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          Formatted for Notion, Confluence, Docs
+        </div>
       )}
     </div>
   )
