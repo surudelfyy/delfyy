@@ -21,7 +21,7 @@ export interface LensPackCompilerInput {
 
 export type LensPackCompilerOutput = [LensPack, LensPack, LensPack]
 
-type AtomType = ConceptAtom['type']
+type AtomType = 'Signal' | 'Heuristic' | 'FailureMode' | 'Pattern' | 'Example' | 'Quote'
 type Lens = 'Customer' | 'Business' | 'Feasibility'
 
 // ---------------------------------------------------------------------------
