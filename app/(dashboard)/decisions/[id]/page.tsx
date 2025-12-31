@@ -7,16 +7,17 @@ import { DecisionActions } from '@/components/decision-actions'
 import { ProvisionalBanner } from '@/components/provisional-banner'
 
 interface PageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default async function DecisionPage({ params }: PageProps) {
+  const { id } = await params
   const supabase = await createClient()
 
   const { data: decision, error } = await supabase
     .from('decisions')
     .select('id, status, question, decision_card, confidence_tier, created_at')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error || !decision) {

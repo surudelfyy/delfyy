@@ -4,8 +4,9 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { ProgressStepper } from '@/components/progress-stepper'
+import { ProgressStepper, PROGRESS_STEPS } from '@/components/progress-stepper'
 import { StagePills } from '@/components/stage-pills'
+import { ThinkingPill } from '@/components/thinking-pill'
 
 const STEP_ORDER = [
   'classifying',
@@ -204,19 +205,17 @@ export default function DecidePage() {
         )}
 
         {showStepper && (
-          <div className="pt-4">
-            <ProgressStepper currentStepIndex={currentStepIndex} />
-            <p className="text-sm text-gray-500 text-center mt-6">
-              Applying the Delfyy framework to reach a defensible call.
-            </p>
-            {timeout20 && (
-              <p className="text-sm text-gray-400 text-center mt-2">
-                This can take up to a minute when finding examples.
+          <div className="flex flex-col items-center py-12">
+            <ProgressStepper currentStep={currentStepIndex} />
+            <ThinkingPill label={PROGRESS_STEPS[currentStepIndex]?.label || 'Processing...'} />
+            {timeout20 && !timeout45 && (
+              <p className="text-sm text-gray-400 mt-6 animate-in fade-in duration-500">
+                Still working — this one needs extra thought.
               </p>
             )}
             {timeout45 && (
-              <p className="text-sm text-gray-400 text-center mt-2">
-                Still working — example matching is the slowest step.
+              <p className="text-sm text-gray-400 mt-6 animate-in fade-in duration-500">
+                Almost there — finalising the recommendation.
               </p>
             )}
           </div>
