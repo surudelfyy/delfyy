@@ -91,7 +91,6 @@ export interface DecisionCard {
     call: string
     confidence: string
     do_next: string
-    success_looks_like: string[]
     change_course_if: string[]
   }
   details: {

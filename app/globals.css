@@ -36,8 +36,8 @@
   --sidebar-accent-foreground: oklch(0 0 0);
   --sidebar-border: oklch(0.9400 0 0);
   --sidebar-ring: oklch(0 0 0);
-  --font-sans: Inter, ui-sans-serif, sans-serif, system-ui;
-  --font-serif: Georgia, serif;
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-serif), 'Times New Roman', serif;
   --font-mono: Roboto Mono, ui-monospace, monospace;
   --radius: 1.3rem;
   --shadow-x: 0px;
@@ -91,8 +91,8 @@
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(0.3200 0 0);
   --sidebar-ring: oklch(0.7200 0 0);
-  --font-sans: Inter, ui-sans-serif, sans-serif, system-ui;
-  --font-serif: Georgia, serif;
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-serif), 'Times New Roman', serif;
   --font-mono: Roboto Mono, ui-monospace, monospace;
   --radius: 1.3rem;
   --shadow-x: 0px;
@@ -180,5 +180,15 @@
   }
   .animate-dot-3 {
     animation: dot-bounce 1.4s ease-in-out 0.4s infinite;
+  }
+
+  .memo {
+    @apply font-sans text-[17px] leading-[1.65] text-gray-800;
+  }
+  .memo h1,
+  .memo h2,
+  .memo h3,
+  .memo h4 {
+    @apply font-serif font-semibold tracking-tight text-gray-900;
   }
 }

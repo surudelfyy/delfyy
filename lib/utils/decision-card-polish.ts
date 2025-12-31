@@ -46,7 +46,6 @@ export function polishDecisionCard(card: DecisionCard): DecisionCard {
   polished.summary.call = limitSentences(polished.summary.call, 2)
   polished.summary.confidence = limitSentences(polished.summary.confidence, 2)
   polished.summary.do_next = cleanLine(polished.summary.do_next)
-  polished.summary.success_looks_like = dedupeList(cleanArray(polished.summary.success_looks_like, 2)).slice(0, 3)
   polished.summary.change_course_if = dedupeList(cleanArray(polished.summary.change_course_if, 2)).slice(0, 3)
 
   // Details

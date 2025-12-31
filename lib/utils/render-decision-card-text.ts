@@ -4,7 +4,7 @@ export function renderDecisionCardText(card: DecisionCard): string {
   const parts: string[] = []
 
   parts.push(card.summary.title, card.summary.call, card.summary.confidence, card.summary.do_next)
-  parts.push(...card.summary.success_looks_like, ...card.summary.change_course_if)
+  parts.push(...card.summary.change_course_if)
 
   parts.push(
     ...card.details.assumptions,

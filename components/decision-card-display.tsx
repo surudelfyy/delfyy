@@ -1,152 +1,213 @@
 'use client'
 
-'use client'
-
-'use client'
-
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Eye, XCircle } from 'lucide-react'
 import type { DecisionCard } from '@/lib/schemas/decision-card'
+import { cleanText, fixContractions, splitBullets, firstExample } from '@/lib/utils/format-decision-text'
 
-const tierConfig: Record<string, { label: string; color: string }> = {
-  high: { label: 'High confidence', color: 'bg-green-100 text-green-800 border-green-200' },
-  good: { label: 'Good confidence', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-  moderate: { label: 'Moderate', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-  directional: { label: 'Directional', color: 'bg-amber-100 text-amber-800 border-amber-200' },
-  exploratory: { label: 'Provisional', color: 'bg-amber-100 text-amber-800 border-amber-200' },
+const tierConfig: Record<string, { label: string; bg: string; text: string; border: string }> = {
+  high: { label: 'High confidence', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  good: { label: 'Good confidence', bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200' },
+  moderate: { label: 'Moderate', bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
+  directional: { label: 'Directional', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+  exploratory: { label: 'Provisional', bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
 }
 
-interface DecisionCardDisplayProps {
-  card: DecisionCard
+function Label({ children }: { children: React.ReactNode }) {
+  return <p className="text-[13px] font-semibold text-gray-600 tracking-tight font-serif mb-3">{children}</p>
 }
 
-function BulletList({ title, items }: { title?: string; items: string[] }) {
-  if (!items.length) return null
+function MemoText({ text }: { text?: string }) {
+  if (!text) return null
+  const blocks = text.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean)
   return (
-    <div>
-      {title && <h3 className="font-semibold text-gray-900 mb-2">{title}</h3>}
-      <ul className="list-disc list-inside text-gray-700 space-y-1">
-        {items.map((item, idx) => (
-          <li key={`${title}-${idx}`} className="leading-relaxed">
-            {item}
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-3">
+      {blocks.map((block, idx) => {
+        const lines = block.split('\n').map((l) => l.trim()).filter(Boolean)
+        const hasList = lines.some((l) => /^[-•]/.test(l))
+        if (hasList) {
+          return (
+            <ul key={idx} className="list-disc ml-5 space-y-1 text-gray-700 leading-relaxed">
+              {lines.map((l, i) => (
+                <li key={i}>{cleanText(fixContractions(l.replace(/^[-•]\s*/, '')))}</li>
+              ))}
+            </ul>
+          )
+        }
+        if (lines.length > 1) {
+          return (
+            <div key={idx} className="space-y-2">
+              {lines.map((l, i) => (
+                <p key={i} className="text-gray-700 leading-relaxed">
+                  {cleanText(fixContractions(l))}
+                </p>
+              ))}
+            </div>
+          )
+        }
+        return (
+          <p key={idx} className="text-gray-700 leading-relaxed">
+            {cleanText(fixContractions(block))}
+          </p>
+        )
+      })}
     </div>
   )
 }
 
-export function DecisionCardDisplay({ card }: DecisionCardDisplayProps) {
-  const tier = tierConfig[card.meta.confidence_tier] || tierConfig.directional
+interface DecisionCardDisplayProps {
+  card: DecisionCard
+  confidenceTier?: string
+}
+
+export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDisplayProps) {
+  const tier = tierConfig[confidenceTier || card.meta.confidence_tier] || tierConfig.directional
+  const decision = cleanText(fixContractions(card.summary.call || ''))
+  const confidence = cleanText(fixContractions(card.summary.confidence || ''))
 
   return (
-    <div className="space-y-12">
-      {/* ACT 1: THE CALL */}
+    <div className="memo space-y-16">
+      {/* Hero: The Call */}
       <section>
-        <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
-          <div className="flex items-start justify-between gap-4 mb-6">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">The Call</p>
-              <p className="text-sm text-gray-400">{card.summary.title}</p>
-            </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium border ${tier.color}`}>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 md:p-10">
+          <div className="flex items-center justify-between mb-6">
+            <Label>The Call</Label>
+            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${tier.bg} ${tier.text} ${tier.border}`}>
               {tier.label}
             </span>
           </div>
 
-          <p className="text-2xl font-semibold text-gray-900 leading-relaxed mb-4">
-            {card.summary.call || 'No decision generated'}
+          <p className="text-[22px] md:text-2xl font-serif font-semibold text-gray-900 leading-snug tracking-tight mb-4">
+            {decision || 'No recommendation generated'}
           </p>
 
-          {card.summary.confidence && (
-            <p className="text-gray-600 leading-relaxed">{card.summary.confidence}</p>
-          )}
+          {confidence && <p className="text-gray-500 leading-relaxed text-sm">{confidence}</p>}
         </div>
 
-        <p className="text-center text-gray-400 mt-6 text-sm">That's one less thing living in your head.</p>
+        <p className="text-center text-sm text-gray-400 mt-6">That's one less thing living in your head.</p>
       </section>
 
-      {/* ACT 2: WHY THIS CALL */}
-      <section className="space-y-6">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Why This Call</h2>
-
-        <BulletList title="Do next" items={[card.summary.do_next]} />
-        <BulletList title="Success looks like" items={card.summary.success_looks_like} />
-        <BulletList title="Change course if" items={card.summary.change_course_if} />
-      </section>
-
-      {/* ACT 3: DETAILS */}
-      <section className="space-y-6">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Details</h2>
-        <BulletList title="Assumptions" items={card.details.assumptions} />
-        <BulletList title="Trade-offs" items={card.details.tradeoffs} />
-        <BulletList title="Risks" items={card.details.risks} />
-        <BulletList title="What to watch for" items={card.details.watch_for} />
-        {card.details.approach && (
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Approach</h3>
-            <p className="text-gray-700 leading-relaxed">{card.details.approach}</p>
+      {/* Next Step */}
+      {card.summary.do_next && (
+        <section>
+          <div className="border-l-4 border-blue-400 bg-blue-50/50 rounded-r-xl pl-6 pr-6 py-5">
+            <Label>Your Next Step</Label>
+            <p className="text-gray-900 leading-relaxed">{cleanText(fixContractions(card.summary.do_next))}</p>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
-      {/* ACT 4: THE EVIDENCE */}
-      <section className="space-y-8">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">The Evidence</h2>
-
-        {card.pattern.principle && (
+      {/* Why This Call */}
+      {card.summary.change_course_if.length > 0 && (
+        <section className="space-y-8">
+          <Label>Why This Call</Label>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">The Pattern</h3>
-            <p className="text-gray-700 leading-relaxed">{card.pattern.principle}</p>
+            <h3 className="font-serif font-semibold text-gray-900 tracking-tight mb-2">Change course if</h3>
+            <MemoText text={card.summary.change_course_if.join('\n')} />
           </div>
-        )}
+        </section>
+      )}
 
-        {card.pattern.mechanism && (
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Why It Works</h3>
-            <p className="text-gray-700 leading-relaxed">{card.pattern.mechanism}</p>
-          </div>
-        )}
+      {/* Details */}
+      {(card.details.assumptions.length ||
+        card.details.tradeoffs.length ||
+        card.details.risks.length ||
+        card.details.watch_for.length ||
+        card.details.approach) && (
+        <section className="space-y-8">
+          <Label>The Reasoning</Label>
+          <MemoText text={card.details.assumptions.join('\n')} />
+          <MemoText text={card.details.tradeoffs.join('\n')} />
+          <MemoText text={card.details.risks.join('\n')} />
+          <MemoText text={card.details.watch_for.join('\n')} />
+          {card.details.approach && (
+            <div>
+              <h3 className="font-serif font-semibold text-gray-900 tracking-tight mb-2">Approach</h3>
+              <MemoText text={card.details.approach} />
+            </div>
+          )}
+        </section>
+      )}
 
-        {(card.pattern.where_worked.length > 0 || card.pattern.where_failed.length > 0) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {card.pattern.where_worked.length > 0 && (
-              <div className="bg-green-50 border border-green-200 rounded-xl p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  <p className="text-xs font-semibold text-green-800 uppercase tracking-wider">
-                    Where It Worked
+      {/* Evidence */}
+      {(card.pattern.principle ||
+        card.pattern.mechanism ||
+        card.pattern.where_worked.length ||
+        card.pattern.where_failed.length) && (
+        <section className="space-y-8">
+          <Label>The Evidence</Label>
+
+          {card.pattern.principle && (
+            <div>
+              <h3 className="font-serif font-semibold text-gray-900 tracking-tight mb-2">The Pattern</h3>
+              <MemoText text={card.pattern.principle} />
+            </div>
+          )}
+
+          {card.pattern.mechanism && (
+            <div>
+              <h3 className="font-serif font-semibold text-gray-900 tracking-tight mb-2">Why It Works</h3>
+              <MemoText text={card.pattern.mechanism} />
+            </div>
+          )}
+
+          {(card.pattern.where_worked.length > 0 || card.pattern.where_failed.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {card.pattern.where_worked.length > 0 && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                    <span className="text-[12px] font-semibold text-emerald-700 tracking-tight font-serif">
+                      Where It Worked
+                    </span>
+                  </div>
+                  <p className="text-sm text-emerald-900 leading-relaxed">
+                    {firstExample(card.pattern.where_worked[0])}
                   </p>
                 </div>
-                <ul className="list-disc list-inside text-green-900 space-y-1 text-sm">
-                  {card.pattern.where_worked.map((item, idx) => (
-                    <li key={`worked-${idx}`} className="leading-relaxed">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+              )}
 
-            {card.pattern.where_failed.length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <XCircle className="h-5 w-5 text-red-600" />
-                  <p className="text-xs font-semibold text-red-800 uppercase tracking-wider">
-                    Where It Failed
+              {card.pattern.where_failed.length > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <XCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+                    <span className="text-[12px] font-semibold text-red-700 tracking-tight font-serif">
+                      Where It Failed
+                    </span>
+                  </div>
+                  <p className="text-sm text-red-900 leading-relaxed">
+                    {firstExample(card.pattern.where_failed[0])}
                   </p>
                 </div>
-                <ul className="list-disc list-inside text-red-900 space-y-1 text-sm">
-                  {card.pattern.where_failed.map((item, idx) => (
-                    <li key={`failed-${idx}`} className="leading-relaxed">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+              )}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Footnotes */}
+      {(card.details.watch_for.length > 0 || card.summary.change_course_if.length > 0) && (
+        <section className="border-t border-gray-100 pt-8 space-y-4">
+          {card.details.watch_for.length > 0 && (
+            <div className="flex gap-3 text-sm">
+              <Eye className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="font-medium text-gray-700">Revisit if: </span>
+                <span className="text-gray-500">{card.details.watch_for.join(' ')}</span>
               </div>
-            )}
-          </div>
-        )}
-      </section>
+            </div>
+          )}
+
+          {card.summary.change_course_if.length > 0 && (
+            <div className="flex gap-3 text-sm">
+              <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="font-medium text-gray-700">Change course if: </span>
+                <span className="text-gray-500">{card.summary.change_course_if.join(' ')}</span>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   )
 }

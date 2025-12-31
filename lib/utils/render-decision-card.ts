@@ -124,18 +124,6 @@ function patternBullets(
   )
 }
 
-function buildSuccessLooksLike(internal: SynthesiserCardBits, max: number): string[] {
-  const fromExpected = internal.next_steps.map((s) => s.expected_output).filter(Boolean)
-  if (fromExpected.length) return deDupeSemantics(fromExpected.map(sentenceSanitize), max)
-  if (internal.escape_hatch?.condition) {
-    return deDupeSemantics(
-      [sentenceSanitize(`We know it's working when ${internal.escape_hatch.condition} is avoided`)],
-      max
-    )
-  }
-  return ['Clear pull from target users without forcing engagement.']
-}
-
 function buildChangeCourseIf(internal: SynthesiserCardBits, max: number): string[] {
   if (internal.escape_hatch?.condition || internal.escape_hatch?.immediate_action) {
     return deDupeSemantics(
@@ -182,7 +170,6 @@ export function renderDecisionCard(input: RenderInput): DecisionCard {
     call,
     confidence: confidenceLine(governorOutput.confidence_tier, internal),
     do_next: doNext,
-    success_looks_like: buildSuccessLooksLike(internal, 3),
     change_course_if: buildChangeCourseIf(internal, 3),
   }
 

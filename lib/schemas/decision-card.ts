@@ -11,7 +11,6 @@ export const DecisionCardSchema = z.object({
     call: z.string(),
     confidence: z.string(),
     do_next: z.string(),
-    success_looks_like: z.array(z.string()).max(3),
     change_course_if: z.array(z.string()).max(3),
   }),
 

@@ -1,15 +1,6 @@
 import type { DecisionCard } from '@/lib/schemas/decision-card'
 import { cleanText, fixContractions, splitBullets } from './format-decision-text'
 
-function normaliseLines(text?: string): string[] {
-  if (!text) return []
-  return text
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => cleanText(fixContractions(line)))
-}
-
 function formatBullets(content: string | string[] | undefined): string {
   if (!content) return ''
   const items = Array.isArray(content)
@@ -22,71 +13,60 @@ function formatBullets(content: string | string[] | undefined): string {
       )
   const cleaned = items.map((i) => cleanText(fixContractions(i))).filter(Boolean)
   if (!cleaned.length) return ''
-  if (cleaned.length === 1) return cleaned[0]
-  return cleaned.map((b) => `- ${b}`).join('\n')
+  return cleaned.join('\n')
 }
 
 function formatParagraph(text?: string): string {
   if (!text) return ''
-  const lines = normaliseLines(text)
-  if (!lines.length) return ''
-  return lines.join(' ')
+  return cleanText(fixContractions(text))
 }
 
-export function decisionCardToMarkdown(question: string, card: DecisionCard, confidenceTier?: string): string {
+export function decisionCardToPlainText(question: string, card: DecisionCard, confidenceTier?: string): string {
   const out: string[] = []
-  const title = cleanText(fixContractions(question))
-  out.push(`# Decision: ${title}`)
+  out.push(`Decision: ${cleanText(fixContractions(question))}`)
   out.push('')
   out.push(`Confidence tier: ${confidenceTier || card.meta.confidence_tier || 'Unknown'}`)
   out.push('')
-
-  out.push('## The call')
+  out.push('The call')
   out.push(formatParagraph(card.summary.call))
   out.push('')
-
-  out.push('## Confidence')
+  out.push('Confidence')
   out.push(formatParagraph(card.summary.confidence))
   out.push('')
-
-  out.push('## Do next')
+  out.push('Do next')
   out.push(formatParagraph(card.summary.do_next))
   out.push('')
-
-  out.push('## Why this call')
-  out.push('### Assumptions')
+  out.push('Why this call')
+  out.push('Assumptions')
   out.push(formatBullets(card.details.assumptions))
   out.push('')
-  out.push('### Trade-offs')
+  out.push('Trade-offs')
   out.push(formatBullets(card.details.tradeoffs))
   out.push('')
-  out.push('### Risks')
+  out.push('Risks')
   out.push(formatBullets(card.details.risks))
   out.push('')
   if (card.details.approach) {
-    out.push('### Approach')
+    out.push('Approach')
     out.push(formatParagraph(card.details.approach))
     out.push('')
   }
-
-  out.push('## Pattern')
-  out.push('### Principle')
+  out.push('Pattern')
+  out.push('Principle')
   out.push(formatParagraph(card.pattern.principle))
   out.push('')
-  out.push('### Why it works')
+  out.push('Why it works')
   out.push(formatParagraph(card.pattern.mechanism))
   out.push('')
-  out.push('### Where it worked')
+  out.push('Where it worked')
   out.push(formatBullets(card.pattern.where_worked))
   out.push('')
-  out.push('### Where it failed')
+  out.push('Where it failed')
   out.push(formatBullets(card.pattern.where_failed))
   out.push('')
-
-  out.push('## Notes')
+  out.push('Notes')
   out.push(`Watch for: ${formatParagraph(card.details.watch_for.join('\n')) || '—'}`)
   out.push(`Change course if: ${formatParagraph(card.summary.change_course_if.join('\n')) || '—'}`)
-  out.push('')
-
   return out.join('\n')
 }
+

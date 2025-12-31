@@ -6,7 +6,14 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ProgressStepper, PROGRESS_STEPS } from '@/components/progress-stepper'
 import { StagePills } from '@/components/stage-pills'
-import { ThinkingPill } from '@/components/thinking-pill'
+
+const TIPS = [
+  'Founders who document decisions are 2x more likely to follow through.',
+  "The best decisions have clear 'change course if' triggers.",
+  "A decision you can defend beats a perfect decision you can't explain.",
+  "The goal isn't certainty — it's clarity on what to do next.",
+  'Most founders revisit pricing decisions 3x before committing.',
+] as const
 
 const STEP_ORDER = [
   'classifying',
@@ -31,6 +38,7 @@ export default function DecidePage() {
   const [timeout20, setTimeout20] = useState(false)
   const [timeout45, setTimeout45] = useState(false)
   const stepIndexRef = useRef(0)
+  const [tipIndex, setTipIndex] = useState(0)
 
   const charCount = contextText.length
   const charColor =
@@ -50,6 +58,14 @@ export default function DecidePage() {
       clearTimers()
     }
   }, [])
+
+  useEffect(() => {
+    if (!processing) return
+    const interval = setInterval(() => {
+      setTipIndex((i) => (i + 1) % TIPS.length)
+    }, 6000)
+    return () => clearInterval(interval)
+  }, [processing])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -205,18 +221,16 @@ export default function DecidePage() {
         )}
 
         {showStepper && (
-          <div className="flex flex-col items-center py-12">
+          <div className="flex flex-col items-center py-16">
             <ProgressStepper currentStep={currentStepIndex} />
-            <ThinkingPill label={PROGRESS_STEPS[currentStepIndex]?.label || 'Processing...'} />
+            <p className="text-sm text-gray-400 text-center mt-10 max-w-md transition-opacity duration-500">
+              {TIPS[tipIndex]}
+            </p>
             {timeout20 && !timeout45 && (
-              <p className="text-sm text-gray-400 mt-6 animate-in fade-in duration-500">
-                Still working — this one needs extra thought.
-              </p>
+              <p className="text-sm text-gray-500 mt-6">Still working — this one needs extra thought.</p>
             )}
             {timeout45 && (
-              <p className="text-sm text-gray-400 mt-6 animate-in fade-in duration-500">
-                Almost there — finalising the recommendation.
-              </p>
+              <p className="text-sm text-gray-500 mt-6">Almost there — finalising the recommendation.</p>
             )}
           </div>
         )}
