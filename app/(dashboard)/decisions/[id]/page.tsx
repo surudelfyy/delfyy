@@ -57,8 +57,21 @@ export default async function DecisionPage({ params }: PageProps) {
   }
 
   const isProvisional = decision.confidence_tier === 'exploratory'
-  const card = decision.decision_card || {}
+  const card = decision.decision_card
   const stage = decision.input_context?.stage
+
+  if (!card) {
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <div className="max-w-3xl mx-auto px-6 py-16 text-center">
+          <p className="text-gray-700 mb-3">No decision card available yet.</p>
+          <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 underline">
+            ← Back to dashboard
+          </Link>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -75,11 +88,7 @@ export default async function DecisionPage({ params }: PageProps) {
               priority
             />
           </Link>
-          <DecisionActions
-            question={decision.question}
-            card={card}
-            confidenceTier={decision.confidence_tier}
-          />
+          <DecisionActions card={card} />
         </div>
       </header>
 
@@ -102,15 +111,11 @@ export default async function DecisionPage({ params }: PageProps) {
         {isProvisional && <ProvisionalBanner />}
 
         {/* The Decision Card */}
-        <DecisionCardDisplay card={card} confidenceTier={decision.confidence_tier} />
+        <DecisionCardDisplay card={card} />
 
         {/* Footer */}
         <footer className="mt-16 pt-8 border-t border-gray-200 flex items-center justify-between text-sm text-gray-400">
-          <DecisionActions
-            question={decision.question}
-            card={card}
-            confidenceTier={decision.confidence_tier}
-          />
+          <DecisionActions card={card} />
           <div className="flex items-center gap-3">
             {stage && <span className="capitalize">{stage}</span>}
             <span>

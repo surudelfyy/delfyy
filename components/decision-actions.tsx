@@ -3,35 +3,18 @@
 import { useState } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { decisionCardToMarkdown } from '@/lib/utils/decision-card-to-markdown'
-
-interface DecisionCard {
-  decision?: string
-  confidence?: string
-  assumptions?: string
-  trade_offs?: string
-  risks?: string
-  next_step?: string
-  review_trigger?: string
-  escape_hatch?: string
-  approach?: string
-  principle?: string
-  where_worked?: string
-  where_failed?: string
-  mechanism?: string
-}
+import { renderDecisionCardMarkdown } from '@/lib/utils/render-decision-card-markdown'
+import type { DecisionCard } from '@/lib/schemas/decision-card'
 
 interface DecisionActionsProps {
-  question: string
   card: DecisionCard
-  confidenceTier?: string
 }
 
-export function DecisionActions({ question, card, confidenceTier }: DecisionActionsProps) {
+export function DecisionActions({ card }: DecisionActionsProps) {
   const [copied, setCopied] = useState(false)
 
   const copyDecision = async () => {
-    const content = decisionCardToMarkdown(question, card, confidenceTier)
+    const content = renderDecisionCardMarkdown(card)
 
     try {
       await navigator.clipboard.writeText(content)

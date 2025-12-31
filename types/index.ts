@@ -33,7 +33,7 @@ export interface LensOutput {
 }
 
 // EVIDENCE GOVERNOR
-export type ConfidenceTier = 'exploratory' | 'directional' | 'supported' | 'high'
+export type ConfidenceTier = 'exploratory' | 'directional' | 'moderate' | 'good' | 'high'
 export type CommitmentPosture =
   | 'explore'
   | 'test'
@@ -80,23 +80,33 @@ export interface PatternMatcherOutput {
   mechanism: string
 }
 
-// DECISION CARD (Display schema, word-capped)
+// DECISION CARD (Display schema, premium memo)
 export interface DecisionCard {
-  // Layer 1 (word caps)
-  decision: string // 30w
-  confidence: string // 20w
-  assumptions: string // 60w
-  trade_offs: string // 50w
-  risks: string // 40w
-  next_step: string // 35w
-  review_trigger: string // 35w
-  escape_hatch: string // 35w
-  approach?: string // 30w
-  // Layer 2 (word caps)
-  principle: string // 35w
-  where_worked: string // 50w
-  where_failed: string // 50w
-  mechanism: string // 40w
+  meta: {
+    confidence_tier: 'high' | 'good' | 'moderate' | 'directional' | 'exploratory'
+    stage?: 'discovery' | 'build' | 'launch' | 'growth'
+  }
+  summary: {
+    title: string
+    call: string
+    confidence: string
+    do_next: string
+    success_looks_like: string[]
+    change_course_if: string[]
+  }
+  details: {
+    assumptions: string[]
+    tradeoffs: string[]
+    risks: string[]
+    watch_for: string[]
+    approach?: string
+  }
+  pattern: {
+    principle: string
+    where_worked: string[]
+    where_failed: string[]
+    mechanism: string
+  }
 }
 
 // CONCEPT ATOM

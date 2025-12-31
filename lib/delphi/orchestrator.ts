@@ -143,6 +143,8 @@ export async function runPipeline(
     try {
       onProgress('rendering', 'Preparing your decision card...')
       displayCard = renderDecisionCard({
+        question: decision.question,
+        stage: (decision.input_context as any)?.stage,
         internal: internalCard,
         pattern,
         lensOutputs,

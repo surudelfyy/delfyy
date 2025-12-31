@@ -214,13 +214,6 @@ export async function matchPatterns(input: MatchPatternsInput): Promise<PatternM
     const allEmpty =
       (value.where_worked?.length ?? 0) === 0 && (value.where_failed?.length ?? 0) === 0
 
-    if (countWords(value.principle) > 35) {
-      throw new Error('principle exceeds 35 words')
-    }
-    if (countWords(value.mechanism) > 40) {
-      throw new Error('mechanism exceeds 40 words')
-    }
-
     if (!value.principle || !value.mechanism || allEmpty) {
       return { ok: false as const, reason: 'empty' as const }
     }

@@ -1,18 +1,4 @@
-export interface DecisionCard {
-  decision?: string
-  confidence?: string
-  assumptions?: string
-  trade_offs?: string
-  risks?: string
-  next_step?: string
-  review_trigger?: string
-  escape_hatch?: string
-  approach?: string
-  principle?: string
-  where_worked?: string
-  where_failed?: string
-  mechanism?: string
-}
+import type { DecisionCard } from '@/lib/schemas/decision-card'
 
 export function decisionCardToMarkdown(
   question: string,
@@ -21,91 +7,67 @@ export function decisionCardToMarkdown(
 ): string {
   const lines: string[] = []
 
-  lines.push(`# Decision: ${question}`)
+  lines.push(`# Decision: ${card.summary.title || question}`)
   lines.push('')
 
-  if (card.decision) {
-    lines.push('## The Call')
-    lines.push(card.decision)
-    lines.push('')
-  }
+  lines.push('## The Call')
+  lines.push(card.summary.call)
+  lines.push('')
 
-  if (card.confidence || confidenceTier) {
-    if (card.confidence) lines.push(`**Confidence:** ${card.confidence}`)
-    if (confidenceTier) lines.push(`**Confidence tier:** ${confidenceTier}`)
-    lines.push('')
-  }
+  lines.push('**Confidence**')
+  lines.push(card.summary.confidence + (confidenceTier ? ` (${confidenceTier})` : ''))
+  lines.push('')
 
-  if (card.assumptions) {
-    lines.push('## Assumptions')
-    lines.push(card.assumptions)
-    lines.push('')
-  }
+  lines.push('**Do next**')
+  lines.push(card.summary.do_next)
+  lines.push('')
 
-  if (card.trade_offs) {
-    lines.push('## Trade-offs')
-    lines.push(card.trade_offs)
-    lines.push('')
-  }
+  lines.push('**Success looks like**')
+  card.summary.success_looks_like.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
 
-  if (card.risks) {
-    lines.push('## Risks')
-    lines.push(card.risks)
-    lines.push('')
-  }
+  lines.push('**Change course if**')
+  card.summary.change_course_if.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
 
-  if (card.next_step) {
-    lines.push('## Next Step')
-    lines.push(card.next_step)
-    lines.push('')
-  }
+  lines.push('## Assumptions')
+  card.details.assumptions.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
 
-  if (card.review_trigger) {
-    lines.push('## What to Watch For')
-    lines.push(card.review_trigger)
-    lines.push('')
-  }
+  lines.push('## Trade-offs')
+  card.details.tradeoffs.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
 
-  if (card.escape_hatch) {
-    lines.push('## What Would Force a Change')
-    lines.push(card.escape_hatch)
-    lines.push('')
-  }
+  lines.push('## Risks')
+  card.details.risks.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
 
-  if (card.approach) {
+  lines.push('## What to watch for')
+  card.details.watch_for.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
+
+  if (card.details.approach) {
     lines.push('## Approach')
-    lines.push(card.approach)
+    lines.push(card.details.approach)
     lines.push('')
   }
 
-  lines.push('---')
+  lines.push('## Pattern')
+  lines.push('**Principle**')
+  lines.push(card.pattern.principle)
   lines.push('')
-  lines.push('# The Pattern')
+
+  lines.push('**Where it worked**')
+  card.pattern.where_worked.forEach((b) => lines.push(`- ${b}`))
   lines.push('')
 
-  if (card.principle) {
-    lines.push('## The Pattern')
-    lines.push(card.principle)
-    lines.push('')
-  }
+  lines.push('**Where it failed**')
+  card.pattern.where_failed.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
 
-  if (card.where_worked) {
-    lines.push('## Where It Worked')
-    lines.push(card.where_worked)
-    lines.push('')
-  }
-
-  if (card.where_failed) {
-    lines.push('## Where It Failed')
-    lines.push(card.where_failed)
-    lines.push('')
-  }
-
-  if (card.mechanism) {
-    lines.push('## Why It Works')
-    lines.push(card.mechanism)
-    lines.push('')
-  }
+  lines.push('**Why it works**')
+  lines.push(card.pattern.mechanism)
+  lines.push('')
 
   return lines.join('\n')
 }
@@ -116,96 +78,48 @@ export function decisionCardToPlainText(
   confidenceTier?: string
 ): string {
   const lines: string[] = []
-
-  lines.push(`DECISION: ${question}`)
+  lines.push(`DECISION: ${card.summary.title || question}`)
   lines.push('')
-
-  if (card.decision) {
-    lines.push('THE CALL')
-    lines.push(card.decision)
-    lines.push('')
-  }
-
-  if (card.confidence) {
-    lines.push(`Confidence: ${card.confidence}`)
-  }
-  if (confidenceTier) {
-    lines.push(`Confidence tier: ${confidenceTier}`)
-  }
-  if (card.confidence || confidenceTier) lines.push('')
-
-  if (card.assumptions) {
-    lines.push('ASSUMPTIONS')
-    lines.push(card.assumptions)
-    lines.push('')
-  }
-
-  if (card.trade_offs) {
-    lines.push('TRADE-OFFS')
-    lines.push(card.trade_offs)
-    lines.push('')
-  }
-
-  if (card.risks) {
-    lines.push('RISKS')
-    lines.push(card.risks)
-    lines.push('')
-  }
-
-  if (card.next_step) {
-    lines.push('NEXT STEP')
-    lines.push(card.next_step)
-    lines.push('')
-  }
-
-  if (card.review_trigger) {
-    lines.push('WHAT TO WATCH FOR')
-    lines.push(card.review_trigger)
-    lines.push('')
-  }
-
-  if (card.escape_hatch) {
-    lines.push('WHAT WOULD FORCE A CHANGE')
-    lines.push(card.escape_hatch)
-    lines.push('')
-  }
-
-  if (card.approach) {
+  lines.push('THE CALL')
+  lines.push(card.summary.call)
+  lines.push('')
+  lines.push(`Confidence: ${card.summary.confidence}${confidenceTier ? ` (${confidenceTier})` : ''}`)
+  lines.push('')
+  lines.push('DO NEXT')
+  lines.push(card.summary.do_next)
+  lines.push('')
+  lines.push('SUCCESS LOOKS LIKE')
+  card.summary.success_looks_like.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
+  lines.push('CHANGE COURSE IF')
+  card.summary.change_course_if.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
+  lines.push('ASSUMPTIONS')
+  card.details.assumptions.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
+  lines.push('TRADE-OFFS')
+  card.details.tradeoffs.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
+  lines.push('RISKS')
+  card.details.risks.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
+  lines.push('WHAT TO WATCH FOR')
+  card.details.watch_for.forEach((b) => lines.push(`- ${b}`))
+  lines.push('')
+  if (card.details.approach) {
     lines.push('APPROACH')
-    lines.push(card.approach)
+    lines.push(card.details.approach)
     lines.push('')
   }
-
-  lines.push('────────────────────')
+  lines.push('PATTERN')
+  lines.push('Principle')
+  lines.push(card.pattern.principle)
+  lines.push('Where it worked')
+  card.pattern.where_worked.forEach((b) => lines.push(`- ${b}`))
+  lines.push('Where it failed')
+  card.pattern.where_failed.forEach((b) => lines.push(`- ${b}`))
+  lines.push('Why it works')
+  lines.push(card.pattern.mechanism)
   lines.push('')
-  lines.push('THE PATTERN')
-  lines.push('')
-
-  if (card.principle) {
-    lines.push('Pattern')
-    lines.push(card.principle)
-    lines.push('')
-  }
-
-  if (card.where_worked) {
-    lines.push('Where It Worked')
-    lines.push(card.where_worked)
-    lines.push('')
-  }
-
-  if (card.where_failed) {
-    lines.push('Where It Failed')
-    lines.push(card.where_failed)
-    lines.push('')
-  }
-
-  if (card.mechanism) {
-    lines.push('Why It Works')
-    lines.push(card.mechanism)
-    lines.push('')
-  }
-
   return lines.join('\n')
 }
-
-
