@@ -22,7 +22,7 @@ export interface DecisionRow {
 }
 
 export interface DecisionContext {
-  stage?: string
+  stage?: 'discovery' | 'build' | 'launch' | 'growth'
   traction?: string
   goal?: string
   constraints?: string[]
@@ -30,5 +30,6 @@ export interface DecisionContext {
   what_tried?: string
   deadline?: string
   bad_decision_signal?: string
+  freeform?: string
 }
 

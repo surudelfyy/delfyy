@@ -31,6 +31,16 @@ HARD RULES:
 - confidence is 0 to 1.
 - Do NOT invent facts.
 
+CONTEXT HANDLING:
+- context.stage: The founder's current phase (discovery/build/launch/growth)
+- context.freeform: Additional context provided by the founder. Extract any implied:
+  - traction signals
+  - goals or priorities
+  - constraints (time, money, skills, team)
+  - risk tolerance
+  - what they've already tried
+  Use this to inform your classification. Do not hallucinate details not present.
+
 RETURN THIS EXACT JSON SHAPE:
 {
   "level": "Strategy" | "Product" | "Feature" | "Operating",

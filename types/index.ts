@@ -157,13 +157,14 @@ export interface Decision {
 
 // INPUT CONTEXT
 export interface InputContext {
-  stage?: 'idea' | 'mvp' | 'early-revenue' | 'scaling'
-  traction?: 'none' | 'few-users' | 'paying' | 'growing'
-  goal?: 'speed' | 'quality' | 'revenue' | 'learning'
+  stage?: 'discovery' | 'build' | 'launch' | 'growth'
+  traction?: string
+  goal?: string
   constraints?: string[]
-  risk_tolerance?: 'low' | 'medium' | 'high'
+  risk_tolerance?: string
   what_tried?: string
   deadline?: string
   bad_decision_signal?: string
+  freeform?: string
 }
 

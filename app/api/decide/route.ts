@@ -11,7 +11,7 @@ const RequestSchema = z.object({
   question: z.string().min(10).max(2000),
   context: z
     .object({
-      stage: z.string().optional(),
+      stage: z.enum(['discovery', 'build', 'launch', 'growth']).optional(),
       traction: z.string().optional(),
       goal: z.string().optional(),
       constraints: z.array(z.string()).optional(),
@@ -19,6 +19,7 @@ const RequestSchema = z.object({
       what_tried: z.string().optional(),
       deadline: z.string().optional(),
       bad_decision_signal: z.string().optional(),
+      freeform: z.string().max(500).optional(),
     })
     .optional(),
   idempotency_key: z.string().optional(),
