@@ -1,11 +1,6 @@
 import { z } from 'zod'
 
-const bulletArray = (min: number, max: number) =>
-  z
-    .array(z.string().trim().min(1))
-    .min(min)
-    .max(max)
-    .strict()
+const bulletArray = (min: number, max: number) => z.array(z.string().trim().min(1)).min(min).max(max)
 
 export const DecisionMemoSchema = z
   .object({

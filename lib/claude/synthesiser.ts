@@ -1,8 +1,7 @@
 import { callClaudeJSON, CLAUDE_MODEL_HAIKU } from '@/lib/claude/client'
 import type { GovernorOutput } from '@/lib/schemas/governor'
 import type { LensOutput } from '@/lib/schemas/lens'
-import { SynthesiserCardBitsSchema, type SynthesiserCardBits } from '@/lib/schemas/synthesiser'
-import { SynthesiserCardBitsJsonSchema } from '@/lib/schemas/synthesiser-json'
+import { DecisionMemoSchema, type DecisionMemo } from '@/lib/schemas/decision-memo'
 import { SYNTHESISER_SYSTEM_PROMPT } from '@/prompts/synthesiser'
 
 const FORBIDDEN_WORDS = [
@@ -50,7 +49,7 @@ export async function synthesise(
   decision: DecisionInput,
   lensOutputs: LensOutput[],
   governorOutput: GovernorOutput
-): Promise<SynthesiserCardBits> {
+): Promise<DecisionMemo> {
   const hasSupport = lensOutputs.some((l) => l.stance === 'support')
   const hasOppose = lensOutputs.some((l) => l.stance === 'oppose')
   const hasDisagreement = hasSupport && hasOppose
@@ -82,16 +81,16 @@ export async function synthesise(
     'Return ONLY valid JSON matching the schema; no code fences; no extra keys.'
 
   const callOnce = async (messages: { role: 'user' | 'assistant'; content: string }[]) => {
-    return callClaudeJSON<SynthesiserCardBits>({
+    return callClaudeJSON<DecisionMemo>({
       model: CLAUDE_MODEL_HAIKU,
       max_tokens: 3500,
       system: SYNTHESISER_SYSTEM_PROMPT,
       messages,
-      schema: SynthesiserCardBitsJsonSchema,
+      schema: DecisionMemoSchema,
     })
   }
 
-  let result: SynthesiserCardBits
+  let result: DecisionMemo
   try {
     result = await callOnce(baseMessages)
   } catch (err) {
@@ -102,18 +101,6 @@ export async function synthesise(
     }
   }
 
-  const forbidden = containsForbiddenWord(result)
-  if (forbidden) {
-    const retryInstruction = `Rewrite the JSON to mean the same thing but remove these forbidden words: ${FORBIDDEN_WORDS.join(
-      ', '
-    )}. Do not use synonyms like 'classification' either. Return JSON only.`
-    result = await callOnce([...baseMessages, { role: 'user', content: retryInstruction }])
-    const forbiddenRetry = containsForbiddenWord(result)
-    if (forbiddenRetry) {
-      throw new Error(`Forbidden word present after retry: ${forbiddenRetry}`)
-    }
-  }
-
-  return result
+  return DecisionMemoSchema.parse(result)
 }
 
