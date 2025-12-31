@@ -30,85 +30,138 @@ export async function runPipeline(
   const atoms = loadAtoms(atomCorpus as unknown[])
 
   try {
-    onProgress('classifying', 'Understanding your decision...')
-    const classifierOutput = await classify({
-      question: decision.question,
-      context: (decision.input_context as Record<string, unknown>) ?? {},
-    })
-    await supabase.from('decisions').update({ classifier_output: classifierOutput }).eq('id', decisionId)
-
-    onProgress('compiling', 'Gathering relevant insights...')
-    const lensPacks = compileLensPacks({ classifierOutput, atoms })
-
-    onProgress('evaluating', 'Evaluating from three perspectives...')
-    const lensOutputs = await evaluateLenses(
-      {
+    let classifierOutput
+    console.time('1-classifier')
+    try {
+      onProgress('classifying', 'Understanding your decision...')
+      classifierOutput = await classify({
         question: decision.question,
-        input_context: decision.input_context,
-        classifier_output: classifierOutput,
-      },
-      lensPacks
-    )
-    await supabase.from('decisions').update({ lens_outputs: lensOutputs }).eq('id', decisionId)
+        context: (decision.input_context as Record<string, unknown>) ?? {},
+      })
+      await supabase.from('decisions').update({ classifier_output: classifierOutput }).eq('id', decisionId)
+    } finally {
+      console.timeEnd('1-classifier')
+    }
 
-    onProgress('governing', 'Checking confidence...')
-    const governorOutput = runEvidenceGovernor({ lensOutputs, classifierOutput })
-    await supabase.from('decisions').update({ governor_output: governorOutput }).eq('id', decisionId)
+    let lensPacks
+    console.time('2-lenspack')
+    try {
+      onProgress('compiling', 'Gathering relevant insights...')
+      lensPacks = compileLensPacks({ classifierOutput, atoms })
+    } finally {
+      console.timeEnd('2-lenspack')
+    }
+
+    let lensOutputs
+    console.time('3-lenses')
+    try {
+      onProgress('evaluating', 'Evaluating from three perspectives...')
+      lensOutputs = await evaluateLenses(
+        {
+          question: decision.question,
+          input_context: decision.input_context,
+          classifier_output: classifierOutput,
+        },
+        lensPacks
+      )
+      await supabase.from('decisions').update({ lens_outputs: lensOutputs }).eq('id', decisionId)
+    } finally {
+      console.timeEnd('3-lenses')
+    }
+
+    let governorOutput
+    console.time('4-governor')
+    try {
+      onProgress('governing', 'Checking confidence...')
+      governorOutput = runEvidenceGovernor({ lensOutputs, classifierOutput })
+      await supabase.from('decisions').update({ governor_output: governorOutput }).eq('id', decisionId)
+    } finally {
+      console.timeEnd('4-governor')
+    }
 
     // Round 2 skipped for MVP (TODO: add when enabled)
 
-    onProgress('synthesising', 'Forming recommendation...')
-    const internalCard = await synthesise(
-      { question: decision.question, input_context: decision.input_context },
-      lensOutputs,
-      governorOutput
-    )
-    await supabase.from('decisions').update({ decision_card_internal: internalCard }).eq('id', decisionId)
-
-    onProgress('matching', 'Finding real-world examples...')
-    const exampleAtoms = atoms.filter((a) => a.type === 'Example')
-    let pattern: PatternMatcherOutput
+    let internalCard
+    console.time('5-synthesiser')
     try {
+      onProgress('synthesising', 'Forming recommendation...')
+      internalCard = await synthesise(
+        { question: decision.question, input_context: decision.input_context },
+        lensOutputs,
+        governorOutput
+      )
+      await supabase.from('decisions').update({ decision_card_internal: internalCard }).eq('id', decisionId)
+    } finally {
+      console.timeEnd('5-synthesiser')
+    }
+
+    let pattern: PatternMatcherOutput
+    console.time('6-pattern')
+    try {
+      onProgress('matching', 'Finding real-world examples...')
+      const exampleAtoms = atoms.filter((a) => a.type === 'Example')
+      console.log(
+        '[MATCH INPUT DEBUG] firstExampleAtomFull',
+        JSON.stringify(exampleAtoms[0] ?? null, null, 2).slice(0, 2000)
+      )
+      const typeCounts = atoms.reduce<Record<string, number>>((acc, a) => {
+        const t = String((a as any).type)
+        acc[t] = (acc[t] ?? 0) + 1
+        return acc
+      }, {})
+
+      console.log('[MATCH INPUT DEBUG]', {
+        hasAtoms: !!atoms?.length,
+        totalAtoms: atoms?.length ?? 0,
+        typeCounts,
+        uniqueTypes: Object.keys(typeCounts),
+      })
+      const topReasons: { reason: string; because: string }[] = []
       const result = await matchPatterns({
         classifierOutput,
         recommendedChoice: internalCard.recommended_call.choice,
-        topReasons: internalCard.top_reasons,
+        topReasons: [], // top reasons omitted in card bits payload
         exampleAtoms,
+        decisionQuestion: decision.question,
       })
-      pattern =
-        result || {
-          principle: '',
-          where_worked: [],
-          where_failed: [],
-          mechanism: '',
-        }
-    } catch {
-      pattern = {
-        principle: '',
-        where_worked: [],
-        where_failed: [],
-        mechanism: '',
+      if (!result) {
+        throw new Error('PATTERN_MATCH_RETURNED_NULL')
       }
+      pattern = result
+    } finally {
+      console.timeEnd('6-pattern')
     }
 
-    onProgress('rendering', 'Preparing your decision card...')
-    const displayCard = renderDecisionCard({
-      internal: internalCard,
-      pattern,
-      lensOutputs,
-      governorOutput,
+    console.log('[match] output', JSON.stringify(pattern, null, 2))
+    console.log('[match] counts', {
+      worked: pattern?.where_worked?.length ?? 0,
+      failed: pattern?.where_failed?.length ?? 0,
     })
-    const cardText = renderDecisionCardText(displayCard)
 
-    await supabase
-      .from('decisions')
-      .update({
-        status: 'complete',
-        decision_card: displayCard,
-        decision_card_text: cardText,
-        confidence_tier: governorOutput.confidence_tier,
+    let displayCard
+    console.time('7-render')
+    try {
+      onProgress('rendering', 'Preparing your decision card...')
+      displayCard = renderDecisionCard({
+        internal: internalCard,
+        pattern,
+        lensOutputs,
+        governorOutput,
       })
-      .eq('id', decisionId)
+      const cardText = renderDecisionCardText(displayCard)
+
+      await supabase
+        .from('decisions')
+        .update({
+          status: 'complete',
+          decision_card: displayCard,
+          decision_card_text: cardText,
+          confidence_tier: governorOutput.confidence_tier,
+        })
+        .eq('id', decisionId)
+    } finally {
+      console.timeEnd('7-render')
+    }
 
     const { data: final } = await supabase.from('decisions').select('*').eq('id', decisionId).single()
     return final as DecisionRow

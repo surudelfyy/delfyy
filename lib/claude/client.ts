@@ -285,21 +285,29 @@ export async function callClaudeJSON<T>(args: {
 }): Promise<T> {
   if (!args.model) throw new Error('Claude model is not configured')
   const client = getAnthropic() as any
-  const res = await client.beta.messages.create({
-    model: args.model,
-    max_tokens: args.max_tokens,
-    betas: ['structured-outputs-2025-11-13'],
-    system: args.system,
-    messages: args.messages,
-    output_format: {
-      type: 'json_schema',
-      schema: args.schema,
-    },
-  })
+  const label = `[CLAUDE_JSON] ${args.model} ${Date.now()}-${Math.random()
+    .toString(16)
+    .slice(2)}`
+  console.time(label)
+  try {
+    const res = await client.beta.messages.create({
+      model: args.model,
+      max_tokens: args.max_tokens,
+      betas: ['structured-outputs-2025-11-13'],
+      system: args.system,
+      messages: args.messages,
+      output_format: {
+        type: 'json_schema',
+        schema: args.schema,
+      },
+    })
 
-  const text = res.content?.[0]?.type === 'text' ? res.content[0].text : ''
-  if (!text) {
-    throw new Error('Empty response from Claude structured output')
+    const text = res.content?.[0]?.type === 'text' ? res.content[0].text : ''
+    if (!text) {
+      throw new Error('Empty response from Claude structured output')
+    }
+    return JSON.parse(text) as T
+  } finally {
+    console.timeEnd(label)
   }
-  return JSON.parse(text) as T
 }

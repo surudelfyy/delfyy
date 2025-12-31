@@ -70,4 +70,6 @@ HARD RULES:
 
 FORBIDDEN WORDS: lens, lens pack, compiler, governor, deterministic, routing, taxonomy, schema, atoms, retrieval, classifier
 
-ALLOWED WORDS: view, evidence, confidence, decision type, categories, examples, reasons`
+ALLOWED WORDS: view, evidence, confidence, decision type, categories, examples, reasons
+
+CRITICAL: Never use these words in your output: lens, lens pack, compiler, governor, deterministic, routing, taxonomy, schema, atoms, retrieval, classifier. Use plain language only.`

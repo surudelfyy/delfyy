@@ -49,7 +49,7 @@ export interface GovernorOutput {
 }
 
 // SYNTHESISER OUTPUT (Internal, structured)
-export interface SynthesiserOutput {
+export interface SynthesiserCardBits {
   version: 1
   recommended_call: {
     status: 'recommendation' | 'insufficient_information'
@@ -58,25 +58,11 @@ export interface SynthesiserOutput {
     confidence_score: number
   }
   confidence_reason: string
-  top_reasons: { reason: string; because: string }[]
   tradeoffs: { tradeoff: string; what_you_gain: string; what_you_risk: string }[]
-  assumptions: { assumption: string; why_it_matters: string; confidence: ConfidenceLevel }[]
   key_risks: { risk: string; why_it_matters: string }[]
-  revisit_signals: { signal: string; why_it_matters: string }[]
-  escape_hatch: { condition: string; immediate_action: string } | null
+  assumptions: { assumption: string; why_it_matters: string; confidence: ConfidenceLevel }[]
+  escape_hatch: { condition: string; immediate_action: string }
   next_steps: { step: string; expected_output: string }[]
-  four_views_summary: {
-    customer_view: { summary: string; key_points: string[] }
-    business_view: { summary: string; key_points: string[] }
-    build_view: { summary: string; key_points: string[] }
-    evidence_view: { summary: string; key_points: string[] }
-  }
-  real_world_examples: {
-    included: boolean
-    items: { type: 'worked' | 'failed'; example: string; lesson: string }[]
-  }
-  safety_notes: { flag: string; note: string }[]
-  contest_summary?: string
 }
 
 // PATTERN MATCHER
@@ -161,7 +147,7 @@ export interface Decision {
   lens_outputs: LensOutput[] | null
   governor_output: GovernorOutput | null
   confidence_tier: ConfidenceTier | null
-  decision_card_internal: SynthesiserOutput | null
+  decision_card_internal: SynthesiserCardBits | null
   decision_card: DecisionCard | null
   decision_card_text: string | null
   created_at: string

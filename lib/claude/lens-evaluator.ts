@@ -83,6 +83,7 @@ export async function evaluateLenses(
     if (result.status === 'fulfilled') {
       return result.value
     }
+    console.error(`Lens ${lens} failed:`, result.reason)
     return fallbackLensOutput(lens)
   })
 

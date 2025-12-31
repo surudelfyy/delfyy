@@ -1,7 +1,7 @@
 import { ClassifierOutput } from '@/lib/schemas/classifier'
 import { LensOutput } from '@/lib/schemas/lens'
 import { GovernorOutput } from '@/lib/schemas/governor'
-import { SynthesiserOutput } from '@/lib/schemas/synthesiser'
+import { SynthesiserCardBits } from '@/lib/schemas/synthesiser'
 import { DecisionCard } from '@/lib/schemas/decision-card'
 
 export interface DecisionRow {
@@ -13,7 +13,7 @@ export interface DecisionRow {
   classifier_output: ClassifierOutput | null
   lens_outputs: LensOutput[] | null
   governor_output: GovernorOutput | null
-  decision_card_internal: SynthesiserOutput | null
+  decision_card_internal: SynthesiserCardBits | null
   decision_card: DecisionCard | null
   decision_card_text: string | null
   confidence_tier: string | null

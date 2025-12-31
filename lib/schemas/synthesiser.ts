@@ -94,10 +94,10 @@ export const SynthesiserOutputSchema = z
     contest_summary: z.string().optional(), // ≤150 chars only if views disagreed
   })
   .superRefine((val, ctx) => {
-    if (val.confidence_reason.length > 100) {
+    if (val.confidence_reason.length > 160) {
       ctx.addIssue({
         code: 'custom',
-        message: 'confidence_reason too long (max 100 chars)',
+        message: 'confidence_reason too long (max 160 chars)',
         path: ['confidence_reason'],
       })
     }
@@ -111,3 +111,54 @@ export const SynthesiserOutputSchema = z
   })
 
 export type SynthesiserOutput = z.infer<typeof SynthesiserOutputSchema>
+
+export const SynthesiserCardBitsSchema = z.object({
+  version: z.literal(1),
+  recommended_call: z.object({
+    status: z.enum(['recommendation', 'insufficient_information']),
+    choice: z.string(),
+    confidence_label: z.enum(['low', 'medium', 'high']),
+    confidence_score: z.number().min(0).max(1),
+  }),
+  confidence_reason: z.string(),
+  tradeoffs: z
+    .array(
+      z.object({
+        tradeoff: z.string(),
+        what_you_gain: z.string(),
+        what_you_risk: z.string(),
+      })
+    )
+    .max(2),
+  key_risks: z
+    .array(
+      z.object({
+        risk: z.string(),
+        why_it_matters: z.string(),
+      })
+    )
+    .max(3),
+  assumptions: z
+    .array(
+      z.object({
+        assumption: z.string(),
+        why_it_matters: z.string(),
+        confidence: z.enum(['high', 'medium', 'low']),
+      })
+    )
+    .max(2),
+  escape_hatch: z.object({
+    condition: z.string(),
+    immediate_action: z.string(),
+  }),
+  next_steps: z
+    .array(
+      z.object({
+        step: z.string(),
+        expected_output: z.string(),
+      })
+    )
+    .max(2),
+})
+
+export type SynthesiserCardBits = z.infer<typeof SynthesiserCardBitsSchema>

@@ -1,24 +1,37 @@
 import { z } from 'zod'
 
 export const PatternMatcherOutputSchema = z.object({
-  principle: z.string(), // ≤35 words, stated plainly
-  where_worked: z.array(
-    z.object({
-      example: z.string(),
-      timeframe: z.string(),
-      lesson: z.string(),
-      atom_id: z.string(), // singular, not atom_ids
+  principle: z.string().min(1, 'principle cannot be empty'), // ≤35 words, stated plainly
+  where_worked: z
+    .array(
+      z.object({
+        example: z.string().min(1),
+        timeframe: z.string().min(1),
+        lesson: z.string().min(1),
+        atom_id: z.string().min(1), // singular, not atom_ids
+      })
+    )
+    .max(3),
+  where_failed: z
+    .array(
+      z.object({
+        example: z.string().min(1),
+        timeframe: z.string().min(1),
+        lesson: z.string().min(1),
+        atom_id: z.string().min(1),
+      })
+    )
+    .max(3),
+  mechanism: z.string().min(1, 'mechanism cannot be empty'), // ≤40 words explaining why it works or breaks
+}).superRefine((val, ctx) => {
+  const total = (val.where_worked?.length ?? 0) + (val.where_failed?.length ?? 0)
+  if (total === 0) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Must return at least one example across where_worked or where_failed',
+      path: ['where_worked'],
     })
-  ).max(3),
-  where_failed: z.array(
-    z.object({
-      example: z.string(),
-      timeframe: z.string(),
-      lesson: z.string(),
-      atom_id: z.string(),
-    })
-  ).max(3),
-  mechanism: z.string(), // ≤40 words explaining why it works or breaks
+  }
 })
 
 export type PatternMatcherOutput = z.infer<typeof PatternMatcherOutputSchema>
@@ -28,38 +41,36 @@ export const PatternMatcherJsonSchema = {
   additionalProperties: false,
   required: ['principle', 'where_worked', 'where_failed', 'mechanism'],
   properties: {
-    principle: { type: 'string', maxLength: 280 },
+    principle: { type: 'string' },
     where_worked: {
       type: 'array',
-      maxItems: 3,
       items: {
         type: 'object',
         additionalProperties: false,
         required: ['example', 'timeframe', 'lesson', 'atom_id'],
         properties: {
-          example: { type: 'string', maxLength: 260 },
-          timeframe: { type: 'string', maxLength: 120 },
-          lesson: { type: 'string', maxLength: 220 },
-          atom_id: { type: 'string', maxLength: 120 },
+          example: { type: 'string' },
+          timeframe: { type: 'string' },
+          lesson: { type: 'string' },
+          atom_id: { type: 'string' },
         },
       },
     },
     where_failed: {
       type: 'array',
-      maxItems: 3,
       items: {
         type: 'object',
         additionalProperties: false,
         required: ['example', 'timeframe', 'lesson', 'atom_id'],
         properties: {
-          example: { type: 'string', maxLength: 260 },
-          timeframe: { type: 'string', maxLength: 120 },
-          lesson: { type: 'string', maxLength: 220 },
-          atom_id: { type: 'string', maxLength: 120 },
+          example: { type: 'string' },
+          timeframe: { type: 'string' },
+          lesson: { type: 'string' },
+          atom_id: { type: 'string' },
         },
       },
     },
-    mechanism: { type: 'string', maxLength: 240 },
+    mechanism: { type: 'string' },
   },
-}
+} as const
 

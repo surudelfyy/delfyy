@@ -81,85 +81,78 @@ export const LensOutputJsonSchema = {
   properties: {
     lens: { enum: ['Customer', 'Business', 'Feasibility'] },
     stance: { enum: ['support', 'oppose', 'mixed', 'unclear'] },
-    summary: { type: 'string', maxLength: 600 },
+    summary: { type: 'string' },
     supporting_points: {
       type: 'array',
-      maxItems: 3,
       items: {
         type: 'object',
         additionalProperties: false,
         required: ['point', 'atom_ids'],
         properties: {
-          point: { type: 'string', maxLength: 240 },
-          atom_ids: { type: 'array', maxItems: 6, items: { type: 'string' } },
+          point: { type: 'string' },
+          atom_ids: { type: 'array', items: { type: 'string' } },
         },
       },
     },
     counterpoints: {
       type: 'array',
-      maxItems: 3,
       items: {
         type: 'object',
         additionalProperties: false,
         required: ['point', 'atom_ids'],
         properties: {
-          point: { type: 'string', maxLength: 240 },
-          atom_ids: { type: 'array', maxItems: 6, items: { type: 'string' } },
+          point: { type: 'string' },
+          atom_ids: { type: 'array', items: { type: 'string' } },
         },
       },
     },
     assumptions: {
       type: 'array',
-      maxItems: 3,
       items: {
         type: 'object',
         additionalProperties: false,
         required: ['assumption', 'why_it_matters'],
         properties: {
-          assumption: { type: 'string', maxLength: 200 },
-          why_it_matters: { type: 'string', maxLength: 240 },
+          assumption: { type: 'string' },
+          why_it_matters: { type: 'string' },
         },
       },
     },
     disconfirming_tests: {
       type: 'array',
-      minItems: 1,
-      maxItems: 2,
       items: {
         type: 'object',
         additionalProperties: false,
         required: ['test', 'pass_signal', 'fail_signal'],
         properties: {
-          test: { type: 'string', maxLength: 240 },
-          pass_signal: { type: 'string', maxLength: 180 },
-          fail_signal: { type: 'string', maxLength: 180 },
+          test: { type: 'string' },
+          pass_signal: { type: 'string' },
+          fail_signal: { type: 'string' },
         },
       },
     },
     open_questions: {
       type: 'array',
-      maxItems: 3,
       items: {
         type: 'object',
         additionalProperties: false,
         required: ['question', 'why_it_matters'],
         properties: {
-          question: { type: 'string', maxLength: 180 },
-          why_it_matters: { type: 'string', maxLength: 220 },
+          question: { type: 'string' },
+          why_it_matters: { type: 'string' },
         },
       },
     },
     examples_in_pack: {
       type: 'array',
-      maxItems: 2,
       items: {
         type: 'object',
         additionalProperties: false,
         required: ['example', 'lesson', 'atom_ids'],
         properties: {
-          example: { type: 'string', maxLength: 260 },
-          lesson: { type: 'string', maxLength: 220 },
-          atom_ids: { type: 'array', maxItems: 6, items: { type: 'string' } },
+          example: { type: 'string' },
+          lesson: { type: 'string' },
+          atom_ids: { type: 'array', items: { type: 'string' } },
         },
       },
     },

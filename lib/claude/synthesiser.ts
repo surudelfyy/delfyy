@@ -1,7 +1,8 @@
-import { callClaude, CLAUDE_MODEL_SONNET } from '@/lib/claude/client'
+import { callClaudeJSON, CLAUDE_MODEL_HAIKU } from '@/lib/claude/client'
 import type { GovernorOutput } from '@/lib/schemas/governor'
 import type { LensOutput } from '@/lib/schemas/lens'
-import { SynthesiserOutputSchema, type SynthesiserOutput } from '@/lib/schemas/synthesiser'
+import { SynthesiserCardBitsSchema, type SynthesiserCardBits } from '@/lib/schemas/synthesiser'
+import { SynthesiserCardBitsJsonSchema } from '@/lib/schemas/synthesiser-json'
 import { SYNTHESISER_SYSTEM_PROMPT } from '@/prompts/synthesiser'
 
 const FORBIDDEN_WORDS = [
@@ -49,7 +50,7 @@ export async function synthesise(
   decision: DecisionInput,
   lensOutputs: LensOutput[],
   governorOutput: GovernorOutput
-): Promise<SynthesiserOutput> {
+): Promise<SynthesiserCardBits> {
   const hasSupport = lensOutputs.some((l) => l.stance === 'support')
   const hasOppose = lensOutputs.some((l) => l.stance === 'oppose')
   const hasDisagreement = hasSupport && hasOppose
@@ -72,23 +73,45 @@ export async function synthesise(
     instruction,
   ].join('\n')
 
-  const result = await callClaude<SynthesiserOutput>({
-    model: CLAUDE_MODEL_SONNET,
-    system: SYNTHESISER_SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: userContent }],
-    schema: SynthesiserOutputSchema,
-    temperature: 0.2,
-    maxTokens: 2500,
-    maxRetries: 1,
-  })
+  console.log('[MODEL] synthesiser using', CLAUDE_MODEL_HAIKU)
 
-  if (!hasDisagreement && result.contest_summary) {
-    throw new Error('contest_summary present without disagreement')
+  const baseMessages: { role: 'user' | 'assistant'; content: string }[] = [
+    { role: 'user', content: userContent },
+  ]
+  const repairMessage =
+    'Return ONLY valid JSON matching the schema; no code fences; no extra keys.'
+
+  const callOnce = async (messages: { role: 'user' | 'assistant'; content: string }[]) => {
+    return callClaudeJSON<SynthesiserCardBits>({
+      model: CLAUDE_MODEL_HAIKU,
+      max_tokens: 3500,
+      system: SYNTHESISER_SYSTEM_PROMPT,
+      messages,
+      schema: SynthesiserCardBitsJsonSchema,
+    })
+  }
+
+  let result: SynthesiserCardBits
+  try {
+    result = await callOnce(baseMessages)
+  } catch (err) {
+    if ((err as Error)?.name === 'ClaudeValidationError') {
+      result = await callOnce([...baseMessages, { role: 'user', content: repairMessage }])
+    } else {
+      throw err
+    }
   }
 
   const forbidden = containsForbiddenWord(result)
   if (forbidden) {
-    throw new Error(`Forbidden word present: ${forbidden}`)
+    const retryInstruction = `Rewrite the JSON to mean the same thing but remove these forbidden words: ${FORBIDDEN_WORDS.join(
+      ', '
+    )}. Do not use synonyms like 'classification' either. Return JSON only.`
+    result = await callOnce([...baseMessages, { role: 'user', content: retryInstruction }])
+    const forbiddenRetry = containsForbiddenWord(result)
+    if (forbiddenRetry) {
+      throw new Error(`Forbidden word present after retry: ${forbiddenRetry}`)
+    }
   }
 
   return result
