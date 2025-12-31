@@ -37,6 +37,7 @@ async function main() {
       level: 'Product',
       dimension: 'Packaging',
       secondary_dimensions: [],
+      related_dimensions: [],
       decision_mode: 'choose',
       context_tags: ['mvp'],
       risk_flags: [],
