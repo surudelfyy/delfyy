@@ -18,8 +18,9 @@ HARD RULES:
 - IMPORTANT:
   - Use "dimension" (SINGULAR string). Do NOT output "dimensions".
   - "dimension" MUST be ONE value from the selected level list above.
-  - "secondary_dimensions" MUST be an array of 0-2 strings AND every item must be from the SAME level list.
-  - If unsure, leave secondary_dimensions as [].
+  - "secondary_dimensions" MUST be an array of 0-2 strings AND every item must be from the SAME level list (same level as "level").
+  - If unsure or no same-level secondary dimensions apply, leave secondary_dimensions as [].
+  - If you want to reference dimensions from OTHER levels, put them in related_dimensions as objects: { level: <Level>, dimension: <Dimension> }.
 - decision_mode MUST be inferred from the question text:
   - choose = selecting between options
   - diagnose = figuring out why something is happening
@@ -35,6 +36,7 @@ RETURN THIS EXACT JSON SHAPE:
   "level": "Strategy" | "Product" | "Feature" | "Operating",
   "dimension": "<ONE dimension from the selected level>",
   "secondary_dimensions": ["<0-2 dims from same level>"],
+  "related_dimensions": [{"level": "<Level>", "dimension": "<Dimension>"}],
   "decision_mode": "choose" | "diagnose" | "plan",
   "context_tags": ["<strings>"],
   "risk_flags": ["<strings>"],

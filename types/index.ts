@@ -6,6 +6,7 @@ export interface ClassifierOutput {
   level: ClassifierLevel
   dimension: string
   secondary_dimensions: string[]
+  related_dimensions?: { level: ClassifierLevel; dimension: string }[]
   decision_mode: DecisionMode
   context_tags: string[]
   risk_flags: string[]

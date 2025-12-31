@@ -13,6 +13,15 @@ export const ClassifierOutputSchema = z
     level: z.enum(['Strategy', 'Product', 'Feature', 'Operating']),
     dimension: z.string(),
     secondary_dimensions: z.array(z.string()).max(2),
+    related_dimensions: z
+      .array(
+        z.object({
+          level: z.enum(['Strategy', 'Product', 'Feature', 'Operating']),
+          dimension: z.string(),
+        })
+      )
+      .optional()
+      .default([]),
     decision_mode: z.enum(['choose', 'diagnose', 'plan']),
     context_tags: z.array(z.string()),
     risk_flags: z.array(z.string()),
