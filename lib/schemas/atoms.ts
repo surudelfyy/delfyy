@@ -4,7 +4,7 @@ export const ConceptAtomSchema = z.object({
   id: z.string(),
   source: z.string(),
   version: z.number().optional(),
-  type: z.enum(['Signal', 'Heuristic', 'FailureMode', 'Pattern', 'Example', 'Quote', 'example']),
+  type: z.enum(['Signal', 'Heuristic', 'FailureMode', 'Pattern', 'Example', 'Quote']),
   purpose: z.enum(['Detect', 'Evaluate', 'Warn', 'Illustrate']),
   claim: z.string(),
   rationale: z.string().optional(),
