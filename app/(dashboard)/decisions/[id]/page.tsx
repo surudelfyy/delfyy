@@ -3,9 +3,10 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { AlertTriangle, ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
-import { DecisionCardDisplay } from '@/components/decision-card-display'
 import { DecisionActions } from '@/components/decision-actions'
 import { cleanText, fixContractions } from '@/lib/utils/format-decision-text'
+import { DecisionMemo } from '@/components/decision-memo'
+import { decisionCardToMarkdown } from '@/lib/utils/decision-card-to-markdown'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -80,71 +81,50 @@ export default async function DecisionPage({ params }: PageProps) {
           <Link href="/dashboard" className="flex items-center gap-2">
             <Image src="/delfyylogo.svg" alt="Delfyy" width={120} height={40} className="h-auto" priority />
           </Link>
-          <DecisionActions card={card} showPlainText buttonSize="sm" />
+          <DecisionActions
+            card={card}
+            question={questionClean}
+            decisionId={decision.id}
+            confidenceTier={decision.confidence_tier ?? undefined}
+            buttonSize="sm"
+          />
         </div>
       </header>
 
-      <div className="memo max-w-[780px] mx-auto px-6 py-12 space-y-16">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              All decisions
-            </Link>
-            <h1 className="text-2xl md:text-3xl font-serif font-semibold text-gray-900 leading-snug tracking-tight">
-              {questionClean}
-            </h1>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-              <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1 text-gray-700">
-                {decision.confidence_tier ?? 'Unknown confidence'}
-              </span>
-              {decision.input_context?.stage && (
-                <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1 text-gray-700 capitalize">
-                  {decision.input_context.stage}
-                </span>
-              )}
-              <span>
-                {new Date(decision.created_at).toLocaleDateString('en-GB', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </span>
-            </div>
-          </div>
-          <div className="hidden sm:flex">
-            <DecisionActions card={card} showPlainText buttonSize="sm" />
-          </div>
+      <div className="max-w-[820px] mx-auto px-6 py-12 space-y-10">
+        <div className="space-y-3">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            All decisions
+          </Link>
+          <h1 className="text-2xl md:text-3xl font-serif font-semibold text-gray-900 leading-snug tracking-tight">
+            {questionClean}
+          </h1>
+          <p className="text-sm text-gray-500">That&apos;s one less thing living in your head.</p>
         </div>
 
-        <div className="border-t border-gray-200 pt-10">
-          {card.meta.confidence_tier === 'exploratory' && (
-            <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
-              <AlertTriangle className="h-5 w-5 mt-0.5" />
-              <div>
-                <p className="font-semibold text-amber-900">Provisional call</p>
-                <p className="text-sm text-amber-800">This is a hypothesis. Run the next step to firm it up.</p>
-              </div>
+        {card.meta.confidence_tier === 'exploratory' && (
+          <div className="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
+            <AlertTriangle className="h-4 w-4 mt-0.5" />
+            <div>
+              <p className="font-semibold text-amber-900">Provisional call</p>
+              <p className="text-sm text-amber-800">This is a hypothesis. Run the next step to firm it up.</p>
             </div>
+          </div>
+        )}
+
+        <DecisionMemo
+          markdown={decisionCardToMarkdown(
+            decision.question,
+            card,
+            decision.confidence_tier ?? undefined,
+            decision.input_context?.stage,
+            decision.created_at
           )}
-
-          <DecisionCardDisplay card={card} confidenceTier={decision.confidence_tier ?? undefined} />
-        </div>
-
-        <footer className="pt-8 border-t border-gray-100 flex justify-between text-sm text-gray-500">
-          <span>
-            Generated on{' '}
-            {new Date(decision.created_at).toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            })}
-          </span>
-          <DecisionActions card={card} showPlainText buttonSize="sm" />
-        </footer>
+        />
       </div>
     </main>
   )

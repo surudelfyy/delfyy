@@ -7,18 +7,45 @@ import { decisionCardToMarkdown } from '@/lib/utils/decision-card-to-markdown'
 import { decisionCardToPlainText } from '@/lib/utils/decision-card-to-plain-text'
 import type { DecisionCard } from '@/lib/schemas/decision-card'
 
+type ButtonSize = 'default' | 'sm' | 'lg'
+
 interface DecisionActionsProps {
   card: DecisionCard
-  showPlainText?: boolean
-  buttonSize?: 'sm' | 'md'
+  question?: string
+  decisionId?: string
+  confidenceTier?: string
+  buttonSize?: ButtonSize
 }
 
-export function DecisionActions({ card, showPlainText = false, buttonSize = 'sm' }: DecisionActionsProps) {
+export function DecisionActions({
+  card,
+  question,
+  decisionId,
+  confidenceTier,
+  buttonSize = 'default',
+}: DecisionActionsProps) {
   const [copiedMarkdown, setCopiedMarkdown] = useState(false)
   const [copiedText, setCopiedText] = useState(false)
 
+  const buildMarkdown = () =>
+    decisionCardToMarkdown(question || card.summary.title, card, confidenceTier || card.meta.confidence_tier)
+
+  const downloadMarkdown = () => {
+    const content = buildMarkdown()
+    const blob = new Blob([content], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    const safeId = decisionId || new Date().toISOString().split('T')[0]
+    link.href = url
+    link.download = `delfyy-decision-${safeId}.md`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   const copyDecision = async () => {
-    const content = decisionCardToMarkdown(card.summary.title, card, card.meta.confidence_tier)
+    const content = buildMarkdown()
 
     try {
       await navigator.clipboard.writeText(content)
@@ -39,7 +66,11 @@ export function DecisionActions({ card, showPlainText = false, buttonSize = 'sm'
   }
 
   const copyPlain = async () => {
-    const content = decisionCardToPlainText(card.summary.title, card, card.meta.confidence_tier)
+    const content = decisionCardToPlainText(
+      question || card.summary.title,
+      card,
+      confidenceTier || card.meta.confidence_tier
+    )
     try {
       await navigator.clipboard.writeText(content)
       setCopiedText(true)
@@ -73,22 +104,23 @@ export function DecisionActions({ card, showPlainText = false, buttonSize = 'sm'
           </>
         )}
       </Button>
-
-      {showPlainText && (
-        <Button variant="ghost" size={buttonSize} onClick={copyPlain} className="gap-2 text-gray-600">
-          {copiedText ? (
-            <>
-              <Check className="h-4 w-4 text-green-600" />
-              Copied!
-            </>
-          ) : (
-            <>
-              <Copy className="h-4 w-4" />
-              Copy plain text
-            </>
-          )}
-        </Button>
-      )}
+      <Button variant="ghost" size={buttonSize} onClick={copyPlain} className="gap-2 text-gray-600">
+        {copiedText ? (
+          <>
+            <Check className="h-4 w-4 text-green-600" />
+            Copied!
+          </>
+        ) : (
+          <>
+            <Copy className="h-4 w-4" />
+            Copy plain text
+          </>
+        )}
+      </Button>
+      <Button variant="ghost" size={buttonSize} onClick={downloadMarkdown} className="gap-2 text-gray-600">
+        <Copy className="h-4 w-4" />
+        Download .md
+      </Button>
     </div>
   )
 }

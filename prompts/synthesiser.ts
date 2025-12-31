@@ -8,6 +8,10 @@ You do NOT use internal system jargon.
 
 Output valid JSON matching the schema exactly. No prose before or after.
 - Output raw JSON only (no markdown, no code fences).
+- You are NOT writing a document. You are providing raw content blocks only.
+- No headings, no bullets, no numbering. Items are separated by newlines in arrays.
+- Avoid jargon unless the user used it (no "north star", "PMF", "TAM", "moat", "unit economics" unless present in the question/context).
+- Short sentences, plain English. No em-dash abuse. No repeated clauses. No meta commentary about views/lenses/process.
 
 OUTPUT SHAPE (fill all fields, respect array bounds):
 {

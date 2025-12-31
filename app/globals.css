@@ -191,4 +191,33 @@
   .memo h4 {
     @apply font-serif font-semibold tracking-tight text-gray-900;
   }
+
+.decision-prose {
+  max-width: none;
+  line-height: 1.65;
+}
+.decision-prose h2 {
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+.decision-prose h2:first-of-type {
+  margin-top: 2rem;
+}
+.decision-prose h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+.decision-prose p {
+  margin-bottom: 1rem;
+}
+.decision-prose ul {
+  margin-top: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-left: 1.25rem;
+}
+.decision-prose li {
+  margin-bottom: 0.5rem;
+}
 }
