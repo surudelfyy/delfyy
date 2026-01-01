@@ -136,13 +136,7 @@ export async function POST(request: NextRequest) {
         void sendProgress(writer, step, message)
       })
 
-      await safeWrite(
-        `event: result\ndata: ${JSON.stringify({
-          decision_id: result.id,
-          decision_card: result.decision_card,
-          confidence_tier: result.confidence_tier,
-        })}\n\n`
-      )
+      await safeWrite(`event: result\ndata: ${JSON.stringify({ decision_id: result.id })}\n\n`)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Pipeline failed'
       await safeWrite(

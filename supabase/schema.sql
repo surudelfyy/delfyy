@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS public.decisions (
   governor_output JSONB,
   decision_card_internal JSONB,
   decision_card JSONB,
+  decision_memo JSONB,
   decision_card_text TEXT,
   confidence_tier TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()

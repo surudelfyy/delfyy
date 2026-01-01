@@ -1,7 +1,7 @@
 import { callClaudeJSON, CLAUDE_MODEL_HAIKU } from '@/lib/claude/client'
 import type { GovernorOutput } from '@/lib/schemas/governor'
 import type { LensOutput } from '@/lib/schemas/lens'
-import { DecisionMemoSchema, type DecisionMemo } from '@/lib/schemas/decision-memo'
+import { DecisionMemoSchema, DecisionMemoJsonSchema, type DecisionMemo } from '@/lib/schemas/decision-memo'
 import { SYNTHESISER_SYSTEM_PROMPT } from '@/prompts/synthesiser'
 
 const FORBIDDEN_WORDS = [
@@ -86,8 +86,21 @@ export async function synthesise(
       max_tokens: 3500,
       system: SYNTHESISER_SYSTEM_PROMPT,
       messages,
-      schema: DecisionMemoSchema,
+      schema: DecisionMemoJsonSchema,
     })
+  }
+
+  const clampArrays = (memo: DecisionMemo): DecisionMemo => {
+    return {
+      ...memo,
+      next_steps: Array.isArray(memo.next_steps) ? memo.next_steps.slice(0, 4) : [],
+      why_this_call: Array.isArray(memo.why_this_call) ? memo.why_this_call.slice(0, 5) : [],
+      risks: Array.isArray(memo.risks) ? memo.risks.slice(0, 5) : [],
+      examples: {
+        worked: Array.isArray(memo.examples?.worked) ? memo.examples.worked.slice(0, 2) : [],
+        failed: Array.isArray(memo.examples?.failed) ? memo.examples.failed.slice(0, 2) : [],
+      },
+    }
   }
 
   let result: DecisionMemo
@@ -101,6 +114,7 @@ export async function synthesise(
     }
   }
 
-  return DecisionMemoSchema.parse(result)
+  const normalized = clampArrays(result)
+  return DecisionMemoSchema.parse(normalized)
 }
 

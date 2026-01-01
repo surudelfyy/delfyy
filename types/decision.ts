@@ -3,6 +3,7 @@ import { LensOutput } from '@/lib/schemas/lens'
 import { GovernorOutput } from '@/lib/schemas/governor'
 import { SynthesiserCardBits } from '@/lib/schemas/synthesiser'
 import { DecisionCard } from '@/lib/schemas/decision-card'
+import { DecisionMemo } from '@/lib/schemas/decision-memo'
 
 export interface DecisionRow {
   id: string
@@ -16,6 +17,7 @@ export interface DecisionRow {
   decision_card_internal: SynthesiserCardBits | null
   decision_card: DecisionCard | null
   decision_card_text: string | null
+  decision_memo: DecisionMemo | null
   confidence_tier: string | null
   idempotency_key: string | null
   created_at: string

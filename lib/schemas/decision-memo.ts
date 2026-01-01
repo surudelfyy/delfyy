@@ -59,3 +59,87 @@ export const DecisionMemoSchema = z
 
 export type DecisionMemo = z.infer<typeof DecisionMemoSchema>
 
+export const DecisionMemoJsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: [
+    'question',
+    'call',
+    'confidence',
+    'next_steps',
+    'why_this_call',
+    'risks',
+    'pattern',
+    'examples',
+    'meta',
+  ],
+  properties: {
+    question: { type: 'string' },
+    call: { type: 'string' },
+    confidence: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['tier', 'score', 'rationale'],
+      properties: {
+        tier: { type: 'string', enum: ['high', 'supported', 'directional', 'exploratory'] },
+        score: { type: 'number' },
+        rationale: { type: 'string' },
+      },
+    },
+    next_steps: { type: 'array', items: { type: 'string' } },
+    why_this_call: { type: 'array', items: { type: 'string' } },
+    risks: { type: 'array', items: { type: 'string' } },
+    pattern: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['principle', 'why_it_works'],
+      properties: {
+        principle: { type: 'string' },
+        why_it_works: { type: 'string' },
+      },
+    },
+    examples: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['worked', 'failed'],
+      properties: {
+        worked: {
+          type: 'array',
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['company', 'story'],
+            properties: {
+              company: { type: 'string' },
+              story: { type: 'string' },
+              year: { type: 'string' },
+            },
+          },
+        },
+        failed: {
+          type: 'array',
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['company', 'story'],
+            properties: {
+              company: { type: 'string' },
+              story: { type: 'string' },
+              year: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+    meta: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['date_iso'],
+      properties: {
+        stage: { type: 'string', enum: ['discovery', 'build', 'launch', 'growth'] },
+        date_iso: { type: 'string' },
+      },
+    },
+  },
+} as const
+

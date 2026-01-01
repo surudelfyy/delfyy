@@ -7,8 +7,8 @@ import { synthesise } from '@/lib/claude/synthesiser'
 import { compileLensPacks } from '@/lib/delphi/lenspack-compiler'
 import { runEvidenceGovernor } from '@/lib/delphi/evidence-governor'
 import { loadAtoms } from '@/lib/atoms/loader'
-import { renderDecisionCard } from '@/lib/utils/render-decision-card'
-import { renderDecisionCardText } from '@/lib/utils/render-decision-card-text'
+import { decisionMemoToMarkdown } from '@/lib/utils/decision-memo-to-markdown'
+import type { DecisionMemo } from '@/lib/schemas/decision-memo'
 import type { DecisionRow } from '@/types/decision'
 import type { PatternMatcherOutput } from '@/lib/schemas/pattern-matcher'
 
@@ -81,16 +81,16 @@ export async function runPipeline(
 
     // Round 2 skipped for MVP (TODO: add when enabled)
 
-    let internalCard
+    let decisionMemo: DecisionMemo
     console.time('5-synthesiser')
     try {
       onProgress('synthesising', 'Forming recommendation...')
-      internalCard = await synthesise(
+      decisionMemo = await synthesise(
         { question: decision.question, input_context: decision.input_context },
         lensOutputs,
         governorOutput
       )
-      await supabase.from('decisions').update({ decision_card_internal: internalCard }).eq('id', decisionId)
+      await supabase.from('decisions').update({ decision_memo: decisionMemo }).eq('id', decisionId)
     } finally {
       console.timeEnd('5-synthesiser')
     }
@@ -119,7 +119,7 @@ export async function runPipeline(
       const topReasons: { reason: string; because: string }[] = []
       const result = await matchPatterns({
         classifierOutput,
-        recommendedChoice: internalCard.recommended_call.choice,
+        recommendedChoice: decisionMemo.call,
         topReasons: [], // top reasons omitted in card bits payload
         exampleAtoms,
         decisionQuestion: decision.question,
@@ -138,26 +138,16 @@ export async function runPipeline(
       failed: pattern?.where_failed?.length ?? 0,
     })
 
-    let displayCard
     console.time('7-render')
     try {
-      onProgress('rendering', 'Preparing your decision card...')
-      displayCard = renderDecisionCard({
-        question: decision.question,
-        stage: (decision.input_context as any)?.stage,
-        internal: internalCard,
-        pattern,
-        lensOutputs,
-        governorOutput,
-      })
-      const cardText = renderDecisionCardText(displayCard)
-
+      onProgress('rendering', 'Preparing your decision memo...')
+      const memoMarkdown = decisionMemoToMarkdown(decisionMemo)
       await supabase
         .from('decisions')
         .update({
           status: 'complete',
-          decision_card: displayCard,
-          decision_card_text: cardText,
+          decision_memo: decisionMemo,
+          decision_card_text: memoMarkdown,
           confidence_tier: governorOutput.confidence_tier,
         })
         .eq('id', decisionId)
