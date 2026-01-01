@@ -45,7 +45,6 @@ describe('renderDecisionCardMarkdown', () => {
         call: 'Do the thing.',
         confidence: 'Directional — score 0.3',
         do_next: 'Run a small test.',
-        success_looks_like: ['Users complete the flow.'],
         change_course_if: ['Signals are negative.'],
       },
       details: {
@@ -80,7 +79,6 @@ describe('polishDecisionCard', () => {
         call: "We Don'T ship yet",
         confidence: "Directional",
         do_next: 'Test',
-        success_looks_like: [],
         change_course_if: [],
       },
       details: {
@@ -108,7 +106,6 @@ describe('polishDecisionCard', () => {
         call: 'Call',
         confidence: 'Conf',
         do_next: 'Do',
-        success_looks_like: [],
         change_course_if: ['Stop if churn rises.'],
       },
       details: {
@@ -130,7 +127,6 @@ describe('polishDecisionCard', () => {
         call: 'First sentence. Second sentence is here.',
         confidence: 'Conf',
         do_next: 'Do',
-        success_looks_like: ['One long clause, still okay.'],
         change_course_if: ['Another long clause, still okay.'],
       },
       details: {

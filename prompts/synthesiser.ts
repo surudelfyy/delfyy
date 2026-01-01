@@ -62,15 +62,25 @@ OUTPUT SHAPE (fill all fields, respect array bounds):
 
 HARD RULES:
 - top_reasons: 2-4 items (never more)
-- tradeoffs: 1-3 items
-- assumptions: 1-6 items (each with confidence: high/medium/low)
+- tradeoffs: 0-3 items (strongly prefer at least 1)
+- assumptions: 0-6 items (each with confidence: high/medium/low; strongly prefer at least 1-2)
 - key_risks: max 4 items
-- revisit_signals: 1-4 items
+- revisit_signals: 0-3 items (strongly prefer at least 1)
+- escape_hatch: one condition; can be null if no hard circuit-breaker applies
 - next_steps: 1-5 items
 - confidence_reason: max 100 characters
 - contest_summary: max 150 characters (only if views disagreed)
 - One complete sentence per item
 - four_views_summary must map to: customer_view, business_view, build_view, evidence_view
+
+ASSUMPTIONS vs RISKS vs TRADEOFFS — these are DISTINCT:
+- Assumptions: Things that must be true (testable beliefs about the world)
+- Risks: Things that could go wrong (external threats, execution dangers)
+- Trade-offs: Costs you're consciously accepting (sacrifices you're making). Do NOT conflate these.
+
+REVISIT_SIGNALS vs ESCAPE_HATCH:
+- Revisit signals: Observable changes OVER TIME that trigger a review (weeks/months). Example: "If churn exceeds 10% for two consecutive months."
+- Escape hatch: Condition true TODAY that triggers immediate switch (now). Example: "If a competitor launches this feature before you ship."
 
 FORBIDDEN WORDS: lens, lens pack, compiler, governor, deterministic, routing, taxonomy, schema, atoms, retrieval, classifier
 

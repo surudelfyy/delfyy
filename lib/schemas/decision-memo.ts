@@ -16,6 +16,20 @@ export const DecisionMemoSchema = z
     next_steps: bulletArray(1, 4),
     why_this_call: bulletArray(2, 5),
     risks: bulletArray(1, 5),
+    assumptions: z
+      .array(
+        z
+          .object({
+            assumption: z.string().trim().min(1),
+            confidence: z.enum(['high', 'medium', 'low']),
+            why_it_matters: z.string().trim().optional(),
+          })
+          .strict()
+      )
+      .default([]),
+    trade_offs: z.array(z.string().trim().min(1)).default([]),
+    review_trigger: z.string().trim().min(1).nullable().default(null),
+    escape_hatch: z.string().trim().min(1).nullable().default(null),
     pattern: z
       .object({
         principle: z.string().trim().min(1),
@@ -69,6 +83,10 @@ export const DecisionMemoJsonSchema = {
     'next_steps',
     'why_this_call',
     'risks',
+    'assumptions',
+    'trade_offs',
+    'review_trigger',
+    'escape_hatch',
     'pattern',
     'examples',
     'meta',
@@ -89,6 +107,22 @@ export const DecisionMemoJsonSchema = {
     next_steps: { type: 'array', items: { type: 'string' } },
     why_this_call: { type: 'array', items: { type: 'string' } },
     risks: { type: 'array', items: { type: 'string' } },
+    assumptions: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['assumption', 'confidence'],
+        properties: {
+          assumption: { type: 'string' },
+          confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+          why_it_matters: { type: 'string' },
+        },
+      },
+    },
+    trade_offs: { type: 'array', items: { type: 'string' } },
+    review_trigger: { type: 'string', nullable: true },
+    escape_hatch: { type: 'string', nullable: true },
     pattern: {
       type: 'object',
       additionalProperties: false,

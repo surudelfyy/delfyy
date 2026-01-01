@@ -11,26 +11,27 @@ export const DIMENSIONS_BY_LEVEL = {
 export const ClassifierOutputSchema = z
   .object({
     level: z.enum(['Strategy', 'Product', 'Feature', 'Operating']),
-    dimension: z.string(),
-    secondary_dimensions: z.array(z.string()).max(2),
+    dimension: z.string().trim().min(1),
+    secondary_dimensions: z.array(z.string().trim().min(1)).max(2),
     related_dimensions: z
       .array(
         z.object({
           level: z.enum(['Strategy', 'Product', 'Feature', 'Operating']),
-          dimension: z.string(),
+          dimension: z.string().trim().min(1),
         })
       )
+      .max(4)
       .optional()
       .default([]),
     decision_mode: z.enum(['choose', 'diagnose', 'plan']),
-    context_tags: z.array(z.string()),
-    risk_flags: z.array(z.string()),
+    context_tags: z.array(z.string().trim().min(1)).max(8),
+    risk_flags: z.array(z.string().trim().min(1)).max(6),
     confidence: z.number().min(0).max(1),
     follow_up_questions: z
       .array(
         z.object({
-          question: z.string(),
-          why_it_matters: z.string(),
+          question: z.string().trim().min(1),
+          why_it_matters: z.string().trim().min(1),
         })
       )
       .min(3)
@@ -51,6 +52,24 @@ export const ClassifierOutputSchema = z
       )
     },
     { message: 'secondary_dimensions must be valid for the selected level' }
+  )
+  .refine(
+    (data) => {
+      // secondary_dimensions should not duplicate each other or the primary dimension
+      const unique = new Set(data.secondary_dimensions)
+      return unique.size === data.secondary_dimensions.length && !data.secondary_dimensions.includes(data.dimension)
+    },
+    { message: 'secondary_dimensions must be unique and must not include the primary dimension' }
+  )
+  .refine(
+    (data) => {
+      // related_dimensions (if provided) must be valid for their stated level
+      return (data.related_dimensions ?? []).every((rd) => {
+        const allowed = DIMENSIONS_BY_LEVEL[rd.level]
+        return (allowed as readonly string[]).includes(rd.dimension)
+      })
+    },
+    { message: 'related_dimensions must be valid for their stated level' }
   )
 
 export type ClassifierOutput = z.infer<typeof ClassifierOutputSchema>

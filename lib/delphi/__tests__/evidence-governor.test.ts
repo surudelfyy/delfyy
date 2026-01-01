@@ -67,6 +67,7 @@ function makeClassifier(overrides: Partial<ClassifierOutput> = {}): ClassifierOu
     level: overrides.level ?? 'Product',
     dimension: overrides.dimension ?? 'Scope',
     secondary_dimensions: overrides.secondary_dimensions ?? [],
+    related_dimensions: overrides.related_dimensions ?? [],
     decision_mode: overrides.decision_mode ?? 'choose',
     context_tags: overrides.context_tags ?? [],
     risk_flags: overrides.risk_flags ?? [],

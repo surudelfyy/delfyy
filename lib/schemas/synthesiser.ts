@@ -27,8 +27,8 @@ export const SynthesiserOutputSchema = z
           what_you_risk: z.string(),
         })
       )
-      .min(1)
-      .max(3),
+      .max(3)
+      .default([]),
     assumptions: z
       .array(
         z.object({
@@ -37,8 +37,8 @@ export const SynthesiserOutputSchema = z
           confidence: z.enum(['high', 'medium', 'low']),
         })
       )
-      .min(1)
-      .max(6),
+      .max(6)
+      .default([]),
     key_risks: z
       .array(
         z.object({
@@ -54,12 +54,15 @@ export const SynthesiserOutputSchema = z
           why_it_matters: z.string(),
         })
       )
-      .min(1)
-      .max(4),
-    escape_hatch: z.object({
-      condition: z.string(),
-      immediate_action: z.string(),
-    }),
+      .max(3)
+      .default([]),
+    escape_hatch: z
+      .object({
+        condition: z.string(),
+        immediate_action: z.string(),
+      })
+      .nullable()
+      .default(null),
     next_steps: z
       .array(
         z.object({

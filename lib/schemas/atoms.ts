@@ -8,7 +8,7 @@ export const ConceptAtomSchema = z.object({
   purpose: z.enum(['Detect', 'Evaluate', 'Warn', 'Illustrate']),
   claim: z.string(),
   rationale: z.string().optional(),
-  lens: z.array(z.enum(['Customer', 'Business', 'Feasibility'])),
+  lens: z.array(z.enum(['Customer', 'Business', 'Feasibility'])).min(1),
   level: z.enum(['Strategy', 'Product', 'Feature', 'Operating']),
   dimension: z.string().nullable(), // null = global (applies to all dimensions at this level)
   applies_when: z.array(z.string()).optional(),
@@ -19,6 +19,9 @@ export const ConceptAtomSchema = z.object({
     .object({
       start_year: z.number(),
       end_year: z.number(),
+    })
+    .refine((t) => t.end_year >= t.start_year, {
+      message: 'end_year must be >= start_year',
     })
     .optional(),
   outcome: z.enum(['Worked', 'Failed', 'Mixed']).optional(),
