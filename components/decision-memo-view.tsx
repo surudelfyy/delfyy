@@ -2,6 +2,7 @@ import type { DecisionMemo } from '@/lib/schemas/decision-memo'
 
 interface DecisionMemoViewProps {
   memo: DecisionMemo
+  createdAt?: string
 }
 
 function Section({ title, children }: { title: string; children?: React.ReactNode }) {
@@ -25,11 +26,12 @@ function Bullets({ items }: { items: string[] }) {
   )
 }
 
-export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
+export function DecisionMemoView({ memo, createdAt }: DecisionMemoViewProps) {
   const metaParts: string[] = []
   if (memo.meta.stage) metaParts.push(`Stage: ${memo.meta.stage}`)
-  const date = memo.meta.date_iso
-    ? new Date(memo.meta.date_iso).toLocaleDateString('en-GB', {
+  const dateSource = createdAt || memo.meta.date_iso
+  const date = dateSource
+    ? new Date(dateSource).toLocaleDateString('en-GB', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',

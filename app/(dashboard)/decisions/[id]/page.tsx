@@ -110,7 +110,7 @@ export default async function DecisionPage({ params }: PageProps) {
           </div>
         )}
 
-        <DecisionMemoView memo={memo} />
+        <DecisionMemoView memo={memo} createdAt={decision.created_at} />
       </div>
     </main>
   )
