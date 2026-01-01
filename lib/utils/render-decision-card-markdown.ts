@@ -18,10 +18,6 @@ export function renderDecisionCardMarkdown(card: DecisionCard): string {
   lines.push(card.summary.do_next)
   lines.push('')
 
-  lines.push('**Success looks like**')
-  card.summary.success_looks_like.forEach((b) => lines.push(`- ${b}`))
-  lines.push('')
-
   lines.push('**Change course if**')
   card.summary.change_course_if.forEach((b) => lines.push(`- ${b}`))
   lines.push('')
@@ -41,6 +37,12 @@ export function renderDecisionCardMarkdown(card: DecisionCard): string {
   lines.push('## What to watch for')
   card.details.watch_for.forEach((b) => lines.push(`- ${b}`))
   lines.push('')
+
+  if (card.details.approach) {
+    lines.push('## Approach')
+    lines.push(card.details.approach)
+    lines.push('')
+  }
 
   lines.push('## Pattern')
   lines.push('**Principle**')
