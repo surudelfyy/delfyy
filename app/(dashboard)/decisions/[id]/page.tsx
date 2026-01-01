@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
 import { DecisionActions } from '@/components/decision-actions'
 import { DecisionMemoView } from '@/components/decision-memo-view'
+import { CheckInPromise } from '@/components/check-in-promise'
 import { DecisionMemoSchema, type DecisionMemo } from '@/lib/schemas/decision-memo'
 
 interface PageProps {
@@ -16,7 +17,9 @@ export default async function DecisionPage({ params }: PageProps) {
 
   const { data: decision, error } = await supabase
     .from('decisions')
-    .select('id, status, question, decision_memo, confidence_tier, created_at, input_context')
+    .select(
+      'id, status, question, decision_memo, confidence_tier, created_at, input_context, check_in_date, check_in_outcome, winning_outcome'
+    )
     .eq('id', id)
     .maybeSingle()
 
@@ -111,6 +114,24 @@ export default async function DecisionPage({ params }: PageProps) {
         )}
 
         <DecisionMemoView memo={memo} createdAt={decision.created_at} />
+
+        <div className="mt-6 border-t pt-6">
+          <CheckInPromise
+            decisionId={decision.id}
+            checkInDate={(decision as any).check_in_date ?? null}
+            checkInOutcome={(decision as any).check_in_outcome ?? 'pending'}
+            winningOutcome={(decision as any).winning_outcome ?? null}
+          />
+        </div>
+
+        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 border-t pt-6">
+          <Link href="/decide" className="text-sm font-medium text-primary hover:underline">
+            Make another decision →
+          </Link>
+          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
+            View all decisions
+          </Link>
+        </div>
       </div>
     </main>
   )

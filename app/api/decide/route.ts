@@ -22,6 +22,8 @@ const RequestSchema = z.object({
       freeform: z.string().max(500).optional(),
     })
     .optional(),
+  winning_outcome: z.string().max(500).nullish(),
+  check_in_date: z.string().datetime().nullish(),
   idempotency_key: z.string().optional(),
 })
 
@@ -89,6 +91,8 @@ export async function POST(request: NextRequest) {
       status: 'running',
       question: body.question,
       input_context: body.context || {},
+      winning_outcome: body.winning_outcome ?? null,
+      check_in_date: body.check_in_date ?? null,
       idempotency_key: body.idempotency_key || null,
     })
     .select('id')

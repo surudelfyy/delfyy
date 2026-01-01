@@ -25,6 +25,32 @@ const STEP_ORDER = [
   'rendering',
 ] as const
 
+// ============================================
+// DATE HELPERS
+// ============================================
+
+function getTomorrowDate(): string {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return tomorrow.toISOString().split('T')[0]
+}
+
+function getMaxDate(): string {
+  const maxDate = new Date()
+  maxDate.setDate(maxDate.getDate() + 90)
+  return maxDate.toISOString().split('T')[0]
+}
+
+function getDefaultCheckInDate(): string {
+  const defaultDate = new Date()
+  defaultDate.setDate(defaultDate.getDate() + 7)
+  return defaultDate.toISOString().split('T')[0]
+}
+
+function toISODateTime(dateString: string): string {
+  return new Date(`${dateString}T09:00:00Z`).toISOString()
+}
+
 export default function DecidePage() {
   const router = useRouter()
   const [question, setQuestion] = useState('')
@@ -33,6 +59,9 @@ export default function DecidePage() {
   const [processing, setProcessing] = useState(false)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [winningOutcome, setWinningOutcome] = useState('')
+  const [checkInDate, setCheckInDate] = useState(getDefaultCheckInDate())
+  const [checkInDateError, setCheckInDateError] = useState<string | null>(null)
   const time20Ref = useRef<NodeJS.Timeout | null>(null)
   const time45Ref = useRef<NodeJS.Timeout | null>(null)
   const [timeout20, setTimeout20] = useState(false)
@@ -70,6 +99,18 @@ export default function DecidePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (question.trim().length < 10 || processing) return
+
+    if (checkInDate) {
+      const selectedDate = new Date(checkInDate)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      if (selectedDate <= today) {
+        setCheckInDateError('Check-in date must be in the future')
+        return
+      }
+    }
+    setCheckInDateError(null)
+
     setProcessing(true)
     setError(null)
     setCurrentStepIndex(0) // show activity immediately
@@ -88,6 +129,8 @@ export default function DecidePage() {
             stage: stage ? stage.toLowerCase() : undefined,
             freeform: contextText || undefined,
           },
+          winning_outcome: winningOutcome.trim() || null,
+          check_in_date: checkInDate ? toISODateTime(checkInDate) : null,
         }),
       })
 
@@ -126,6 +169,9 @@ export default function DecidePage() {
             }
           } else if (eventType === 'result') {
             clearTimers()
+            setWinningOutcome('')
+            setCheckInDate(getDefaultCheckInDate())
+            setCheckInDateError(null)
             router.push(`/decisions/${data.decision_id}`)
             return
           } else if (eventType === 'error') {
@@ -208,6 +254,85 @@ export default function DecidePage() {
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none"
                 placeholder="Stage, goal, constraints — whatever shapes this decision."
               />
+            </div>
+
+            {/* ============================================ */}
+            {/* WINNING OUTCOME FIELD */}
+            {/* ============================================ */}
+            <div className="space-y-2">
+              <label
+                htmlFor="winning_outcome"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                What does winning look like?
+                <span className="text-gray-500 font-normal ml-1">(optional)</span>
+              </label>
+
+              <textarea
+                id="winning_outcome"
+                name="winning_outcome"
+                placeholder="e.g., 3 customers pay within 2 weeks"
+                value={winningOutcome}
+                onChange={(e) => setWinningOutcome(e.target.value)}
+                maxLength={500}
+                rows={2}
+                className="flex min-h-[60px] w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-900 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                aria-describedby="winning_outcome_help winning_outcome_count"
+              />
+
+              <div className="flex justify-between items-center">
+                <span id="winning_outcome_help" className="text-xs text-gray-500">
+                  Define success so we know if this worked
+                </span>
+                {winningOutcome.length > 0 && (
+                  <span
+                    id="winning_outcome_count"
+                    className={`text-xs ${
+                      winningOutcome.length > 450 ? 'text-amber-500' : 'text-gray-500'
+                    }`}
+                  >
+                    {winningOutcome.length}/500
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* ============================================ */}
+            {/* CHECK-IN DATE FIELD */}
+            {/* ============================================ */}
+            <div className="space-y-2">
+              <label
+                htmlFor="check_in_date"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                When should we check in?
+              </label>
+
+              <input
+                id="check_in_date"
+                name="check_in_date"
+                type="date"
+                value={checkInDate}
+                onChange={(e) => {
+                  setCheckInDate(e.target.value)
+                  setCheckInDateError(null)
+                }}
+                min={getTomorrowDate()}
+                max={getMaxDate()}
+                required
+                className="flex h-9 w-full sm:w-auto rounded-md border border-gray-300 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-describedby="check_in_date_help check_in_date_error"
+              />
+
+              <p id="check_in_date_help" className="text-xs text-gray-500">
+                We&apos;ll ask if your decision held
+              </p>
+
+              {checkInDateError && (
+                <p id="check_in_date_error" className="text-xs text-red-500" role="alert">
+                  {checkInDateError}
+                </p>
+              )}
             </div>
 
             <button
