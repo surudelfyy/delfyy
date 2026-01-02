@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DecisionList } from '@/components/decision-list'
+import { NewDecisionButton } from '@/components/new-decision-button'
 
 type DecisionRowType = {
   id: string
@@ -38,7 +39,7 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  const { data: usage } = await fetchUsage()
+  const usage = await fetchUsage()
 
   let stats: Stats = { total: 0, held: 0, pivoted: 0, due: 0 }
   const { data: statsData, error: statsError } = await supabase.rpc('get_decision_stats')
@@ -74,13 +75,7 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Decisions</h1>
-        <Link
-          href="/decide"
-          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          data-usage={JSON.stringify(usage || null)}
-        >
-          + New decision
-        </Link>
+        <NewDecisionButton usage={usage} />
       </div>
 
       {stats.total > 0 && (

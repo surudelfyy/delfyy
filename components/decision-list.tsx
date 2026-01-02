@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type JSX } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Check, Loader2, MoreVertical, RotateCcw, Trash2, X } from 'lucide-react'
