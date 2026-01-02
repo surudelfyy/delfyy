@@ -29,35 +29,6 @@ const confidenceRank: Record<Confidence, number> = {
   low: 2,
 }
 
-function ConfidenceMark({ confidence }: { confidence: Confidence }) {
-  if (confidence === 'high') {
-    return (
-      <span
-        aria-label="high confidence"
-        className="h-4 w-4 shrink-0 rounded-full bg-slate-400"
-      />
-    )
-  }
-
-  if (confidence === 'medium') {
-    return (
-      <span
-        aria-label="medium confidence"
-        className="relative h-4 w-4 shrink-0 overflow-hidden rounded-full border border-slate-400"
-      >
-        <span className="absolute inset-0 w-1/2 bg-slate-400/70" />
-      </span>
-    )
-  }
-
-  return (
-    <span
-      aria-label="low confidence"
-      className="h-4 w-4 shrink-0 rounded-full border border-slate-400"
-    />
-  )
-}
-
 export function AssumptionChips({ assumptions }: AssumptionChipsProps) {
   const display = useMemo(() => {
     if (!assumptions?.length) return []
@@ -68,42 +39,34 @@ export function AssumptionChips({ assumptions }: AssumptionChipsProps) {
 
   if (!assumptions?.length) return null
 
+  const chipClass = (confidence: Confidence) => {
+    if (confidence === 'high') return 'w-16 text-center bg-indigo-900 text-white'
+    if (confidence === 'medium') return 'w-16 text-center bg-violet-600 text-white'
+    return 'w-16 text-center bg-slate-400 text-white'
+  }
+
   return (
     <div className="space-y-4">
       {display.map((item, idx) => (
         <div
           key={`${item.assumption}-${idx}`}
-          className="flex items-start gap-3 text-[17px] leading-[1.65] text-slate-800"
+          className="space-y-1"
         >
-          <span className="mt-[3px] inline-flex h-4 w-4 items-center justify-center">
-            <ConfidenceMark confidence={item.confidence} />
-          </span>
-
-          <div className="min-w-0 flex-1 space-y-1">
-            <p className="leading-relaxed">{cleanTextLocal(item.assumption)}</p>
-            {item.why_it_matters ? (
-              <p className="text-sm leading-relaxed text-slate-500">
-                {cleanTextLocal(item.why_it_matters)}
-              </p>
-            ) : null}
+          <div className="flex items-start gap-3 text-[17px] leading-[1.65] text-slate-800">
+            <span
+              className={`text-xs font-medium py-1 rounded-full shrink-0 mt-0.5 ${chipClass(item.confidence)}`}
+            >
+              {item.confidence === 'high' ? 'High' : item.confidence === 'medium' ? 'Medium' : 'Low'}
+            </span>
+            <div className="min-w-0 flex-1 space-y-1">
+              <p className="leading-relaxed">{cleanTextLocal(item.assumption)}</p>
+              {item.why_it_matters ? (
+                <p className="text-sm leading-relaxed text-slate-500">{cleanTextLocal(item.why_it_matters)}</p>
+              ) : null}
+            </div>
           </div>
         </div>
       ))}
-
-      <div className="flex items-center gap-3 pt-2 text-xs text-slate-500">
-        <span className="font-semibold text-slate-600">Confidence levels</span>
-        <span className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1">
-            <ConfidenceMark confidence="high" /> high
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <ConfidenceMark confidence="medium" /> medium
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <ConfidenceMark confidence="low" /> low
-          </span>
-        </span>
-      </div>
     </div>
   )
 }

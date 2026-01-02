@@ -158,7 +158,10 @@ export async function runPipeline(
     const { data: final } = await supabase.from('decisions').select('*').eq('id', decisionId).single()
     return final as DecisionRow
   } catch (err) {
-    await supabase.from('decisions').update({ status: 'failed' }).eq('id', decisionId)
+    await supabase
+      .from('decisions')
+      .update({ status: 'failed', updated_at: new Date().toISOString() })
+      .eq('id', decisionId)
     throw err
   }
 }

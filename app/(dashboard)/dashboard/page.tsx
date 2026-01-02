@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { DecisionList } from '@/components/decision-list'
 
 type DecisionRowType = {
   id: string
@@ -11,9 +12,20 @@ type DecisionRowType = {
   check_in_date: string | null
   check_in_outcome: string | null
   winning_outcome?: string | null
+  input_context?: any
 }
 
 type Stats = { total: number; held: number; pivoted: number; due: number }
+
+async function fetchUsage() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/usage`, { cache: 'no-store' })
+    if (!res.ok) return null
+    return await res.json()
+  } catch {
+    return null
+  }
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -26,7 +38,8 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  // Stats via RPC if available; fallback to zeros
+  const { data: usage } = await fetchUsage()
+
   let stats: Stats = { total: 0, held: 0, pivoted: 0, due: 0 }
   const { data: statsData, error: statsError } = await supabase.rpc('get_decision_stats')
   if (!statsError && Array.isArray(statsData) && statsData[0]) {
@@ -35,7 +48,9 @@ export default async function DashboardPage() {
 
   const { data: decisions, error } = await supabase
     .from('decisions')
-    .select('id, question, decision_card, status, created_at, check_in_date, check_in_outcome, winning_outcome')
+    .select(
+      'id, question, decision_card, status, created_at, check_in_date, check_in_outcome, winning_outcome, input_context'
+    )
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -43,7 +58,6 @@ export default async function DashboardPage() {
   }
 
   const sortedDecisions = [...(decisions || [])].sort((a, b) => {
-    // completed vs processing
     if (a.status !== 'complete' && b.status === 'complete') return 1
     if (a.status === 'complete' && b.status !== 'complete') return -1
 
@@ -57,12 +71,13 @@ export default async function DashboardPage() {
   })
 
   return (
-    <div className="container max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Decisions</h1>
         <Link
           href="/decide"
           className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          data-usage={JSON.stringify(usage || null)}
         >
           + New decision
         </Link>
@@ -98,11 +113,7 @@ export default async function DashboardPage() {
       )}
 
       {sortedDecisions.length > 0 ? (
-        <div className="space-y-3">
-          {sortedDecisions.map((decision) => (
-            <DecisionRow key={decision.id} decision={decision} />
-          ))}
-        </div>
+        <DecisionList decisions={sortedDecisions as DecisionRowType[]} />
       ) : (
         <div className="rounded-lg border border-dashed py-12 text-center">
           <p className="mb-4 text-muted-foreground">No decisions yet</p>
@@ -112,92 +123,5 @@ export default async function DashboardPage() {
         </div>
       )}
     </div>
-  )
-}
-
-function DecisionRow({ decision }: { decision: DecisionRowType }) {
-  const recommendation =
-    typeof decision.decision_card === 'object' &&
-    decision.decision_card !== null &&
-    'decision' in decision.decision_card
-      ? (decision.decision_card as { decision?: string }).decision
-      : null
-
-  const createdDate = new Date(decision.created_at).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-  })
-
-  return (
-    <Link
-      href={`/decisions/${decision.id}`}
-      className="block rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <p className="font-medium leading-snug">{recommendation || decision.question}</p>
-          {recommendation && (
-            <p className="mt-1 text-sm text-muted-foreground line-clamp-1">{decision.question}</p>
-          )}
-          <p className="mt-2 text-xs text-muted-foreground">{createdDate}</p>
-        </div>
-        <div className="flex-shrink-0">
-          <StatusBadge decision={decision} />
-        </div>
-      </div>
-    </Link>
-  )
-}
-
-function StatusBadge({ decision }: { decision: DecisionRowType }) {
-  if (decision.status !== 'complete') {
-    return (
-      <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
-        Processing
-      </span>
-    )
-  }
-
-  if (decision.check_in_outcome === 'held') {
-    return (
-      <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
-        ✓ Held
-      </span>
-    )
-  }
-
-  if (decision.check_in_outcome === 'pivoted') {
-    return (
-      <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
-        ↻ Pivoted
-      </span>
-    )
-  }
-
-  if (decision.check_in_date) {
-    const checkInDate = new Date(decision.check_in_date)
-    const now = new Date()
-    if (checkInDate <= now) {
-      return (
-        <Link
-          href={`/decisions/${decision.id}/check-in`}
-          className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-200"
-        >
-          Check in →
-        </Link>
-      )
-    }
-    const diffDays = Math.ceil((checkInDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-    return (
-      <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-700">
-        {diffDays}d
-      </span>
-    )
-  }
-
-  return (
-    <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
-      —
-    </span>
   )
 }

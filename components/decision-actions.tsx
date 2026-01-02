@@ -5,6 +5,7 @@ import { Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { decisionCardToMarkdown } from '@/lib/utils/decision-card-to-markdown'
 import { decisionMemoToMarkdown } from '@/lib/utils/decision-memo-to-markdown'
+import { renderDecisionView } from '@/lib/tone/render-decision-view'
 import type { DecisionMemo } from '@/lib/schemas/decision-memo'
 
 type ButtonSize = 'default' | 'sm' | 'lg'
@@ -18,7 +19,10 @@ interface DecisionActionsProps {
 export function DecisionActions({ memo, decisionId, buttonSize = 'default' }: DecisionActionsProps) {
   const [copiedMarkdown, setCopiedMarkdown] = useState(false)
 
-  const buildMarkdown = () => decisionMemoToMarkdown(memo)
+  const buildMarkdown = () => {
+    const base = decisionMemoToMarkdown(memo)
+    return renderDecisionView({ memoMarkdown: base, tone: 'calm-founder', channel: 'markdown' }).markdown
+  }
 
   const downloadMarkdown = () => {
     const content = buildMarkdown()

@@ -2,32 +2,33 @@ import type { DecisionMemo } from '@/lib/schemas/decision-memo'
 import { AssumptionChips } from './memo/AssumptionChips'
 import { TradeOffLine } from './memo/TradeOffLine'
 import { TriggerCard } from './memo/TriggerCard'
+import { BookOpen } from 'lucide-react'
 
-function ConfidenceChip({ tier }: { tier: string }) {
+export function ConfidenceChip({ tier }: { tier: string }) {
   const map: Record<
     string,
     { label: string; className: string }
   > = {
     exploratory: {
-      label: 'Needs more info',
-      className: 'bg-red-50 text-red-700 border border-red-200',
+      label: 'Early signal',
+      className: 'bg-slate-400 text-white',
     },
     directional: {
-      label: 'Early signal',
-      className: 'bg-amber-50 text-amber-700 border border-amber-200',
+      label: 'Medium confidence',
+      className: 'bg-violet-600 text-white',
     },
     supported: {
-      label: 'Good confidence',
-      className: 'bg-green-50 text-green-700 border border-green-200',
+      label: 'High confidence',
+      className: 'bg-indigo-900 text-white',
     },
     high: {
-      label: 'Strong confidence',
-      className: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+      label: 'Very high confidence',
+      className: 'bg-indigo-900 text-white',
     },
   }
   const config = map[tier] ?? map.directional
   return (
-    <span className={`rounded-full px-3 py-1 text-sm ${config.className}`}>
+    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${config.className}`}>
       {config.label}
     </span>
   )
@@ -60,41 +61,9 @@ function Bullets({ items }: { items: string[] }) {
 }
 
 export function DecisionMemoView({ memo, createdAt }: DecisionMemoViewProps) {
-  console.log('memo data:', {
-    assumptions: memo.assumptions,
-    trade_offs: memo.trade_offs,
-    review_trigger: memo.review_trigger,
-    escape_hatch: memo.escape_hatch,
-  })
-
-  const metaParts: string[] = []
-  const dateSource = createdAt || memo.meta.date_iso
-  const date = dateSource
-    ? new Date(dateSource).toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      })
-    : null
-  const stageLabel = memo.meta.stage ? memo.meta.stage.charAt(0).toUpperCase() + memo.meta.stage.slice(1) : null
-
   return (
     <article className="max-w-[760px] w-full mx-auto bg-white border border-gray-200 shadow-sm rounded-2xl p-6 md:p-10 space-y-10">
-      <header className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-serif font-semibold text-gray-900 tracking-tight">
-          {memo.question}
-        </h1>
-        <p className="text-sm text-gray-500">That&apos;s one less thing living in your head.</p>
-        <div className="flex flex-wrap items-center gap-2">
-          <ConfidenceChip tier={memo.confidence.tier} />
-          {stageLabel && (
-            <span className="bg-slate-100 text-slate-600 rounded-full px-3 py-1 text-sm">{stageLabel}</span>
-          )}
-          {date && <span className="bg-slate-100 text-slate-600 rounded-full px-3 py-1 text-sm">{date}</span>}
-        </div>
-      </header>
-
-      <Section title="The Call">
+      <Section title="Decision">
         <p>{memo.call}</p>
       </Section>
 
@@ -110,11 +79,11 @@ export function DecisionMemoView({ memo, createdAt }: DecisionMemoViewProps) {
         <TradeOffLine tradeOffs={memo.trade_offs} />
       </Section>
 
-      <Section title="Do next">
+      <Section title="Next steps">
         <Bullets items={memo.next_steps} />
       </Section>
 
-      <Section title="Why this call">
+      <Section title="Reasoning">
         <Bullets items={memo.why_this_call} />
       </Section>
 
@@ -122,34 +91,52 @@ export function DecisionMemoView({ memo, createdAt }: DecisionMemoViewProps) {
         <Bullets items={memo.risks} />
       </Section>
 
-      <TriggerCard reviewTrigger={memo.review_trigger} escapeHatch={memo.escape_hatch} />
-
-      <Section title="The Pattern">
-        <p className="font-semibold">{memo.pattern.principle}</p>
-        <p>{memo.pattern.why_it_works}</p>
+      <Section title="When to revisit">
+        <TriggerCard reviewTrigger={memo.review_trigger} escapeHatch={memo.escape_hatch} />
       </Section>
 
-      {memo.examples.worked.length > 0 && (
-        <Section title="Where it worked">
-          <Bullets
-            items={memo.examples.worked.map((e) => {
-              const yr = e.year ? ` (${e.year})` : ''
-              return `${e.company}${yr}: ${e.story}`
-            })}
-          />
-        </Section>
-      )}
+      <div className="mt-2 bg-zinc-50 border-l-2 border-zinc-300 pl-4 py-4 rounded-r space-y-4">
+        <div className="flex items-center gap-2 text-sm font-medium text-zinc-600">
+          <BookOpen className="h-4 w-4" aria-hidden="true" />
+          <span>Real-world precedent</span>
+        </div>
 
-      {memo.examples.failed.length > 0 && (
-        <Section title="Where it failed">
-          <Bullets
-            items={memo.examples.failed.map((e) => {
-              const yr = e.year ? ` (${e.year})` : ''
-              return `${e.company}${yr}: ${e.story}`
-            })}
-          />
-        </Section>
-      )}
+        <div className="space-y-2">
+          <p className="text-zinc-700 font-semibold">{memo.pattern.principle}</p>
+        </div>
+
+        {memo.examples.worked.length > 0 && (
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-green-700 uppercase tracking-wide">What worked</span>
+            <p className="text-zinc-600 text-sm mt-1">
+              {memo.examples.worked
+                .map((e) => {
+                  const yr = e.year ? ` (${e.year})` : ''
+                  return `${e.company}${yr}: ${e.story}`
+                })
+                .join(' · ')}
+            </p>
+          </div>
+        )}
+
+        {memo.examples.failed.length > 0 && (
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-red-700 uppercase tracking-wide">What failed</span>
+            <p className="text-zinc-600 text-sm mt-1">
+              {memo.examples.failed
+                .map((e) => {
+                  const yr = e.year ? ` (${e.year})` : ''
+                  return `${e.company}${yr}: ${e.story}`
+                })
+                .join(' · ')}
+            </p>
+          </div>
+        )}
+
+        {memo.pattern.why_it_works && (
+          <p className="text-zinc-500 text-sm italic">{memo.pattern.why_it_works}</p>
+        )}
+      </div>
     </article>
   )
 }

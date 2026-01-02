@@ -6,6 +6,9 @@ import { DecisionActions } from '@/components/decision-actions'
 import { DecisionMemoView } from '@/components/decision-memo-view'
 import { CheckInPromise } from '@/components/check-in-promise'
 import { DecisionMemoSchema, type DecisionMemo } from '@/lib/schemas/decision-memo'
+import { toSentenceCase } from '@/lib/utils/format'
+import { ConfidenceChip } from '@/components/decision-memo-view'
+import { DeleteDecisionButton } from '@/components/delete-decision-button'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -89,19 +92,40 @@ export default async function DecisionPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Image src="/delfyylogo.svg" alt="Delfyy" width={120} height={40} className="h-auto" priority />
-          </Link>
-          <DecisionActions memo={memo} decisionId={decision.id} buttonSize="sm" />
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <Link href="/dashboard" className="flex items-center gap-2" aria-label="Back to dashboard" />
+          <div />
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-12 space-y-8">
-        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600">
-          <ArrowLeft className="h-3.5 w-3.5" />
-          All decisions
-        </Link>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+        <div className="space-y-4">
+          <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            All decisions
+          </Link>
+
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-3xl font-semibold text-gray-900 leading-snug">{toSentenceCase(memo.question)}</h1>
+              <div className="flex items-center gap-3 text-sm mt-2">
+                <ConfidenceChip tier={memo.confidence.tier} />
+                <span className="text-gray-500">
+                  {(memo.meta.stage ?? '').charAt(0).toUpperCase() + (memo.meta.stage ?? '').slice(1) || 'Unknown'} ·{' '}
+                  {new Date(decision.created_at).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <DecisionActions memo={memo} decisionId={decision.id} buttonSize="sm" />
+              <DeleteDecisionButton decisionId={decision.id} />
+            </div>
+          </div>
+        </div>
 
         {memo.confidence.tier === 'exploratory' && (
           <div className="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
@@ -124,12 +148,18 @@ export default async function DecisionPage({ params }: PageProps) {
           />
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 border-t pt-6">
-          <Link href="/decide" className="text-sm font-medium text-primary hover:underline">
-            Make another decision →
+        <div className="mt-8 flex items-center justify-between border-t border-zinc-200 pt-6">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-gray-700 hover:bg-zinc-50 transition-colors"
+          >
+            ← All decisions
           </Link>
-          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-            View all decisions
+          <Link
+            href="/decide"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            + New decision
           </Link>
         </div>
       </div>

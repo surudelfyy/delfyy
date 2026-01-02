@@ -1,6 +1,6 @@
 'use client'
 
-import { RotateCcw, Zap } from 'lucide-react'
+import { RotateCcw, AlertTriangle } from 'lucide-react'
 
 interface TriggerCardProps {
   reviewTrigger: string | null
@@ -10,36 +10,27 @@ interface TriggerCardProps {
 export function TriggerCard({ reviewTrigger, escapeHatch }: TriggerCardProps) {
   if (!reviewTrigger && !escapeHatch) return null
 
-  const rows = [
-    reviewTrigger
-      ? {
-          icon: <RotateCcw className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />,
-          label: 'Revisit if',
-          text: reviewTrigger,
-        }
-      : null,
-    escapeHatch
-      ? {
-          icon: <Zap className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />,
-          label: 'Switch if',
-          text: escapeHatch,
-        }
-      : null,
-  ].filter(Boolean) as { icon: React.ReactNode; label: string; text: string }[]
-
   return (
-    <div className="border border-slate-200 rounded-lg p-4 space-y-3 bg-slate-50/50">
-      {rows.map((row, idx) => (
-        <div key={idx} className="flex items-start gap-3">
-          {row.icon}
-          <div className="flex gap-2">
-            <span className="text-xs font-medium text-slate-500 uppercase tracking-wide w-20 flex-shrink-0">
-              {row.label}
-            </span>
-            <span className="text-sm text-slate-700 leading-relaxed">{row.text}</span>
-          </div>
+    <div className="space-y-3">
+      {reviewTrigger && (
+        <div className="border-l-2 border-slate-300 bg-slate-50 p-4 rounded-r-lg">
+          <p className="text-sm font-medium text-slate-800 flex items-center gap-2">
+            <RotateCcw className="h-4 w-4" />
+            Revisit if
+          </p>
+          <p className="text-sm text-slate-900 mt-1">{reviewTrigger}</p>
         </div>
-      ))}
+      )}
+
+      {escapeHatch && (
+        <div className="border-l-2 border-rose-300 bg-rose-50 p-4 rounded-r-lg">
+          <p className="text-sm font-medium text-rose-800 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Switch immediately if
+          </p>
+          <p className="text-sm text-rose-900 mt-1">{escapeHatch}</p>
+        </div>
+      )}
     </div>
   )
 }

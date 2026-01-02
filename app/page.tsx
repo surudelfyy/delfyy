@@ -7,8 +7,8 @@ export default function HomePage() {
         <Image
           src="/delfyylogo.svg"
           alt="Delfyy"
-          width={140}
-          height={50}
+          width={98}
+          height={35}
           priority
         />
       </div>

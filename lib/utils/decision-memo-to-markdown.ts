@@ -1,37 +1,48 @@
 import type { DecisionMemo } from '@/lib/schemas/decision-memo'
 
-function fmtScore(score: number): string {
-  return score.toFixed(2)
+type MarkdownOptions = {
+  checkInDays?: number
+  winningOutcome?: string | null
 }
 
-function fmtDate(dateIso?: string): string | undefined {
-  if (!dateIso) return undefined
-  const d = new Date(dateIso)
-  if (Number.isNaN(d.getTime())) return undefined
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+const TONE_SOFTEN_REPLACEMENTS: [RegExp, string][] = [
+  [/\bcollapses\b/gi, 'may struggle to stand on its own'],
+  [/\binvalidates\b/gi, 'puts pressure on'],
+  [/\bentire value prop\b/gi, 'core value'],
+  [/\bno defensible moat\b/gi, 'harder to defend'],
+  [/\bunproven\b/gi, 'still needs testing'],
+  [/\bif false, users bounce to ([^.]+)\b/gi, "if this doesn't hold, users may fall back to $1"],
+  [/\bdominates\b/gi, 'tends to work better'],
+  [/\bmust\b/gi, 'worth testing'],
+  [/\bfails\b/gi, 'struggles'],
+  [/\bexistential\b/gi, 'significant'],
+]
+
+function softenText(text?: string): string {
+  if (!text) return ''
+  let output = text
+  for (const [pattern, replacement] of TONE_SOFTEN_REPLACEMENTS) {
+    output = output.replace(pattern, replacement)
+  }
+  return output
 }
 
-function bullets(items?: string[]): string {
+function bullets(items?: string[], soften = false): string {
   if (!items || !items.length) return ''
-  return items.map((i) => `- ${i.trim()}`).join('\n')
+  return items
+    .map((i) => `- ${soften ? softenText(i.trim()) : i.trim()}`)
+    .join('\n')
 }
 
 function bulletsAssumptions(items?: DecisionMemo['assumptions']): string {
   if (!items || !items.length) return ''
   return items
     .map((a) => {
-      const why = a.why_it_matters ? ` — ${a.why_it_matters.trim()}` : ''
-      const icon = a.confidence === 'high' ? '●' : a.confidence === 'medium' ? '◐' : '○'
-      return `- ${icon} ${a.assumption.trim()} *(${a.confidence})*${why}`
+      const why = a.why_it_matters ? ` — ${softenText(a.why_it_matters.trim())}` : ''
+      const confidenceLabel = a.confidence.toLowerCase()
+      return `- **${softenText(a.assumption.trim())}**${why} *(${confidenceLabel})*`
     })
     .join('\n')
-}
-
-function joinWithAnd(items: string[]): string {
-  if (items.length === 0) return ''
-  if (items.length === 1) return items[0]
-  if (items.length === 2) return `${items[0]} and ${items[1]}`
-  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`
 }
 
 function exampleLines(list: DecisionMemo['examples']['worked']): string {
@@ -44,32 +55,27 @@ function exampleLines(list: DecisionMemo['examples']['worked']): string {
     .join('\n')
 }
 
-export function decisionMemoToMarkdown(memo: DecisionMemo): string {
+export function decisionMemoToMarkdown(memo: DecisionMemo, options: MarkdownOptions = {}): string {
+  const { checkInDays = 7, winningOutcome } = options
   const out: string[] = []
-  out.push('# Decision Memo')
-  out.push('')
-  out.push('## Question')
-  out.push(memo.question.trim())
+
+  out.push(`# ${memo.question.trim()}`)
   out.push('')
 
-  out.push('## The Call')
-  out.push(memo.call.trim())
+  out.push('## Decision')
+  out.push(softenText(memo.call.trim()))
   out.push('')
 
   out.push('## Confidence')
-  out.push(`Tier (${fmtScore(memo.confidence.score)}): ${memo.confidence.tier} — ${memo.confidence.rationale.trim()}`)
-  out.push('')
-
-  out.push('## Do next')
-  out.push(bullets(memo.next_steps))
-  out.push('')
-
-  out.push('## Why this call')
-  out.push(bullets(memo.why_this_call))
-  out.push('')
-
-  out.push('## Risks')
-  out.push(bullets(memo.risks))
+  const confidenceLabel =
+    memo.confidence.tier === 'high'
+      ? 'Very high confidence'
+      : memo.confidence.tier === 'supported'
+      ? 'High confidence'
+      : memo.confidence.tier === 'directional'
+      ? 'Medium confidence'
+      : 'Early signal'
+  out.push(`${confidenceLabel} — ${softenText(memo.confidence.rationale.trim())}`)
   out.push('')
 
   const assumptions = bulletsAssumptions(memo.assumptions)
@@ -79,54 +85,58 @@ export function decisionMemoToMarkdown(memo: DecisionMemo): string {
     out.push('')
   }
 
-  const tradeOffs = bullets(memo.trade_offs)
+  const tradeOffs = bullets(memo.trade_offs, true)
   if (tradeOffs) {
     out.push('## Trade-offs')
-    out.push(`You're accepting ${joinWithAnd(memo.trade_offs)}.`)
+    out.push(tradeOffs)
     out.push('')
   }
 
-  if (memo.review_trigger) {
-    out.push('## Decision Guardrails')
-    out.push(`**Revisit if:** ${memo.review_trigger.trim()}`)
-    if (memo.escape_hatch) {
-      out.push(`**Switch if:** ${memo.escape_hatch.trim()}`)
-    }
-    out.push('')
-  } else if (memo.escape_hatch) {
-    out.push('## Decision Guardrails')
-    out.push(`**Switch if:** ${memo.escape_hatch.trim()}`)
+  out.push('## Next steps')
+  out.push(bullets(memo.next_steps, false))
+  out.push('')
+
+  out.push('## Reasoning')
+  out.push(bullets(memo.why_this_call, true))
+  out.push('')
+
+  out.push('## Risks')
+  out.push(bullets(memo.risks, true))
+  out.push('')
+
+  if (memo.review_trigger || memo.escape_hatch) {
+    out.push('## When to revisit')
+    if (memo.review_trigger) out.push(`**Revisit if:** ${softenText(memo.review_trigger.trim())}`)
+    if (memo.escape_hatch) out.push(`**Switch immediately if:** ${softenText(memo.escape_hatch.trim())}`)
     out.push('')
   }
 
-  out.push('## The Pattern')
+  out.push('## Real-world precedent')
   out.push(`**Principle:** ${memo.pattern.principle.trim()}`)
-  out.push(`**Why it works:** ${memo.pattern.why_it_works.trim()}`)
   out.push('')
 
   const worked = exampleLines(memo.examples.worked)
   if (worked) {
-    out.push('## Where it worked')
+    out.push('**What worked:**')
     out.push(worked)
     out.push('')
   }
 
   const failed = exampleLines(memo.examples.failed)
   if (failed) {
-    out.push('## Where it failed')
+    out.push('**What failed:**')
     out.push(failed)
     out.push('')
   }
 
-  const metaParts: string[] = []
-  if (memo.meta.stage) metaParts.push(`Stage: ${memo.meta.stage}`)
-  const date = fmtDate(memo.meta.date_iso)
-  if (date) metaParts.push(`Date: ${date}`)
-  if (metaParts.length) {
-    out.push('## Meta')
-    out.push(metaParts.join(' • '))
-    out.push('')
-  }
+  out.push(`**Why it works:** ${memo.pattern.why_it_works.trim()}`)
+  out.push('')
+
+  out.push('## Check-in')
+  out.push(`In ${checkInDays} days, we'll ask: did this work?`)
+  out.push('')
+  out.push(`Winning looks like: "${winningOutcome?.trim() || 'Not provided'}"`)
+  out.push('')
 
   return out.join('\n')
 }

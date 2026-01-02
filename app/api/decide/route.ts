@@ -6,9 +6,16 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { runPipeline } from '@/lib/delphi/orchestrator'
 import { sendProgress, sendResult, sendError, startHeartbeat } from '@/lib/utils/sse'
 import { rateLimit } from '@/lib/utils/rate-limit'
+import { getUserTier } from '@/lib/billing/getUserTier'
+import { enforceDecisionLimits, LimitError } from '@/lib/limits/validate-decision'
+import {
+  QUESTION_MAX,
+  PER_DECISION_CONTEXT_MAX,
+  ERROR_MESSAGES,
+} from '@/lib/limits/decisionLimits'
 
 const RequestSchema = z.object({
-  question: z.string().min(10).max(2000),
+  question: z.string().min(10).max(QUESTION_MAX),
   context: z
     .object({
       stage: z.enum(['discovery', 'build', 'launch', 'growth']).optional(),
@@ -19,7 +26,7 @@ const RequestSchema = z.object({
       what_tried: z.string().optional(),
       deadline: z.string().optional(),
       bad_decision_signal: z.string().optional(),
-      freeform: z.string().max(500).optional(),
+      freeform: z.string().max(PER_DECISION_CONTEXT_MAX).optional(),
     })
     .optional(),
   winning_outcome: z.string().max(500).nullish(),
@@ -44,6 +51,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // 2b. Resolve tier
+  const tierResult = await getUserTier(user.id)
+
   // 3. Rate limit
   const rate = await rateLimit(user.id, 10, 60_000)
   if (!rate.success) {
@@ -55,7 +65,54 @@ export async function POST(request: NextRequest) {
   try {
     body = RequestSchema.parse(await request.json())
   } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    return NextResponse.json({ error: { message: 'Invalid request body' } }, { status: 400 })
+  }
+
+  // 4b. Validate question contains letters
+  if (!/[A-Za-z]/.test(body.question || '')) {
+    return NextResponse.json(
+      { error: { code: 'VALIDATION_INVALID_QUESTION', message: ERROR_MESSAGES.VALIDATION_INVALID_QUESTION } },
+      { status: 400 }
+    )
+  }
+
+  // 4c. Count completed decisions
+  const { count: completedCount, error: countError } = await supabase
+    .from('decisions')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .in('status', ['complete', 'completed'])
+
+  if (countError) {
+    return NextResponse.json({ error: { message: 'Failed to check usage' } }, { status: 500 })
+  }
+
+  // 4d. Optional default context from profiles if present (best-effort)
+  let defaultContext: string | null = null
+  try {
+    const { data: profile } = await supabase.from('profiles').select('default_context').maybeSingle()
+    if (profile && typeof profile.default_context === 'string') {
+      defaultContext = profile.default_context
+    }
+  } catch (err) {
+    console.error('profile default_context fetch failed', err)
+  }
+
+  // 4e. Enforce limits
+  try {
+    enforceDecisionLimits({
+      tier: tierResult.tier,
+      completedDecisions: completedCount || 0,
+      question: body.question,
+      contextFreeform: body.context?.freeform,
+      defaultContext,
+    })
+  } catch (err) {
+    if (err instanceof LimitError) {
+      const status = err.code === 'LIMIT_PAYWALL' ? 402 : 400
+      return NextResponse.json({ error: { code: err.code, message: err.message } }, { status })
+    }
+    return NextResponse.json({ error: { message: 'Validation failed' } }, { status: 400 })
   }
 
   // 5. Idempotency check
@@ -83,16 +140,21 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // 6. Create decision row (RLS)
+  // 6. Combine contexts
+  const combinedFreeform = [defaultContext, body.context?.freeform].filter(Boolean).join('\n\n') || null
+
+  // 7. Create decision row (RLS)
   const { data: decision, error: insertError } = await supabase
     .from('decisions')
     .insert({
       user_id: user.id,
       status: 'running',
       question: body.question,
-      input_context: body.context || {},
+      input_context: {
+        ...(body.context || {}),
+        freeform: combinedFreeform,
+      },
       winning_outcome: body.winning_outcome ?? null,
-      check_in_date: body.check_in_date ?? null,
       idempotency_key: body.idempotency_key || null,
     })
     .select('id')
@@ -102,10 +164,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create decision' }, { status: 500 })
   }
 
-  // 7. Service client for background writes
+  // 8. Service client for background writes
   const serviceClient = createServiceClient()
 
-  // 8. SSE stream
+  // 9. SSE stream
   const stream = new TransformStream()
   const writer = stream.writable.getWriter()
   const heartbeat = startHeartbeat(writer)

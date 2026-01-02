@@ -19,6 +19,11 @@ export function CheckInPromise({ decisionId, checkInDate, checkInOutcome, winnin
 
   const diffTime = checkIn.getTime() - now.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  const formatted = checkIn.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 
   if (isCompleted) {
     const outcomeConfig = {
@@ -93,15 +98,9 @@ export function CheckInPromise({ decisionId, checkInDate, checkInOutcome, winnin
           </svg>
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">
-            In{' '}
-            <span className="font-medium text-foreground">
-              {diffDays} day{diffDays !== 1 ? 's' : ''}
-            </span>
-            , we&apos;ll ask: did this work?
-          </p>
+          <p className="text-sm text-muted-foreground">Check-in: {formatted}</p>
           {winningOutcome && (
-            <p className="mt-1 text-sm text-muted-foreground">Success = &quot;{winningOutcome}&quot;</p>
+            <p className="mt-1 text-sm text-muted-foreground">Success: &quot;{winningOutcome}&quot;</p>
           )}
         </div>
       </div>

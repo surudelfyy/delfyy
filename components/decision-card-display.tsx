@@ -4,12 +4,12 @@ import { AlertTriangle, CheckCircle2, Eye, XCircle } from 'lucide-react'
 import type { DecisionCard } from '@/lib/schemas/decision-card'
 import { cleanText, fixContractions, splitBullets, firstExample } from '@/lib/utils/format-decision-text'
 
-const tierConfig: Record<string, { label: string; bg: string; text: string; border: string }> = {
-  high: { label: 'High confidence', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  good: { label: 'Good confidence', bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200' },
-  moderate: { label: 'Moderate', bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
-  directional: { label: 'Directional', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-  exploratory: { label: 'Provisional', bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+const tierConfig: Record<string, { label: string; className: string }> = {
+  high: { label: 'High confidence', className: 'bg-indigo-900 text-white' },
+  good: { label: 'Good confidence', className: 'bg-indigo-900 text-white' },
+  moderate: { label: 'Moderate', className: 'bg-violet-600 text-white' },
+  directional: { label: 'Directional', className: 'bg-violet-600 text-white' },
+  exploratory: { label: 'Provisional', className: 'bg-slate-400 text-white' },
 }
 
 function Label({ children }: { children: React.ReactNode }) {
@@ -71,9 +71,7 @@ export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDispla
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 md:p-10">
           <div className="flex items-center justify-between mb-6">
             <Label>The Call</Label>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${tier.bg} ${tier.text} ${tier.border}`}>
-              {tier.label}
-            </span>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${tier.className}`}>{tier.label}</span>
           </div>
 
           <p className="text-[22px] md:text-2xl font-serif font-semibold text-gray-900 leading-snug tracking-tight mb-4">
