@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { StagePills } from '@/components/stage-pills'
 import { DecisionLoading } from '@/components/decision-loading'
+import { ContinuationGate } from '@/components/continuation-gate'
 
 const STEP_ORDER = [
   'classifying',
@@ -32,6 +33,7 @@ export default function DecidePage() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const questionRef = useRef<HTMLTextAreaElement | null>(null)
   const contextRef = useRef<HTMLTextAreaElement | null>(null)
+  const [showGate, setShowGate] = useState(false)
 
   const charCount = contextText.length
   const charColor =
@@ -105,6 +107,23 @@ export default function DecidePage() {
           winning_outcome: winningOutcome.trim() || null,
         }),
       })
+
+      if (!response.ok) {
+        if (response.status === 402) {
+          setShowGate(true)
+          setProcessing(false)
+          return
+        }
+        try {
+          const errJson = await response.json()
+          setError(errJson?.error?.message || 'Request failed')
+        } catch {
+          const text = await response.text()
+          setError(text || 'Request failed')
+        }
+        setProcessing(false)
+        return
+      }
 
       if (!response.body) {
         throw new Error('No response body from server')
@@ -346,6 +365,23 @@ export default function DecidePage() {
               Try again
             </button>
           </div>
+        )}
+
+        {showGate && (
+          <ContinuationGate
+            onClose={() => setShowGate(false)}
+            onUpgrade={async () => {
+              try {
+                const res = await fetch('/api/stripe/checkout', { method: 'POST' })
+                const data = await res.json()
+                if (data?.url) {
+                  window.location.href = data.url as string
+                }
+              } catch {
+                // ignore
+              }
+            }}
+          />
         )}
       </div>
     </main>

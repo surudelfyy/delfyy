@@ -37,6 +37,8 @@ export function ConfidenceChip({ tier }: { tier: string }) {
 interface DecisionMemoViewProps {
   memo: DecisionMemo
   createdAt?: string
+  decisionId?: string
+  assumptionCorrections?: Record<string, { original: string; correction: string; corrected_at: string }>
 }
 
 function Section({ title, children }: { title: string; children?: React.ReactNode }) {
@@ -60,7 +62,7 @@ function Bullets({ items }: { items: string[] }) {
   )
 }
 
-export function DecisionMemoView({ memo, createdAt }: DecisionMemoViewProps) {
+export function DecisionMemoView({ memo, createdAt, decisionId, assumptionCorrections }: DecisionMemoViewProps) {
   return (
     <article className="max-w-[760px] w-full mx-auto bg-white border border-gray-200 shadow-sm rounded-2xl p-6 md:p-10 space-y-10">
       <Section title="Decision">
@@ -72,7 +74,11 @@ export function DecisionMemoView({ memo, createdAt }: DecisionMemoViewProps) {
       </Section>
 
       <Section title="Assumptions">
-        <AssumptionChips assumptions={memo.assumptions} />
+        <AssumptionChips
+          assumptions={memo.assumptions}
+          decisionId={decisionId}
+          corrections={assumptionCorrections}
+        />
       </Section>
 
       <Section title="Trade-offs">

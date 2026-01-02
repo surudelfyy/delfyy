@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DecisionList } from '@/components/decision-list'
 import { NewDecisionButton } from '@/components/new-decision-button'
+import { UpgradeToastClient } from '@/components/upgrade-toast-client'
 
 type DecisionRowType = {
   id: string
@@ -73,6 +74,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
+      <UpgradeToastClient />
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Decisions</h1>
         <NewDecisionButton usage={usage} />

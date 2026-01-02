@@ -26,6 +26,18 @@ export function NewDecisionButton({ usage }: NewDecisionButtonProps) {
     router.push('/decide')
   }
 
+  const handleUpgrade = async () => {
+    try {
+      const res = await fetch('/api/stripe/checkout', { method: 'POST' })
+      const data = await res.json()
+      if (data?.url) {
+        window.location.href = data.url as string
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   return (
     <>
       <button
@@ -60,6 +72,7 @@ export function NewDecisionButton({ usage }: NewDecisionButtonProps) {
               <button
                 type="button"
                 className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                onClick={handleUpgrade}
               >
                 Upgrade
               </button>

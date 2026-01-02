@@ -9,6 +9,7 @@ import { DecisionMemoSchema, type DecisionMemo } from '@/lib/schemas/decision-me
 import { toSentenceCase } from '@/lib/utils/format'
 import { ConfidenceChip } from '@/components/decision-memo-view'
 import { DeleteDecisionButton } from '@/components/delete-decision-button'
+import { DecisionStatusBanner } from '@/components/decision-status-banner'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -21,7 +22,7 @@ export default async function DecisionPage({ params }: PageProps) {
   const { data: decision, error } = await supabase
     .from('decisions')
     .select(
-      'id, status, question, decision_memo, confidence_tier, created_at, input_context, check_in_date, check_in_outcome, winning_outcome'
+      'id, status, question, decision_memo, confidence_tier, created_at, input_context, check_in_date, check_in_outcome, winning_outcome, assumption_corrections'
     )
     .eq('id', id)
     .maybeSingle()
@@ -36,37 +37,6 @@ export default async function DecisionPage({ params }: PageProps) {
           <p className="text-sm text-gray-600">We couldn&apos;t load that decision. It may have been removed.</p>
           <Link href="/dashboard" className="text-sm text-gray-500 underline hover:text-gray-700">
             Back to dashboard
-          </Link>
-        </div>
-      </main>
-    )
-  }
-
-  if (decision.status === 'running') {
-    return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 text-gray-500 mb-4">
-            <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-            <span>Still processing...</span>
-          </div>
-          <p className="text-sm text-gray-400">
-            <Link href="/dashboard" className="underline hover:text-gray-600">
-              Back to dashboard
-            </Link>
-          </p>
-        </div>
-      </main>
-    )
-  }
-
-  if (decision.status === 'failed') {
-    return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">This decision couldn't be completed.</p>
-          <Link href="/decide" className="text-sm text-gray-500 underline hover:text-gray-700">
-            Try again
           </Link>
         </div>
       </main>
@@ -88,6 +58,17 @@ export default async function DecisionPage({ params }: PageProps) {
   }
 
   const memo: DecisionMemo = parsed.data
+
+  if (decision.status === 'running' || decision.status === 'failed') {
+    return (
+      <DecisionStatusBanner
+        status={decision.status as 'running' | 'failed'}
+        decisionId={decision.id}
+        question={decision.question}
+        inputContext={decision.input_context}
+      />
+    )
+  }
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -137,7 +118,12 @@ export default async function DecisionPage({ params }: PageProps) {
           </div>
         )}
 
-        <DecisionMemoView memo={memo} createdAt={decision.created_at} />
+        <DecisionMemoView
+          memo={memo}
+          createdAt={decision.created_at}
+          decisionId={decision.id}
+          assumptionCorrections={(decision as any).assumption_corrections || {}}
+        />
 
         <div className="mt-6 border-t pt-6">
           <CheckInPromise
