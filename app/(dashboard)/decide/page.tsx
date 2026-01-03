@@ -35,7 +35,7 @@ export default function DecidePage() {
 
   const charCount = contextText.length
   const charColor =
-    charCount >= 500 ? 'text-red-500' : charCount >= 450 ? 'text-amber-500' : 'text-gray-400'
+    charCount >= 500 ? 'text-red-500' : charCount >= 450 ? 'text-amber-500' : 'text-zinc-600'
 
   const clearTimers = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
@@ -177,12 +177,12 @@ export default function DecidePage() {
   const showStatus = processing && !error
 
   return (
-    <main className="relative min-h-screen bg-white">
+    <main className="relative min-h-screen bg-zinc-950">
       <header className="flex items-center justify-between px-6 py-4">
         <div />
         <a
           href="/dashboard"
-          className="text-sm text-gray-600 border border-gray-300 rounded-md px-3 py-2 hover:border-gray-400"
+          className="text-sm text-zinc-400 border border-zinc-700 rounded-md px-3 py-2 hover:border-zinc-600"
         >
           Cancel
         </a>
@@ -207,7 +207,7 @@ export default function DecidePage() {
                 }}
                 maxLength={500}
                 rows={3}
-                className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-base text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none resize-none"
+                className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-base text-zinc-50 shadow-sm focus:border-zinc-50 focus:outline-none resize-none"
                 placeholder="What decision are you stuck on?"
               />
               <div className="flex items-center justify-between text-xs text-zinc-500">
@@ -230,15 +230,15 @@ export default function DecidePage() {
                 <div className="space-y-4 rounded-lg border border-zinc-200 p-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-900">Where are you?</span>
-                      <span className="text-xs text-gray-500">We&apos;ll infer it if you skip this.</span>
+                      <span className="text-sm font-medium text-zinc-50">Where are you?</span>
+                      <span className="text-xs text-zinc-500">We&apos;ll infer it if you skip this.</span>
                     </div>
                     <StagePills selected={stage} onSelect={setStage} />
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-900">Context</span>
+                      <span className="text-sm font-medium text-zinc-50">Context</span>
                       <span className={`text-xs ${charColor}`}>{charCount} / 500</span>
                     </div>
                     <textarea
@@ -250,7 +250,7 @@ export default function DecidePage() {
                       }}
                       maxLength={500}
                       rows={2}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none resize-none"
+                      className="w-full rounded-md border border-zinc-700 px-3 py-2 text-sm text-zinc-50 shadow-sm focus:border-zinc-50 focus:outline-none resize-none"
                       placeholder="Stage, goal, constraints — whatever shapes this decision."
                     />
                   </div>
@@ -261,7 +261,7 @@ export default function DecidePage() {
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
                       What does winning look like?
-                      <span className="text-gray-500 font-normal ml-1">(optional)</span>
+                      <span className="text-zinc-500 font-normal ml-1">(optional)</span>
                     </label>
 
                     <textarea
@@ -272,19 +272,19 @@ export default function DecidePage() {
                       onChange={(e) => setWinningOutcome(e.target.value)}
                       maxLength={500}
                       rows={2}
-                      className="flex min-h-[60px] w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-900 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                      className="flex min-h-[60px] w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-900 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                       aria-describedby="winning_outcome_help winning_outcome_count"
                     />
 
                     <div className="flex justify-between items-center">
-                      <span id="winning_outcome_help" className="text-xs text-gray-500">
+                      <span id="winning_outcome_help" className="text-xs text-zinc-500">
                         Define success so we know if this worked
                       </span>
                       {winningOutcome.length > 0 && (
                         <span
                           id="winning_outcome_count"
                           className={`text-xs ${
-                            winningOutcome.length > 450 ? 'text-amber-500' : 'text-gray-500'
+                            winningOutcome.length > 450 ? 'text-amber-500' : 'text-zinc-500'
                           }`}
                         >
                           {winningOutcome.length}/500
@@ -299,7 +299,7 @@ export default function DecidePage() {
             <button
               type="submit"
               disabled={!hasValidQuestion(question) || processing}
-              className="w-full rounded-md bg-gray-900 px-4 py-2 text-white text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full rounded-md bg-zinc-50 px-4 py-2 text-zinc-950 text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
             >
               Make decision
             </button>
@@ -331,11 +331,11 @@ export default function DecidePage() {
         {error && (
           <div className="mt-6 text-center space-y-3">
             <div className="text-3xl">⚠️</div>
-            <div className="text-lg font-semibold text-gray-900">Something went wrong.</div>
-            <div className="text-sm text-gray-700">{error}</div>
+            <div className="text-lg font-semibold text-zinc-50">Something went wrong.</div>
+            <div className="text-sm text-zinc-300">{error}</div>
             <button
               type="button"
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:border-gray-400"
+              className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 hover:border-zinc-600"
               onClick={() => {
                 setError(null)
                 setProcessing(false)

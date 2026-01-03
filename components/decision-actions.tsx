@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { decisionCardToMarkdown } from '@/lib/utils/decision-card-to-markdown'
 import { decisionMemoToMarkdown } from '@/lib/utils/decision-memo-to-markdown'
 import { renderDecisionView } from '@/lib/tone/render-decision-view'
 import type { DecisionMemo } from '@/lib/schemas/decision-memo'
@@ -74,7 +73,7 @@ export function DecisionActions({ memo, decisionId, buttonSize = 'default' }: De
           </>
         )}
       </Button>
-      <Button variant="ghost" size={buttonSize} onClick={downloadMarkdown} className="gap-2 text-gray-600">
+      <Button variant="ghost" size={buttonSize} onClick={downloadMarkdown} className="gap-2 text-zinc-400">
         <Copy className="h-4 w-4" />
         Download .md
       </Button>

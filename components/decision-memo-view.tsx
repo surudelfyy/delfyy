@@ -1,4 +1,5 @@
 import type { DecisionMemo } from '@/lib/schemas/decision-memo'
+import { cn } from '@/lib/utils'
 import { AssumptionChips } from './memo/AssumptionChips'
 import { TradeOffLine } from './memo/TradeOffLine'
 import { TriggerCard } from './memo/TriggerCard'
@@ -11,19 +12,19 @@ export function ConfidenceChip({ tier }: { tier: string }) {
   > = {
     exploratory: {
       label: 'Early signal',
-      className: 'bg-slate-400 text-white',
+      className: 'bg-slate-400 text-zinc-950',
     },
     directional: {
       label: 'Medium confidence',
-      className: 'bg-violet-600 text-white',
+      className: 'bg-violet-600 text-zinc-950',
     },
     supported: {
       label: 'High confidence',
-      className: 'bg-indigo-900 text-white',
+      className: 'bg-indigo-900 text-zinc-950',
     },
     high: {
       label: 'Very high confidence',
-      className: 'bg-indigo-900 text-white',
+      className: 'bg-indigo-900 text-zinc-950',
     },
   }
   const config = map[tier] ?? map.directional
@@ -43,8 +44,8 @@ function Section({ title, children }: { title: string; children?: React.ReactNod
   if (!children) return null
   return (
     <section className="space-y-3">
-      <h2 className="text-xl font-serif font-semibold text-gray-900 tracking-tight">{title}</h2>
-      <div className="text-[17px] leading-[1.65] text-gray-800 space-y-2">{children}</div>
+      <h2 className="text-xl font-serif font-semibold text-zinc-50 tracking-tight">{title}</h2>
+      <div className="text-[17px] leading-[1.65] text-zinc-100 space-y-2">{children}</div>
     </section>
   )
 }
@@ -60,9 +61,14 @@ function Bullets({ items }: { items: string[] }) {
   )
 }
 
-export function DecisionMemoView({ memo, createdAt }: DecisionMemoViewProps) {
+export function DecisionMemoView({ memo, createdAt: _createdAt, className }: DecisionMemoViewProps & { className?: string }) {
   return (
-    <article className="max-w-[760px] w-full mx-auto bg-white border border-gray-200 shadow-sm rounded-2xl p-6 md:p-10 space-y-10">
+    <article
+      className={cn(
+        'max-w-[760px] w-full mx-auto bg-zinc-950 border border-zinc-800 shadow-sm rounded-2xl p-6 md:p-10 space-y-10',
+        className
+      )}
+    >
       <Section title="Decision">
         <p>{memo.call}</p>
       </Section>
@@ -95,20 +101,20 @@ export function DecisionMemoView({ memo, createdAt }: DecisionMemoViewProps) {
         <TriggerCard reviewTrigger={memo.review_trigger} escapeHatch={memo.escape_hatch} />
       </Section>
 
-      <div className="mt-2 bg-zinc-50 border-l-2 border-zinc-300 pl-4 py-4 rounded-r space-y-4">
-        <div className="flex items-center gap-2 text-sm font-medium text-zinc-600">
+      <div className="mt-2 bg-zinc-900 border-l-2 border-zinc-700 pl-4 py-4 rounded-r space-y-4">
+        <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
           <BookOpen className="h-4 w-4" aria-hidden="true" />
           <span>Real-world precedent</span>
         </div>
 
         <div className="space-y-2">
-          <p className="text-zinc-700 font-semibold">{memo.pattern.principle}</p>
+          <p className="text-zinc-300 font-semibold">{memo.pattern.principle}</p>
         </div>
 
         {memo.examples.worked.length > 0 && (
           <div className="space-y-1">
-            <span className="text-xs font-medium text-green-700 uppercase tracking-wide">What worked</span>
-            <p className="text-zinc-600 text-sm mt-1">
+            <span className="text-xs font-medium text-green-400 uppercase tracking-wide">What worked</span>
+            <p className="text-zinc-400 text-sm mt-1">
               {memo.examples.worked
                 .map((e) => {
                   const yr = e.year ? ` (${e.year})` : ''
@@ -121,8 +127,8 @@ export function DecisionMemoView({ memo, createdAt }: DecisionMemoViewProps) {
 
         {memo.examples.failed.length > 0 && (
           <div className="space-y-1">
-            <span className="text-xs font-medium text-red-700 uppercase tracking-wide">What failed</span>
-            <p className="text-zinc-600 text-sm mt-1">
+            <span className="text-xs font-medium text-red-400 uppercase tracking-wide">What failed</span>
+            <p className="text-zinc-400 text-sm mt-1">
               {memo.examples.failed
                 .map((e) => {
                   const yr = e.year ? ` (${e.year})` : ''

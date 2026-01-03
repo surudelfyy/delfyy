@@ -22,8 +22,8 @@ export function StagePills({ selected, onSelect }: StagePillsProps) {
             className={clsx(
               'rounded-full border px-3 py-1 text-sm transition',
               active
-                ? 'border-gray-900 bg-gray-900 text-white'
-                : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                ? 'border-zinc-50 bg-zinc-50 text-zinc-950'
+                : 'border-zinc-700 text-zinc-300 hover:border-zinc-600'
             )}
           >
             {stage}

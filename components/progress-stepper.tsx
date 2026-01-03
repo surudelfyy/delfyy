@@ -27,9 +27,9 @@ export function ProgressStepper({ currentStep }: ProgressStepperProps) {
             key={step.key}
             className={clsx(
               'flex items-center gap-3 text-sm',
-              state === 'done' && 'text-gray-500',
-              state === 'active' && 'text-gray-900 font-semibold text-base',
-              state === 'todo' && 'text-gray-300'
+              state === 'done' && 'text-zinc-500',
+              state === 'active' && 'text-zinc-50 font-semibold text-base',
+              state === 'todo' && 'text-zinc-500'
             )}
           >
             {state === 'done' && (
@@ -44,7 +44,7 @@ export function ProgressStepper({ currentStep }: ProgressStepperProps) {
               </span>
             )}
             {state === 'todo' && (
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 text-gray-300 text-xs">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-zinc-700 text-zinc-500 text-xs">
                 ○
               </span>
             )}

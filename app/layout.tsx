@@ -17,6 +17,7 @@ const sourceSerif = Source_Serif_4({
 export const metadata: Metadata = {
   title: 'Delfyy',
   description: 'Defensible decisions, delivered clearly.',
+  themeColor: '#09090b', // zinc-950
 }
 
 export default function RootLayout({
@@ -25,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${sourceSans.variable} ${sourceSerif.variable} font-sans antialiased`}>
+    <html lang="en" className="bg-zinc-950">
+      <body className={`${sourceSans.variable} ${sourceSerif.variable} font-sans bg-zinc-950 text-zinc-50 min-h-screen antialiased`}>
         {children}
       </body>
     </html>

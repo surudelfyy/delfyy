@@ -14,17 +14,17 @@ export function DecisionSectionCard({ label, content, highlight, action }: Decis
     <div
       className={`p-4 rounded-lg border transition-all ${
         action
-          ? 'bg-blue-50/50 border-blue-200/60'
+          ? 'bg-blue-950/30 border-blue-800/60'
           : highlight
-          ? 'bg-gray-50 border-gray-200'
-          : 'bg-white border-gray-100 hover:border-gray-200'
+          ? 'bg-zinc-900 border-zinc-800'
+          : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'
       }`}
     >
-      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+      <p className="text-[11px] font-semibold text-zinc-600 uppercase tracking-wider mb-2">
         {label}
       </p>
       <p
-        className={`leading-relaxed ${action ? 'text-blue-900' : 'text-gray-800'} ${
+        className={`leading-relaxed ${action ? 'text-blue-200' : 'text-zinc-100'} ${
           highlight ? 'font-medium' : ''
         }`}
       >

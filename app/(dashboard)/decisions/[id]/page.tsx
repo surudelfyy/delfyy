@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { AlertTriangle, ArrowLeft } from 'lucide-react'
-import Image from 'next/image'
+import { AlertTriangle, ChevronLeft } from 'lucide-react'
 import { DecisionActions } from '@/components/decision-actions'
 import { DecisionMemoView } from '@/components/decision-memo-view'
 import { CheckInPromise } from '@/components/check-in-promise'
@@ -9,6 +8,8 @@ import { DecisionMemoSchema, type DecisionMemo } from '@/lib/schemas/decision-me
 import { toSentenceCase } from '@/lib/utils/format'
 import { ConfidenceChip } from '@/components/decision-memo-view'
 import { DeleteDecisionButton } from '@/components/delete-decision-button'
+import { CopyDocumentButton } from '@/components/copy-document-button'
+import type { DecisionDocument } from '@/lib/utils/copy-as-document'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -30,11 +31,11 @@ export default async function DecisionPage({ params }: PageProps) {
 
   if (error || !decision) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <main className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-center space-y-3">
-          <div className="text-xl font-semibold text-gray-900">Decision not found</div>
-          <p className="text-sm text-gray-600">We couldn&apos;t load that decision. It may have been removed.</p>
-          <Link href="/dashboard" className="text-sm text-gray-500 underline hover:text-gray-700">
+          <div className="text-xl font-semibold text-zinc-50">Decision not found</div>
+          <p className="text-sm text-zinc-400">We couldn&apos;t load that decision. It may have been removed.</p>
+          <Link href="/dashboard" className="text-sm text-zinc-500 underline hover:text-zinc-300">
             Back to dashboard
           </Link>
         </div>
@@ -44,14 +45,14 @@ export default async function DecisionPage({ params }: PageProps) {
 
   if (decision.status === 'running') {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <main className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 text-gray-500 mb-4">
-            <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+          <div className="inline-flex items-center gap-2 text-zinc-500 mb-4">
+            <div className="h-4 w-4 border-2 border-zinc-700 border-t-zinc-600 rounded-full animate-spin" />
             <span>Still processing...</span>
           </div>
-          <p className="text-sm text-gray-400">
-            <Link href="/dashboard" className="underline hover:text-gray-600">
+          <p className="text-sm text-zinc-600">
+            <Link href="/dashboard" className="underline hover:text-zinc-400">
               Back to dashboard
             </Link>
           </p>
@@ -62,10 +63,10 @@ export default async function DecisionPage({ params }: PageProps) {
 
   if (decision.status === 'failed') {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <main className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">This decision couldn't be completed.</p>
-          <Link href="/decide" className="text-sm text-gray-500 underline hover:text-gray-700">
+          <p className="text-red-600 mb-4">This decision couldn&apos;t be completed.</p>
+          <Link href="/decide" className="text-sm text-zinc-500 underline hover:text-zinc-300">
             Try again
           </Link>
         </div>
@@ -76,10 +77,10 @@ export default async function DecisionPage({ params }: PageProps) {
   const parsed = DecisionMemoSchema.safeParse(decision.decision_memo)
   if (!parsed.success) {
     return (
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-screen bg-zinc-950">
         <div className="max-w-2xl mx-auto px-6 py-16 text-center">
-          <p className="text-gray-700 mb-3">Decision memo is missing or invalid.</p>
-          <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 underline">
+          <p className="text-zinc-300 mb-3">Decision memo is missing or invalid.</p>
+          <Link href="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-300 underline">
             ← Back to dashboard
           </Link>
         </div>
@@ -89,28 +90,59 @@ export default async function DecisionPage({ params }: PageProps) {
 
   const memo: DecisionMemo = parsed.data
 
+  const decisionDocument: DecisionDocument = {
+    id: decision.id,
+    question: decision.question,
+    created_at: decision.created_at,
+    decision_card: {
+      decision: memo.call,
+      confidence_tier: memo.confidence.tier,
+      confidence_reason: memo.confidence.rationale,
+      reasoning: memo.why_this_call?.join('\n'),
+      assumptions: memo.assumptions,
+      trade_offs: Array.isArray(memo.trade_offs) ? memo.trade_offs.join('\n') : memo.trade_offs,
+      risks: memo.risks,
+      next_steps: memo.next_steps,
+      review_trigger: memo.review_trigger,
+      escape_hatch: memo.escape_hatch,
+      principle: memo.pattern?.principle,
+      where_worked: memo.examples?.worked
+        ?.map((e) => `${e.company}${e.year ? ` (${e.year})` : ''}: ${e.story}`)
+        .join('; '),
+      where_failed: memo.examples?.failed
+        ?.map((e) => `${e.company}${e.year ? ` (${e.year})` : ''}: ${e.story}`)
+        .join('; '),
+      mechanism: memo.pattern?.why_it_works,
+    },
+  }
+
   return (
-    <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-100">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2" aria-label="Back to dashboard" />
-          <div />
-        </div>
-      </header>
+    <main className="min-h-screen bg-zinc-950">
+      <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-8">
+        <article className="bg-zinc-950 rounded-2xl sm:border sm:border-zinc-800 sm:shadow-sm overflow-hidden">
+          <header className="px-5 py-4 sm:px-6 border-b border-zinc-800 flex items-center justify-between gap-3">
+            <Link
+              href="/dashboard"
+              className="text-sm text-zinc-500 hover:text-zinc-300 flex items-center gap-1 transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              All decisions
+            </Link>
+            <div className="flex items-center gap-2">
+              <CopyDocumentButton decision={decisionDocument} />
+              <DecisionActions memo={memo} decisionId={decision.id} buttonSize="sm" />
+              <DeleteDecisionButton decisionId={decision.id} />
+            </div>
+          </header>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-        <div className="space-y-4">
-          <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600">
-            <ArrowLeft className="h-3.5 w-3.5" />
-            All decisions
-          </Link>
-
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-3xl font-semibold text-gray-900 leading-snug">{toSentenceCase(memo.question)}</h1>
-              <div className="flex items-center gap-3 text-sm mt-2">
+          <div className="px-5 py-6 sm:px-8 sm:py-8 space-y-8">
+            <div className="space-y-3">
+              <h1 className="text-2xl sm:text-3xl font-semibold leading-tight text-zinc-50">
+                {toSentenceCase(memo.question)}
+              </h1>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-sm">
                 <ConfidenceChip tier={memo.confidence.tier} />
-                <span className="text-gray-500">
+                <span className="text-zinc-500">
                   {(memo.meta.stage ?? '').charAt(0).toUpperCase() + (memo.meta.stage ?? '').slice(1) || 'Unknown'} ·{' '}
                   {new Date(decision.created_at).toLocaleDateString('en-GB', {
                     day: 'numeric',
@@ -119,49 +151,33 @@ export default async function DecisionPage({ params }: PageProps) {
                   })}
                 </span>
               </div>
+              {memo.confidence.rationale && (
+                <p className="text-base leading-relaxed text-zinc-400">{memo.confidence.rationale}</p>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <DecisionActions memo={memo} decisionId={decision.id} buttonSize="sm" />
-              <DeleteDecisionButton decisionId={decision.id} />
+
+            {memo.confidence.tier === 'exploratory' && (
+              <div className="flex items-start gap-3 rounded-md border border-amber-800 bg-amber-950/30 px-4 py-3 text-amber-200">
+                <AlertTriangle className="h-4 w-4 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-amber-100">Provisional call</p>
+                  <p className="text-sm text-amber-200">This is a hypothesis. Run the next step to firm it up.</p>
+                </div>
+              </div>
+            )}
+
+            <DecisionMemoView memo={memo} createdAt={decision.created_at} className="bg-transparent border-0 shadow-none p-0" />
+
+            <div className="border-t border-zinc-800 pt-6">
+              <CheckInPromise
+                decisionId={decision.id}
+                checkInDate={(decision as any).check_in_date ?? null}
+                checkInOutcome={(decision as any).check_in_outcome ?? 'pending'}
+                winningOutcome={(decision as any).winning_outcome ?? null}
+              />
             </div>
           </div>
-        </div>
-
-        {memo.confidence.tier === 'exploratory' && (
-          <div className="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
-            <AlertTriangle className="h-4 w-4 mt-0.5" />
-            <div>
-              <p className="font-semibold text-amber-900">Provisional call</p>
-              <p className="text-sm text-amber-800">This is a hypothesis. Run the next step to firm it up.</p>
-            </div>
-          </div>
-        )}
-
-        <DecisionMemoView memo={memo} createdAt={decision.created_at} />
-
-        <div className="mt-6 border-t pt-6">
-          <CheckInPromise
-            decisionId={decision.id}
-            checkInDate={(decision as any).check_in_date ?? null}
-            checkInOutcome={(decision as any).check_in_outcome ?? 'pending'}
-            winningOutcome={(decision as any).winning_outcome ?? null}
-          />
-        </div>
-
-        <div className="mt-8 flex items-center justify-between border-t border-zinc-200 pt-6">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-gray-700 hover:bg-zinc-50 transition-colors"
-          >
-            ← All decisions
-          </Link>
-          <Link
-            href="/decide"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            + New decision
-          </Link>
-        </div>
+        </article>
       </div>
     </main>
   )

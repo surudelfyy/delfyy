@@ -40,9 +40,9 @@ export function AssumptionChips({ assumptions }: AssumptionChipsProps) {
   if (!assumptions?.length) return null
 
   const chipClass = (confidence: Confidence) => {
-    if (confidence === 'high') return 'w-16 text-center bg-indigo-900 text-white'
-    if (confidence === 'medium') return 'w-16 text-center bg-violet-600 text-white'
-    return 'w-16 text-center bg-slate-400 text-white'
+    if (confidence === 'high') return 'w-16 text-center bg-indigo-900 text-zinc-950'
+    if (confidence === 'medium') return 'w-16 text-center bg-violet-600 text-zinc-950'
+    return 'w-16 text-center bg-slate-400 text-zinc-950'
   }
 
   return (

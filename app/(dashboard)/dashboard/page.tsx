@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DecisionList } from '@/components/decision-list'
-import { NewDecisionButton } from '@/components/new-decision-button'
 
 type DecisionRowType = {
   id: string
@@ -39,7 +38,7 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  const usage = await fetchUsage()
+  const _usage = await fetchUsage()
 
   let stats: Stats = { total: 0, held: 0, pivoted: 0, due: 0 }
   const { data: statsData, error: statsError } = await supabase.rpc('get_decision_stats')
@@ -72,51 +71,36 @@ export default async function DashboardPage() {
   })
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Decisions</h1>
-        <NewDecisionButton usage={usage} />
-      </div>
-
-      {stats.total > 0 && (
-        <div className="mb-6 rounded-lg border bg-card p-4">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-            <span>
-              <span className="font-semibold">{stats.total}</span>
-              <span className="ml-1 text-muted-foreground">decision{stats.total !== 1 ? 's' : ''}</span>
-            </span>
-            <span className="text-muted-foreground">·</span>
-            <span>
-              <span className="font-semibold text-green-600">{stats.held}</span>
-              <span className="ml-1 text-muted-foreground">held</span>
-            </span>
-            <span className="text-muted-foreground">·</span>
-            <span>
-              <span className="font-semibold text-amber-600">{stats.pivoted}</span>
-              <span className="ml-1 text-muted-foreground">pivoted</span>
-            </span>
-            {stats.due > 0 && (
-              <>
-                <span className="text-muted-foreground">·</span>
-                <span className="font-medium text-amber-600">
-                  {stats.due} check-in{stats.due !== 1 ? 's' : ''} due
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {sortedDecisions.length > 0 ? (
-        <DecisionList decisions={sortedDecisions as DecisionRowType[]} />
-      ) : (
-        <div className="rounded-lg border border-dashed py-12 text-center">
-          <p className="mb-4 text-muted-foreground">No decisions yet</p>
-          <Link href="/decide" className="text-primary hover:underline">
-            Make your first decision →
+    <main className="min-h-screen bg-white text-gray-900">
+      <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-semibold text-gray-900">Decisions</h1>
+          <Link
+            href="/decide"
+            className="bg-gray-900 text-white text-sm font-medium px-4 py-2 rounded-none hover:bg-gray-800"
+          >
+            + New decision
           </Link>
         </div>
-      )}
-    </div>
+
+        {stats.total > 0 && (
+          <p className="text-sm text-gray-500 mb-6">
+            {stats.total} decision{stats.total !== 1 ? 's' : ''} · {stats.held} worked · {stats.pivoted} didn&apos;t work
+            {stats.due > 0 ? ` · ${stats.due} check-in${stats.due !== 1 ? 's' : ''} due` : ''}
+          </p>
+        )}
+
+        {sortedDecisions.length > 0 ? (
+          <DecisionList decisions={sortedDecisions as DecisionRowType[]} />
+        ) : (
+          <div className="border border-dashed border-gray-200 py-12 text-center rounded-none">
+            <p className="mb-4 text-gray-500">No decisions yet</p>
+            <Link href="/decide" className="text-gray-900 hover:underline">
+              Make your first decision →
+            </Link>
+          </div>
+        )}
+      </div>
+    </main>
   )
 }

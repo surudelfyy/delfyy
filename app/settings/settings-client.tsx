@@ -67,20 +67,20 @@ export default function SettingsClient() {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-900">Default context</label>
-        <p className="text-sm text-gray-600">Added to every decision automatically.</p>
+        <label className="block text-sm font-medium text-zinc-50">Default context</label>
+        <p className="text-sm text-zinc-400">Added to every decision automatically.</p>
         <textarea
           value={value}
           onChange={(e) => {
             if (e.target.value.length <= limit) setValue(e.target.value)
           }}
           rows={6}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none"
+          className="w-full rounded-md border border-zinc-700 px-3 py-2 text-sm text-zinc-50 shadow-sm focus:border-zinc-50 focus:outline-none"
           maxLength={limit}
           placeholder="E.g., team, audience, constraints..."
           disabled={loading}
         />
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-xs text-zinc-500">
           <span>
             {value.length}/{limit}
           </span>
@@ -91,7 +91,7 @@ export default function SettingsClient() {
         type="button"
         onClick={save}
         disabled={saving || loading}
-        className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center rounded-md bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-950 disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {saving ? 'Saving...' : 'Save'}
       </button>
