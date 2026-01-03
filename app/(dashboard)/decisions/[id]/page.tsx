@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { DecisionMemoView } from '@/components/decision-memo-view'
