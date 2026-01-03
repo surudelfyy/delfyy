@@ -151,7 +151,7 @@ export default async function DecisionPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-zinc-950">
       <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-8">
-        <article className="bg-zinc-950 rounded-2xl sm:border sm:border-zinc-800 sm:shadow-sm overflow-hidden">
+        <article className="bg-zinc-900 border border-zinc-800 rounded-none overflow-hidden">
           <header className="px-5 py-4 sm:px-6 border-b border-zinc-800 flex items-center justify-between gap-3">
             <Link
               href="/dashboard"
@@ -161,7 +161,10 @@ export default async function DecisionPage({ params }: PageProps) {
               All decisions
             </Link>
             <div className="flex items-center gap-2">
-              <CopyDocumentButton decision={decisionDocument} />
+              <CopyDocumentButton
+                decision={decisionDocument}
+                className="rounded-none border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+              />
               <DecisionActions
                 memo={memo}
                 decisionId={decision.id}
@@ -173,7 +176,7 @@ export default async function DecisionPage({ params }: PageProps) {
 
           <div className="px-5 py-6 sm:px-8 sm:py-8 space-y-8">
             <div className="space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-semibold leading-tight text-zinc-50">
+              <h1 className="text-2xl sm:text-3xl font-semibold leading-tight text-zinc-100">
                 {toSentenceCase(memo.question)}
               </h1>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-sm">
@@ -197,15 +200,17 @@ export default async function DecisionPage({ params }: PageProps) {
             </div>
 
             {memo.confidence.tier === 'exploratory' && (
-              <div className="flex items-start gap-3 rounded-md border border-amber-800 bg-amber-950/30 px-4 py-3 text-amber-200">
-                <AlertTriangle className="h-4 w-4 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-amber-100">
-                    Provisional call
-                  </p>
-                  <p className="text-sm text-amber-200">
-                    This is a hypothesis. Run the next step to firm it up.
-                  </p>
+              <div className="rounded-none border-l-4 border-amber-600 bg-amber-950/30 p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-amber-200">
+                      Provisional call
+                    </p>
+                    <p className="text-sm text-amber-300/80">
+                      This is a hypothesis. Run the next step to firm it up.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
