@@ -8,6 +8,7 @@ import {
 import { toSentenceCase } from '@/lib/utils/format'
 import { DecisionHeaderBar } from '@/components/memo/DecisionHeaderBar'
 import { CommitmentBlock } from '@/components/memo/CommitmentBlock'
+import { cn } from '@/lib/utils'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -139,10 +140,25 @@ export default async function DecisionPage({ params }: PageProps) {
           ? 'Pending'
           : null
 
+  const bannerStyle =
+    memo.confidence.tier === 'exploratory' ||
+    memo.confidence.tier === 'directional'
+      ? 'bg-zinc-900 border-zinc-800'
+      : 'bg-zinc-900 border-zinc-800'
+
   return (
     <main className="min-h-screen bg-zinc-950">
       <article className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-        <DecisionHeaderBar memo={memo} decisionId={decision.id} />
+        <DecisionHeaderBar
+          memo={memo}
+          decisionId={decision.id}
+          createdAt={decision.created_at}
+          outcome={
+            (decision.outcome as 'successful' | 'failed' | null | undefined) ??
+            null
+          }
+          stage={memo.meta.stage ?? null}
+        />
 
         <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-zinc-100 mb-3">
           {toSentenceCase(memo.question)}
@@ -165,16 +181,13 @@ export default async function DecisionPage({ params }: PageProps) {
           ) : null}
         </div>
 
-        {memo.confidence.tier === 'exploratory' && (
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-zinc-400 mb-2">
-              Provisional call
-            </h3>
-            <p className="text-base text-zinc-300 leading-relaxed">
-              This is a hypothesis. Run the next step to firm it up.
+        {memo.confidence.rationale ? (
+          <div className={cn('mt-4 mb-6 p-4 rounded-lg border', bannerStyle)}>
+            <p className="text-zinc-400 text-sm leading-relaxed">
+              {memo.confidence.rationale}
             </p>
           </div>
-        )}
+        ) : null}
 
         <DecisionMemoView memo={memo} />
 

@@ -28,27 +28,14 @@ export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
         <p className="text-base text-zinc-300 leading-relaxed">{memo.call}</p>
       </section>
 
+      <hr className="border-zinc-800 my-10" />
+
       <section className="mt-10">
         <h2 className="text-xl font-semibold text-zinc-100 mb-4">Reasoning</h2>
         <Bullets items={memo.why_this_call} />
-        <div className="mt-6 pt-4 border-t border-zinc-800">
-          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
-            {memo.confidence.tier === 'high'
-              ? 'Very high'
-              : memo.confidence.tier === 'supported'
-                ? 'High'
-                : memo.confidence.tier === 'directional'
-                  ? 'Medium'
-                  : 'Early signal'}{' '}
-            confidence
-          </span>
-          {memo.confidence.rationale ? (
-            <p className="mt-2 text-zinc-400 text-sm">
-              {memo.confidence.rationale}
-            </p>
-          ) : null}
-        </div>
       </section>
+
+      <hr className="border-zinc-800 my-10" />
 
       <section className="mt-10">
         <h2 className="text-xl font-semibold text-zinc-100 mb-4">
@@ -71,15 +58,21 @@ export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
         </ul>
       </section>
 
+      <hr className="border-zinc-800 my-10" />
+
       <section>
         <h2 className="text-xl font-semibold text-zinc-100 mb-4">Trade-offs</h2>
         <TradeOffLine tradeOffs={memo.trade_offs} />
       </section>
 
+      <hr className="border-zinc-800 my-10" />
+
       <section>
         <h2 className="text-xl font-semibold text-zinc-100 mb-4">Risks</h2>
         <Bullets items={memo.risks} />
       </section>
+
+      <hr className="border-zinc-800 my-10" />
 
       <section>
         <h2 className="text-xl font-semibold text-zinc-100 mb-4">
@@ -90,6 +83,8 @@ export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
           escapeHatch={memo.escape_hatch}
         />
       </section>
+
+      <hr className="border-zinc-800 my-10" />
 
       <section className="mt-10">
         <h2 className="text-xl font-semibold text-zinc-100 mb-4">

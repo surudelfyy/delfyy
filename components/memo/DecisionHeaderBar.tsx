@@ -1,7 +1,7 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Check, ChevronLeft, Copy, Upload } from 'lucide-react'
 
 import type { DecisionMemo } from '@/lib/schemas/decision-memo'
@@ -11,17 +11,26 @@ import { renderDecisionView } from '@/lib/tone/render-decision-view'
 type DecisionHeaderBarProps = {
   memo: DecisionMemo
   decisionId: string
+  createdAt: string
+  outcome?: 'successful' | 'failed' | null
+  stage?: string | null
 }
 
 export function DecisionHeaderBar({
   memo,
   decisionId,
+  createdAt,
+  outcome = null,
+  stage = null,
 }: DecisionHeaderBarProps) {
-  const router = useRouter()
   const [copied, setCopied] = useState(false)
 
   const buildMarkdown = () => {
-    const base = decisionMemoToMarkdown(memo)
+    const base = decisionMemoToMarkdown(memo, {
+      createdAt,
+      outcome,
+      stage,
+    })
     return renderDecisionView({
       memoMarkdown: base,
       tone: 'calm-founder',
@@ -34,7 +43,7 @@ export function DecisionHeaderBar({
     try {
       await navigator.clipboard.writeText(content)
       setCopied(true)
-      setTimeout(() => setCopied(false), 1600)
+      setTimeout(() => setCopied(false), 2000)
     } catch {
       const textarea = document.createElement('textarea')
       textarea.value = content
@@ -45,7 +54,7 @@ export function DecisionHeaderBar({
       document.execCommand('copy')
       document.body.removeChild(textarea)
       setCopied(true)
-      setTimeout(() => setCopied(false), 1600)
+      setTimeout(() => setCopied(false), 2000)
     }
   }
 
@@ -64,26 +73,32 @@ export function DecisionHeaderBar({
 
   return (
     <header className="flex items-center justify-between py-4 mb-6">
-      <button
-        onClick={() => router.back()}
-        className="p-2 text-zinc-400 hover:text-zinc-100"
-        title="Back to all decisions"
-        aria-label="Back"
+      <Link
+        href="/dashboard"
+        className="flex items-center gap-2 text-zinc-400 hover:text-zinc-100 transition-colors"
+        aria-label="Back to dashboard"
       >
         <ChevronLeft className="w-5 h-5" />
-      </button>
+        <span>Dashboard</span>
+      </Link>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         <button
           onClick={copyAsMarkdown}
-          className="p-2 text-zinc-400 hover:text-zinc-100"
-          title="Copy as Markdown"
-          aria-label="Copy"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-zinc-800 hover:bg-zinc-700 rounded transition-colors"
+          title="Copy document"
+          aria-label="Copy document"
         >
           {copied ? (
-            <Check className="w-5 h-5" />
+            <>
+              <Check className="w-4 h-4 text-green-400" />
+              <span className="text-green-400">Copied</span>
+            </>
           ) : (
-            <Copy className="w-5 h-5" />
+            <>
+              <Copy className="w-4 h-4" />
+              <span>Copy document</span>
+            </>
           )}
         </button>
 
