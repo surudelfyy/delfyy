@@ -92,33 +92,41 @@ export function generateDocumentMarkdown(decision: DecisionDocument): string {
   sections.push(`---\n`)
 
   // Precedent
-  const hasPrecedent = memo.principle || memo.where_worked || memo.where_failed || memo.mechanism
+  const hasPrecedent =
+    memo.principle || memo.where_worked || memo.where_failed || memo.mechanism
   if (hasPrecedent) {
     sections.push(`## Precedent\n`)
     if (memo.principle) sections.push(`${memo.principle}\n`)
-    if (memo.where_worked) sections.push(`**What worked:** ${memo.where_worked}\n`)
-    if (memo.where_failed) sections.push(`**What failed:** ${memo.where_failed}\n`)
+    if (memo.where_worked)
+      sections.push(`**What worked:** ${memo.where_worked}\n`)
+    if (memo.where_failed)
+      sections.push(`**What failed:** ${memo.where_failed}\n`)
     if (memo.mechanism) sections.push(`*${memo.mechanism}*\n`)
     sections.push(`---\n`)
   }
 
   // Footer with backlink
-  sections.push(`*Decision made with [Delfyy](https://askdelfyy.com) · ${date}*`)
+  sections.push(
+    `*Decision made with [Delfyy](https://askdelfyy.com) · ${date}*`,
+  )
 
   return sections.join('\n')
 }
 
-export async function copyAsDocument(decision: DecisionDocument): Promise<boolean> {
+export async function copyAsDocument(
+  decision: DecisionDocument,
+): Promise<boolean> {
   const markdown = generateDocumentMarkdown(decision)
 
   try {
-    const html = marked.parse(markdown, { breaks: true })
+    const html = await marked.parse(markdown, { breaks: true })
 
     if (typeof ClipboardItem !== 'undefined') {
+      const htmlString = await Promise.resolve(html)
       await navigator.clipboard.write([
         new ClipboardItem({
           'text/plain': new Blob([markdown], { type: 'text/plain' }),
-          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/html': new Blob([htmlString], { type: 'text/html' }),
         }),
       ])
       return true
@@ -134,4 +142,3 @@ export async function copyAsDocument(decision: DecisionDocument): Promise<boolea
     return false
   }
 }
-

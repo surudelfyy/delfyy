@@ -122,14 +122,21 @@ export default async function DecisionPage({ params }: PageProps) {
       confidence_tier: memo.confidence.tier,
       confidence_reason: memo.confidence.rationale,
       reasoning: memo.why_this_call?.join('\n'),
-      assumptions: memo.assumptions,
+      assumptions: Array.isArray(memo.assumptions)
+        ? memo.assumptions.map((a) => {
+            if (typeof a === 'string') return a
+            const confidence = a.confidence ? ` (${a.confidence})` : ''
+            const why = a.why_it_matters ? ` - ${a.why_it_matters}` : ''
+            return `${a.assumption}${confidence}${why}`
+          })
+        : [],
       trade_offs: Array.isArray(memo.trade_offs)
         ? memo.trade_offs.join('\n')
         : memo.trade_offs,
       risks: memo.risks,
       next_steps: memo.next_steps,
-      review_trigger: memo.review_trigger,
-      escape_hatch: memo.escape_hatch,
+      review_trigger: memo.review_trigger || undefined,
+      escape_hatch: memo.escape_hatch || undefined,
       principle: memo.pattern?.principle,
       where_worked: memo.examples?.worked
         ?.map((e) => `${e.company}${e.year ? ` (${e.year})` : ''}: ${e.story}`)
@@ -214,7 +221,12 @@ export default async function DecisionPage({ params }: PageProps) {
                 decisionId={decision.id}
                 checkInDate={decision.check_in_date ?? null}
                 checkInOutcome={
-                  (decision.check_in_outcome as string) ?? 'pending'
+                  (decision.check_in_outcome as
+                    | 'pending'
+                    | 'held'
+                    | 'pivoted'
+                    | 'too_early'
+                    | null) ?? 'pending'
                 }
                 winningOutcome={decision.winning_outcome ?? null}
               />
