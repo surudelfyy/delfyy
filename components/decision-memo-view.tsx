@@ -48,7 +48,7 @@ function Section({
   return (
     <section className="space-y-3">
       <h2 className="text-lg font-semibold text-zinc-100 mb-1">{title}</h2>
-      <div className="text-[17px] leading-[1.65] text-zinc-300 space-y-2">
+      <div className="text-base leading-relaxed text-zinc-300 space-y-2">
         {children}
       </div>
     </section>
@@ -58,7 +58,7 @@ function Section({
 function Bullets({ items }: { items: string[] }) {
   if (!items?.length) return null
   return (
-    <ul className="list-disc ml-5 space-y-2">
+    <ul className="list-disc pl-5 space-y-2">
       {items.map((item, idx) => (
         <li key={idx}>{item}</li>
       ))}
@@ -68,7 +68,6 @@ function Bullets({ items }: { items: string[] }) {
 
 export function DecisionMemoView({
   memo,
-  createdAt: _createdAt,
   className,
 }: DecisionMemoViewProps & { className?: string }) {
   return (
@@ -86,35 +85,16 @@ export function DecisionMemoView({
         <p>{memo.confidence.rationale}</p>
       </Section>
 
+      <Section title="Reasoning">
+        <Bullets items={memo.why_this_call} />
+      </Section>
+
       <Section title="Assumptions">
         <AssumptionChips assumptions={memo.assumptions} />
       </Section>
 
       <Section title="Trade-offs">
         <TradeOffLine tradeOffs={memo.trade_offs} />
-      </Section>
-
-      {memo.next_steps && memo.next_steps.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-zinc-100">Next steps</h2>
-          <div className="space-y-3">
-            {memo.next_steps.map((step, i) => (
-              <div key={i} className="flex items-start gap-3 group">
-                <div
-                  className="rounded-none border border-zinc-700 w-5 h-5 flex items-center justify-center shrink-0 mt-0.5 cursor-pointer hover:border-zinc-500 transition-colors"
-                  role="checkbox"
-                  aria-checked="false"
-                  aria-label={`Step ${i + 1}`}
-                />
-                <p className="text-zinc-300 leading-relaxed">{step}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <Section title="Reasoning">
-        <Bullets items={memo.why_this_call} />
       </Section>
 
       <Section title="Risks">
@@ -142,9 +122,7 @@ export function DecisionMemoView({
 
         {memo.examples.worked.length > 0 && (
           <div className="mb-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-2">
-              What worked
-            </h4>
+            <h4 className="text-base font-semibold mt-6 mb-2">What worked</h4>
             <div className="space-y-2 text-zinc-300">
               {memo.examples.worked.map((e, i) => (
                 <p key={i}>
@@ -158,9 +136,7 @@ export function DecisionMemoView({
 
         {memo.examples.failed.length > 0 && (
           <div className="mb-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-red-400 mb-2">
-              What failed
-            </h4>
+            <h4 className="text-base font-semibold mt-6 mb-2">What failed</h4>
             <div className="space-y-2 text-zinc-300">
               {memo.examples.failed.map((e, i) => (
                 <p key={i}>
@@ -173,7 +149,7 @@ export function DecisionMemoView({
         )}
 
         {memo.pattern.why_it_works && (
-          <p className="italic text-zinc-400 border-t border-zinc-800 pt-4 mt-2">
+          <p className="mt-4 text-zinc-400 italic border-t border-zinc-800 pt-4">
             {memo.pattern.why_it_works}
           </p>
         )}
