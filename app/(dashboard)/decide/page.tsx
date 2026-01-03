@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+ 
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
@@ -22,10 +22,11 @@ export default function DecidePage() {
   const [contextText, setContextText] = useState('')
   const [stage, setStage] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
-  const [currentStepId, setCurrentStepId] = useState<(typeof STEP_ORDER)[number]>(STEP_ORDER[0])
+  const [currentStepId, setCurrentStepId] = useState<
+    (typeof STEP_ORDER)[number]
+  >(STEP_ORDER[0])
   const [error, setError] = useState<string | null>(null)
   const [timedOut, setTimedOut] = useState(false)
-  const [winningOutcome, setWinningOutcome] = useState('')
   const [showContext, setShowContext] = useState(false)
   const [questionError, setQuestionError] = useState<string | null>(null)
   const stepIndexRef = useRef(0)
@@ -35,7 +36,11 @@ export default function DecidePage() {
 
   const charCount = contextText.length
   const charColor =
-    charCount >= 500 ? 'text-red-500' : charCount >= 450 ? 'text-amber-500' : 'text-zinc-600'
+    charCount >= 500
+      ? 'text-red-500'
+      : charCount >= 450
+        ? 'text-amber-500'
+        : 'text-zinc-600'
 
   const clearTimers = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
@@ -43,7 +48,10 @@ export default function DecidePage() {
   }
 
   useEffect(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('decide_context_expanded') : null
+    const saved =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('decide_context_expanded')
+        : null
     if (saved === 'true') setShowContext(true)
     return () => {
       clearTimers()
@@ -52,7 +60,10 @@ export default function DecidePage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    localStorage.setItem('decide_context_expanded', showContext ? 'true' : 'false')
+    localStorage.setItem(
+      'decide_context_expanded',
+      showContext ? 'true' : 'false',
+    )
   }, [showContext])
 
   const autoResize = (el: HTMLTextAreaElement | null) => {
@@ -79,7 +90,9 @@ export default function DecidePage() {
     e.preventDefault()
     if (processing) return
     if (!hasValidQuestion(question)) {
-      setQuestionError('Question must be at least 10 characters and include letters.')
+      setQuestionError(
+        'Question must be at least 10 characters and include letters.',
+      )
       return
     }
     setQuestionError(null)
@@ -102,7 +115,6 @@ export default function DecidePage() {
             stage: stage ? stage.toLowerCase() : undefined,
             freeform: contextText || undefined,
           },
-          winning_outcome: winningOutcome.trim() || null,
         }),
       })
 
@@ -147,7 +159,6 @@ export default function DecidePage() {
               }
             } else if (eventType === 'result') {
               clearTimers()
-              setWinningOutcome('')
               router.push(`/decisions/${data.decision_id}`)
               return
             } else if (eventType === 'error') {
@@ -182,7 +193,7 @@ export default function DecidePage() {
         <div />
         <a
           href="/dashboard"
-          className="text-sm text-zinc-400 border border-zinc-700 rounded-md px-3 py-2 hover:border-zinc-600"
+          className="text-sm text-zinc-400 border border-zinc-700 px-3 py-2 hover:border-zinc-500 hover:text-zinc-300"
         >
           Cancel
         </a>
@@ -207,12 +218,14 @@ export default function DecidePage() {
                 }}
                 maxLength={500}
                 rows={3}
-                className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-base text-zinc-50 shadow-sm focus:border-zinc-50 focus:outline-none resize-none"
+                className="w-full border-2 border-zinc-700 bg-transparent px-4 py-3 text-base text-zinc-50 focus:border-zinc-50 focus:outline-none resize-none placeholder:text-zinc-600"
                 placeholder="What decision are you stuck on?"
               />
               <div className="flex items-center justify-between text-xs text-zinc-500">
                 <span>{question.length}/500</span>
-                {questionError && <span className="text-rose-600">{questionError}</span>}
+                {questionError && (
+                  <span className="text-rose-600">{questionError}</span>
+                )}
               </div>
             </div>
 
@@ -220,26 +233,34 @@ export default function DecidePage() {
               <button
                 type="button"
                 onClick={() => setShowContext((v) => !v)}
-                className="flex items-center gap-2 text-sm font-medium text-zinc-700"
+                className="flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-zinc-300"
               >
                 <span className="inline-block">{showContext ? '▼' : '►'}</span>
                 Add context (optional)
               </button>
 
               {showContext && (
-                <div className="space-y-4 rounded-lg border border-zinc-200 p-4">
+                <div className="space-y-4 border border-zinc-700 p-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-zinc-50">Where are you?</span>
-                      <span className="text-xs text-zinc-500">We&apos;ll infer it if you skip this.</span>
+                      <span className="text-sm font-medium text-zinc-50">
+                        Where are you?
+                      </span>
+                      <span className="text-xs text-zinc-500">
+                        We&apos;ll infer it if you skip this.
+                      </span>
                     </div>
                     <StagePills selected={stage} onSelect={setStage} />
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-zinc-50">Context</span>
-                      <span className={`text-xs ${charColor}`}>{charCount} / 500</span>
+                      <span className="text-sm font-medium text-zinc-50">
+                        Context
+                      </span>
+                      <span className={`text-xs ${charColor}`}>
+                        {charCount} / 500
+                      </span>
                     </div>
                     <textarea
                       ref={contextRef}
@@ -250,47 +271,9 @@ export default function DecidePage() {
                       }}
                       maxLength={500}
                       rows={2}
-                      className="w-full rounded-md border border-zinc-700 px-3 py-2 text-sm text-zinc-50 shadow-sm focus:border-zinc-50 focus:outline-none resize-none"
+                      className="w-full border border-zinc-700 bg-transparent px-3 py-2 text-sm text-zinc-50 focus:border-zinc-50 focus:outline-none resize-none placeholder:text-zinc-600"
                       placeholder="Stage, goal, constraints — whatever shapes this decision."
                     />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="winning_outcome"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      What does winning look like?
-                      <span className="text-zinc-500 font-normal ml-1">(optional)</span>
-                    </label>
-
-                    <textarea
-                      id="winning_outcome"
-                      name="winning_outcome"
-                      placeholder="e.g., 3 customers pay within 2 weeks"
-                      value={winningOutcome}
-                      onChange={(e) => setWinningOutcome(e.target.value)}
-                      maxLength={500}
-                      rows={2}
-                      className="flex min-h-[60px] w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-900 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-                      aria-describedby="winning_outcome_help winning_outcome_count"
-                    />
-
-                    <div className="flex justify-between items-center">
-                      <span id="winning_outcome_help" className="text-xs text-zinc-500">
-                        Define success so we know if this worked
-                      </span>
-                      {winningOutcome.length > 0 && (
-                        <span
-                          id="winning_outcome_count"
-                          className={`text-xs ${
-                            winningOutcome.length > 450 ? 'text-amber-500' : 'text-zinc-500'
-                          }`}
-                        >
-                          {winningOutcome.length}/500
-                        </span>
-                      )}
-                    </div>
                   </div>
                 </div>
               )}
@@ -299,7 +282,7 @@ export default function DecidePage() {
             <button
               type="submit"
               disabled={!hasValidQuestion(question) || processing}
-              className="w-full rounded-md bg-zinc-50 px-4 py-2 text-zinc-950 text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full border-2 border-zinc-50 bg-zinc-50 px-4 py-3 text-zinc-950 text-sm font-semibold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:bg-transparent hover:text-zinc-50 transition-colors"
             >
               Make decision
             </button>
@@ -308,7 +291,10 @@ export default function DecidePage() {
 
         {showStatus && (
           <div className="py-12 space-y-4">
-            <DecisionLoading question={question || 'Working on your decision...'} currentStep={currentStepId} />
+            <DecisionLoading
+              question={question || 'Working on your decision...'}
+              currentStep={currentStepId}
+            />
             {timedOut && (
               <div className="text-sm text-zinc-500">
                 This is taking longer than usual.
@@ -331,11 +317,13 @@ export default function DecidePage() {
         {error && (
           <div className="mt-6 text-center space-y-3">
             <div className="text-3xl">⚠️</div>
-            <div className="text-lg font-semibold text-zinc-50">Something went wrong.</div>
+            <div className="text-lg font-semibold text-zinc-50">
+              Something went wrong.
+            </div>
             <div className="text-sm text-zinc-300">{error}</div>
             <button
               type="button"
-              className="rounded-md border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 hover:border-zinc-600"
+              className="border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 hover:border-zinc-50 hover:text-zinc-50"
               onClick={() => {
                 setError(null)
                 setProcessing(false)
@@ -351,5 +339,3 @@ export default function DecidePage() {
     </main>
   )
 }
-
-

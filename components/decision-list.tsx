@@ -13,7 +13,7 @@ type DecisionRowType = {
   check_in_date: string | null
   check_in_outcome: string | null
   winning_outcome?: string | null
-  input_context?: any
+  input_context?: Record<string, unknown>
 }
 
 interface DecisionListProps {
@@ -30,9 +30,13 @@ export function DecisionList({ decisions }: DecisionListProps) {
   if (!items.length) return null
 
   return (
-    <div className="divide-y divide-gray-200 border-t border-b border-gray-200">
+    <div className="divide-y divide-zinc-800 border-t border-b border-zinc-800">
       {items.map((decision) => (
-        <DecisionRow key={decision.id} decision={decision} onDeleted={handleDeleted} />
+        <DecisionRow
+          key={decision.id}
+          decision={decision}
+          onDeleted={handleDeleted}
+        />
       ))}
     </div>
   )
@@ -43,7 +47,7 @@ function DecisionRow({
   onDeleted,
 }: {
   decision: DecisionRowType
-  onDeleted: (id: string) => void
+  onDeleted: (_id: string) => void
 }) {
   const router = useRouter()
   const recommendation =
@@ -53,10 +57,13 @@ function DecisionRow({
       ? (decision.decision_card as { decision?: string }).decision
       : null
 
-  const createdDate = new Date(decision.created_at).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-  })
+  const createdDate = new Date(decision.created_at).toLocaleDateString(
+    'en-GB',
+    {
+      day: 'numeric',
+      month: 'short',
+    },
+  )
 
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -68,7 +75,9 @@ function DecisionRow({
     if (!confirmed) return
     setIsDeleting(true)
     try {
-      const res = await fetch(`/api/decisions/${decision.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/decisions/${decision.id}`, {
+        method: 'DELETE',
+      })
       if (res.ok) {
         onDeleted(decision.id)
         router.refresh()
@@ -78,23 +87,24 @@ function DecisionRow({
     }
   }
 
-  const statusLabel = decision.status === 'complete' ? 'Complete' : decision.status
+  const statusLabel =
+    decision.status === 'complete' ? 'Complete' : decision.status
 
   return (
-    <div className="border-b border-gray-200 py-4">
+    <div className="border-b border-zinc-800 py-4">
       <Link href={`/decisions/${decision.id}`} className="block group">
-        <p className="text-base text-gray-900 leading-snug group-hover:underline">
+        <p className="text-base text-zinc-50 leading-snug group-hover:underline">
           {recommendation || decision.question}
         </p>
 
         <div className="flex items-center justify-between mt-2 text-sm">
-          <p className="text-gray-500">
+          <p className="text-zinc-500">
             {statusLabel} · {createdDate}
           </p>
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="text-gray-400 hover:text-gray-900 disabled:opacity-60"
+            className="text-zinc-600 hover:text-zinc-50 disabled:opacity-60"
           >
             {isDeleting ? 'Deleting...' : 'Delete'}
           </button>
@@ -103,4 +113,3 @@ function DecisionRow({
     </div>
   )
 }
-

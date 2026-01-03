@@ -4,7 +4,10 @@ import { AlertTriangle, ChevronLeft } from 'lucide-react'
 import { DecisionActions } from '@/components/decision-actions'
 import { DecisionMemoView } from '@/components/decision-memo-view'
 import { CheckInPromise } from '@/components/check-in-promise'
-import { DecisionMemoSchema, type DecisionMemo } from '@/lib/schemas/decision-memo'
+import {
+  DecisionMemoSchema,
+  type DecisionMemo,
+} from '@/lib/schemas/decision-memo'
 import { toSentenceCase } from '@/lib/utils/format'
 import { ConfidenceChip } from '@/components/decision-memo-view'
 import { DeleteDecisionButton } from '@/components/delete-decision-button'
@@ -22,20 +25,30 @@ export default async function DecisionPage({ params }: PageProps) {
   const { data: decision, error } = await supabase
     .from('decisions')
     .select(
-      'id, status, question, decision_memo, confidence_tier, created_at, input_context, check_in_date, check_in_outcome, winning_outcome'
+      'id, status, question, decision_memo, confidence_tier, created_at, input_context, check_in_date, check_in_outcome, winning_outcome',
     )
     .eq('id', id)
     .maybeSingle()
 
-  console.log('[decisions/[id]] supabase fetch', { error: error?.message, hasDecision: !!decision })
+  console.log('[decisions/[id]] supabase fetch', {
+    error: error?.message,
+    hasDecision: !!decision,
+  })
 
   if (error || !decision) {
     return (
       <main className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-center space-y-3">
-          <div className="text-xl font-semibold text-zinc-50">Decision not found</div>
-          <p className="text-sm text-zinc-400">We couldn&apos;t load that decision. It may have been removed.</p>
-          <Link href="/dashboard" className="text-sm text-zinc-500 underline hover:text-zinc-300">
+          <div className="text-xl font-semibold text-zinc-50">
+            Decision not found
+          </div>
+          <p className="text-sm text-zinc-400">
+            We couldn&apos;t load that decision. It may have been removed.
+          </p>
+          <Link
+            href="/dashboard"
+            className="text-sm text-zinc-500 underline hover:text-zinc-300"
+          >
             Back to dashboard
           </Link>
         </div>
@@ -65,8 +78,13 @@ export default async function DecisionPage({ params }: PageProps) {
     return (
       <main className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">This decision couldn&apos;t be completed.</p>
-          <Link href="/decide" className="text-sm text-zinc-500 underline hover:text-zinc-300">
+          <p className="text-red-600 mb-4">
+            This decision couldn&apos;t be completed.
+          </p>
+          <Link
+            href="/decide"
+            className="text-sm text-zinc-500 underline hover:text-zinc-300"
+          >
             Try again
           </Link>
         </div>
@@ -79,8 +97,13 @@ export default async function DecisionPage({ params }: PageProps) {
     return (
       <main className="min-h-screen bg-zinc-950">
         <div className="max-w-2xl mx-auto px-6 py-16 text-center">
-          <p className="text-zinc-300 mb-3">Decision memo is missing or invalid.</p>
-          <Link href="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-300 underline">
+          <p className="text-zinc-300 mb-3">
+            Decision memo is missing or invalid.
+          </p>
+          <Link
+            href="/dashboard"
+            className="text-sm text-zinc-500 hover:text-zinc-300 underline"
+          >
             ← Back to dashboard
           </Link>
         </div>
@@ -100,7 +123,9 @@ export default async function DecisionPage({ params }: PageProps) {
       confidence_reason: memo.confidence.rationale,
       reasoning: memo.why_this_call?.join('\n'),
       assumptions: memo.assumptions,
-      trade_offs: Array.isArray(memo.trade_offs) ? memo.trade_offs.join('\n') : memo.trade_offs,
+      trade_offs: Array.isArray(memo.trade_offs)
+        ? memo.trade_offs.join('\n')
+        : memo.trade_offs,
       risks: memo.risks,
       next_steps: memo.next_steps,
       review_trigger: memo.review_trigger,
@@ -130,7 +155,11 @@ export default async function DecisionPage({ params }: PageProps) {
             </Link>
             <div className="flex items-center gap-2">
               <CopyDocumentButton decision={decisionDocument} />
-              <DecisionActions memo={memo} decisionId={decision.id} buttonSize="sm" />
+              <DecisionActions
+                memo={memo}
+                decisionId={decision.id}
+                buttonSize="sm"
+              />
               <DeleteDecisionButton decisionId={decision.id} />
             </div>
           </header>
@@ -143,7 +172,9 @@ export default async function DecisionPage({ params }: PageProps) {
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-sm">
                 <ConfidenceChip tier={memo.confidence.tier} />
                 <span className="text-zinc-500">
-                  {(memo.meta.stage ?? '').charAt(0).toUpperCase() + (memo.meta.stage ?? '').slice(1) || 'Unknown'} ·{' '}
+                  {(memo.meta.stage ?? '').charAt(0).toUpperCase() +
+                    (memo.meta.stage ?? '').slice(1) || 'Unknown'}{' '}
+                  ·{' '}
                   {new Date(decision.created_at).toLocaleDateString('en-GB', {
                     day: 'numeric',
                     month: 'short',
@@ -152,7 +183,9 @@ export default async function DecisionPage({ params }: PageProps) {
                 </span>
               </div>
               {memo.confidence.rationale && (
-                <p className="text-base leading-relaxed text-zinc-400">{memo.confidence.rationale}</p>
+                <p className="text-base leading-relaxed text-zinc-400">
+                  {memo.confidence.rationale}
+                </p>
               )}
             </div>
 
@@ -160,20 +193,30 @@ export default async function DecisionPage({ params }: PageProps) {
               <div className="flex items-start gap-3 rounded-md border border-amber-800 bg-amber-950/30 px-4 py-3 text-amber-200">
                 <AlertTriangle className="h-4 w-4 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-amber-100">Provisional call</p>
-                  <p className="text-sm text-amber-200">This is a hypothesis. Run the next step to firm it up.</p>
+                  <p className="font-semibold text-amber-100">
+                    Provisional call
+                  </p>
+                  <p className="text-sm text-amber-200">
+                    This is a hypothesis. Run the next step to firm it up.
+                  </p>
                 </div>
               </div>
             )}
 
-            <DecisionMemoView memo={memo} createdAt={decision.created_at} className="bg-transparent border-0 shadow-none p-0" />
+            <DecisionMemoView
+              memo={memo}
+              createdAt={decision.created_at}
+              className="bg-transparent border-0 shadow-none p-0"
+            />
 
             <div className="border-t border-zinc-800 pt-6">
               <CheckInPromise
                 decisionId={decision.id}
-                checkInDate={(decision as any).check_in_date ?? null}
-                checkInOutcome={(decision as any).check_in_outcome ?? 'pending'}
-                winningOutcome={(decision as any).winning_outcome ?? null}
+                checkInDate={decision.check_in_date ?? null}
+                checkInOutcome={
+                  (decision.check_in_outcome as string) ?? 'pending'
+                }
+                winningOutcome={decision.winning_outcome ?? null}
               />
             </div>
           </div>
@@ -182,4 +225,3 @@ export default async function DecisionPage({ params }: PageProps) {
     </main>
   )
 }
-

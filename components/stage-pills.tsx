@@ -6,7 +6,7 @@ const STAGES = ['Discovery', 'Build', 'Launch', 'Growth'] as const
 
 interface StagePillsProps {
   selected: string | null
-  onSelect: (stage: string | null) => void
+  onSelect: (_stage: string | null) => void
 }
 
 export function StagePills({ selected, onSelect }: StagePillsProps) {
@@ -20,10 +20,10 @@ export function StagePills({ selected, onSelect }: StagePillsProps) {
             type="button"
             onClick={() => onSelect(active ? null : stage)}
             className={clsx(
-              'rounded-full border px-3 py-1 text-sm transition',
+              'border px-3 py-1.5 text-sm font-medium transition-colors',
               active
                 ? 'border-zinc-50 bg-zinc-50 text-zinc-950'
-                : 'border-zinc-700 text-zinc-300 hover:border-zinc-600'
+                : 'border-zinc-700 text-zinc-400 hover:border-zinc-50 hover:text-zinc-50',
             )}
           >
             {stage}
@@ -33,5 +33,3 @@ export function StagePills({ selected, onSelect }: StagePillsProps) {
     </div>
   )
 }
-
-
