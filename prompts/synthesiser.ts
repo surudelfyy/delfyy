@@ -99,12 +99,13 @@ OUTPUT SHAPE (fill all fields, respect array bounds):
 HARD RULES:
 - top_reasons: 2-4 items (never more)
 - tradeoffs: 0-3 items (strongly prefer at least 1)
-- assumptions: 0-6 items (each with confidence: high/medium/low; strongly prefer at least 1-2)
+- assumptions: 1-3 items (NEVER 0, NEVER more than 3). If uncertain, output exactly 1 assumption: the single biggest unknown that would change this call. Surface only the most critical unknowns. Each with confidence: high/medium/low.
 - key_risks: max 4 items
 - revisit_signals: 0-3 items (strongly prefer at least 1)
-- escape_hatch: one condition; can be null if no hard circuit-breaker applies
+- review_trigger: MUST be a non-empty string (minimum 15 characters). State when to revisit this decision. If you cannot identify a metric-based trigger, use time-based: "Revisit in 14 days after completing the validation steps."
+- escape_hatch: MUST be a non-empty string (minimum 15 characters). State what would flip this decision immediately. If you cannot identify a hard stop, use: "If there is no measurable progress after 30 days of testing, stop and pivot."
 - next_steps: 1-5 items
-- confidence_reason: max 100 characters
+- confidence_reason: max 100 characters; must directly answer "Can I act on this now, or do I need more information first?"
 - contest_summary: max 150 characters (only if views disagreed)
 - One complete sentence per item
 - four_views_summary must map to: customer_view, business_view, build_view, evidence_view
