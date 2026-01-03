@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 const outcomeSchema = z.object({
-  outcome: z.enum(['pending', 'worked', 'didnt_work']),
+  outcome: z.enum(['in_progress', 'successful', 'failed']),
 })
 
 export async function PATCH(

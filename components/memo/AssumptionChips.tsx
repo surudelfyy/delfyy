@@ -37,19 +37,15 @@ export function AssumptionChips({ assumptions }: AssumptionChipsProps) {
   return (
     <div className="space-y-6">
       {display.map((item, idx) => (
-        <div key={`${item.assumption}-${idx}`} className="space-y-1">
-          <p className="text-base text-zinc-100 leading-relaxed">
-            <span className="text-zinc-500 text-sm uppercase tracking-wide mr-2">
-              {item.confidence === 'high'
-                ? 'High'
-                : item.confidence === 'medium'
-                  ? 'Medium'
-                  : 'Low'}
+        <div key={`${item.assumption}-${idx}`}>
+          <div className="flex items-start gap-3">
+            <span className="inline-flex items-center px-2 py-0.5 text-xs font-bold bg-zinc-100 text-zinc-900 rounded uppercase tracking-wide shrink-0">
+              {item.confidence}
             </span>
-            {cleanTextLocal(item.assumption)}
-          </p>
+            <p className="text-zinc-100">{cleanTextLocal(item.assumption)}</p>
+          </div>
           {item.why_it_matters ? (
-            <p className="text-sm leading-relaxed text-zinc-500">
+            <p className="mt-1 pl-16 text-zinc-500 text-sm">
               {cleanTextLocal(item.why_it_matters)}
             </p>
           ) : null}

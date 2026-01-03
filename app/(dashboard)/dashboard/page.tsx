@@ -103,7 +103,7 @@ export default async function DashboardPage() {
         {stats.total > 0 && (
           <p className="text-sm text-zinc-500 mb-6">
             {stats.total} decision{stats.total !== 1 ? 's' : ''} ·{' '}
-            {stats.worked} worked · {stats.didntWork} didn&apos;t work
+            {stats.worked} successful · {stats.didntWork} failed
           </p>
         )}
 

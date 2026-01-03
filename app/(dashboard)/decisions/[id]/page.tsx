@@ -7,7 +7,7 @@ import {
 } from '@/lib/schemas/decision-memo'
 import { toSentenceCase } from '@/lib/utils/format'
 import { DecisionHeaderBar } from '@/components/memo/DecisionHeaderBar'
-import { OutcomeSelector } from '@/components/outcome-selector'
+import { CommitmentBlock } from '@/components/memo/CommitmentBlock'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -130,6 +130,15 @@ export default async function DecisionPage({ params }: PageProps) {
     (memo.meta.stage ?? '').charAt(0).toUpperCase() +
       (memo.meta.stage ?? '').slice(1) || 'Unknown'
 
+  const outcomeLabel =
+    decision.outcome === 'successful'
+      ? 'Successful'
+      : decision.outcome === 'failed'
+        ? 'Failed'
+        : decision.committed_at
+          ? 'Pending'
+          : null
+
   return (
     <main className="min-h-screen bg-zinc-950">
       <article className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
@@ -141,7 +150,7 @@ export default async function DecisionPage({ params }: PageProps) {
 
         <div className="flex flex-wrap items-center gap-2 mt-3 mb-4">
           <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
-            {confidenceLabel} confidence
+            {confidenceLabel}
           </span>
           <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
             {stageLabel}
@@ -149,6 +158,11 @@ export default async function DecisionPage({ params }: PageProps) {
           <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
             {createdDate}
           </span>
+          {outcomeLabel ? (
+            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
+              {outcomeLabel}
+            </span>
+          ) : null}
         </div>
 
         {memo.confidence.tier === 'exploratory' && (
@@ -164,32 +178,19 @@ export default async function DecisionPage({ params }: PageProps) {
 
         <DecisionMemoView memo={memo} />
 
-        {decision.status === 'complete' ? (
-          <OutcomeSelector
-            decisionId={decision.id}
-            currentOutcome={
-              (decision.outcome as
-                | 'pending'
-                | 'worked'
-                | 'didnt_work'
-                | null) ?? null
-            }
-          />
-        ) : null}
-
         {!decision.committed_at ? (
           <div className="mt-12 pt-8 border-t border-zinc-800">
-            <p className="text-zinc-500 text-sm text-center mb-4">
-              Committing helps you track what you decided and follow through.
-            </p>
-            <div className="flex items-center justify-center gap-4">
-              <button className="px-6 py-2 border border-zinc-600 text-zinc-100 rounded hover:bg-zinc-800 transition">
-                Commit to decision
-              </button>
-              <button className="text-zinc-500 hover:text-zinc-300 transition">
-                Save for later
-              </button>
-            </div>
+            <CommitmentBlock
+              decisionId={decision.id}
+              nextSteps={memo.next_steps}
+              isCommitted={Boolean(decision.committed_at)}
+              committedAt={decision.committed_at ?? undefined}
+              acceptedSteps={
+                Array.isArray(decision.accepted_steps)
+                  ? (decision.accepted_steps as string[])
+                  : []
+              }
+            />
           </div>
         ) : null}
       </article>

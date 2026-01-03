@@ -108,7 +108,7 @@ export function CommitmentBlock({
               type="checkbox"
               checked={selectedSteps.includes(step)}
               onChange={() => toggleStep(step)}
-              className="mt-1 h-4 w-4 rounded-none border border-zinc-600 bg-transparent"
+              className="mt-1 h-4 w-4 rounded-none border border-zinc-600 bg-transparent accent-zinc-100 checked:bg-zinc-100 checked:border-zinc-100 focus:ring-0 focus:ring-offset-0"
             />
             <span className="text-base leading-relaxed">{step}</span>
           </label>
@@ -124,7 +124,7 @@ export function CommitmentBlock({
           type="checkbox"
           checked={acceptCheckbox}
           onChange={(e) => setAcceptCheckbox(e.target.checked)}
-          className="h-4 w-4 rounded-none border border-zinc-600 bg-transparent"
+          className="h-4 w-4 rounded-none border border-zinc-600 bg-transparent accent-zinc-100 checked:bg-zinc-100 checked:border-zinc-100 focus:ring-0 focus:ring-offset-0"
         />
         <span className="text-base">I accept this recommendation</span>
       </label>

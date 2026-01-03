@@ -1,5 +1,4 @@
 import type { DecisionMemo } from '@/lib/schemas/decision-memo'
-import { AssumptionChips } from './memo/AssumptionChips'
 import { TradeOffLine } from './memo/TradeOffLine'
 import { TriggerCard } from './memo/TriggerCard'
 
@@ -51,11 +50,25 @@ export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
         </div>
       </section>
 
-      <section>
+      <section className="mt-10">
         <h2 className="text-xl font-semibold text-zinc-100 mb-4">
           Assumptions
         </h2>
-        <AssumptionChips assumptions={memo.assumptions} />
+        <ul className="space-y-6">
+          {memo.assumptions.map((item, i) => (
+            <li key={i} className="space-y-1">
+              <div>
+                <span className="inline-flex items-center px-2 py-0.5 text-xs font-bold bg-zinc-100 text-zinc-900 rounded uppercase tracking-wide">
+                  {item.confidence}
+                </span>
+              </div>
+              <p className="text-zinc-100">{item.assumption}</p>
+              {item.why_it_matters ? (
+                <p className="text-zinc-500 text-sm">{item.why_it_matters}</p>
+              ) : null}
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section>
@@ -78,62 +91,47 @@ export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
         />
       </section>
 
-      <section>
+      <section className="mt-10">
         <h2 className="text-xl font-semibold text-zinc-100 mb-4">
-          Real-world precedent
+          Real-world case studies
         </h2>
-        <div className="space-y-6">
-          <p className="text-lg text-zinc-200">{memo.pattern.principle}</p>
 
-          {memo.examples.worked.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-zinc-400">What worked</p>
-              <div className="space-y-4 text-zinc-300">
-                {memo.examples.worked.map((e, i) => (
-                  <p key={i}>
-                    <strong className="text-zinc-100">{e.company}</strong>
-                    {e.year ? ` (${e.year})` : ''}: {e.story}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
+        <p className="text-zinc-300 mb-6">{memo.pattern.principle}</p>
 
-          {memo.examples.failed.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-zinc-400">What failed</p>
-              <div className="space-y-4 text-zinc-300">
-                {memo.examples.failed.map((e, i) => (
-                  <p key={i}>
-                    <strong className="text-zinc-100">{e.company}</strong>
-                    {e.year ? ` (${e.year})` : ''}: {e.story}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {memo.pattern.why_it_works && (
-            <p className="text-zinc-400 italic">{memo.pattern.why_it_works}</p>
-          )}
+        <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wide mb-3">
+          What worked
+        </h3>
+        <div className="space-y-4 mb-6">
+          {memo.examples.worked.map((e, i) => (
+            <p key={i} className="text-zinc-300">
+              <span className="font-semibold text-zinc-100">{e.company}</span>
+              {e.year ? (
+                <span className="text-zinc-500"> ({e.year})</span>
+              ) : null}
+              : {e.story}
+            </p>
+          ))}
         </div>
-      </section>
 
-      {memo.next_steps?.length ? (
-        <section className="mt-10">
-          <h2 className="text-xl font-semibold text-zinc-100 mb-4">
-            Next steps
-          </h2>
-          <ul className="space-y-3">
-            {memo.next_steps.map((step, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="mt-1 w-4 h-4 border border-zinc-600 rounded-sm shrink-0" />
-                <span className="text-zinc-300">{step}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+        <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wide mb-3">
+          What failed
+        </h3>
+        <div className="space-y-4 mb-6">
+          {memo.examples.failed.map((e, i) => (
+            <p key={i} className="text-zinc-300">
+              <span className="font-semibold text-zinc-100">{e.company}</span>
+              {e.year ? (
+                <span className="text-zinc-500"> ({e.year})</span>
+              ) : null}
+              : {e.story}
+            </p>
+          ))}
+        </div>
+
+        {memo.pattern.why_it_works && (
+          <p className="text-zinc-500 italic">{memo.pattern.why_it_works}</p>
+        )}
+      </section>
     </div>
   )
 }

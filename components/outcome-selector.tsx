@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
-type Outcome = 'pending' | 'worked' | 'didnt_work'
+type Outcome = 'in_progress' | 'successful' | 'failed'
 
 interface OutcomeSelectorProps {
   decisionId: string
@@ -15,7 +15,9 @@ export function OutcomeSelector({
   decisionId,
   currentOutcome,
 }: OutcomeSelectorProps) {
-  const [outcome, setOutcome] = useState<Outcome>(currentOutcome || 'pending')
+  const [outcome, setOutcome] = useState<Outcome>(
+    currentOutcome || 'in_progress',
+  )
   const [saving, setSaving] = useState(false)
   const router = useRouter()
 
@@ -66,9 +68,9 @@ export function OutcomeSelector({
       <h2 className="text-xl font-semibold text-zinc-100 mb-2">Outcome</h2>
       <p className="text-sm text-zinc-500 mb-4">Did this decision work out?</p>
       <div className="flex flex-wrap gap-2">
-        {btn('worked', 'Worked')}
-        {btn('didnt_work', "Didn't work")}
-        {btn('pending', 'Too early to tell')}
+        {btn('successful', 'Successful')}
+        {btn('failed', 'Failed')}
+        {btn('in_progress', 'In progress')}
       </div>
     </section>
   )
