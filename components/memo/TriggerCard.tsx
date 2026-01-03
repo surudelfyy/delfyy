@@ -26,7 +26,7 @@ export function TriggerCard({ reviewTrigger, escapeHatch }: TriggerCardProps) {
         <div className="border-l-2 border-rose-300 bg-rose-50 p-4 rounded-r-lg">
           <p className="text-sm font-medium text-rose-800 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
-            Switch immediately if
+            Escape hatch
           </p>
           <p className="text-sm text-rose-900 mt-1">{escapeHatch}</p>
         </div>
@@ -34,4 +34,3 @@ export function TriggerCard({ reviewTrigger, escapeHatch }: TriggerCardProps) {
     </div>
   )
 }
-

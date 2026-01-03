@@ -82,7 +82,12 @@ export function DecisionMemoView({
       </Section>
 
       <Section title="Confidence">
-        <p>{memo.confidence.rationale}</p>
+        <div className="flex flex-wrap items-baseline gap-3">
+          <ConfidenceChip tier={memo.confidence.tier} />
+          <p className="text-base leading-relaxed">
+            {memo.confidence.rationale}
+          </p>
+        </div>
       </Section>
 
       <Section title="Reasoning">
@@ -149,9 +154,9 @@ export function DecisionMemoView({
         )}
 
         {memo.pattern.why_it_works && (
-          <p className="mt-4 text-zinc-400 italic border-t border-zinc-800 pt-4">
-            {memo.pattern.why_it_works}
-          </p>
+          <div className="mt-6 pt-4 px-4 pb-4 -mx-4 bg-zinc-900/50 rounded-none">
+            <p className="text-zinc-400">{memo.pattern.why_it_works}</p>
+          </div>
         )}
       </div>
     </article>

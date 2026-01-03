@@ -11,7 +11,10 @@ const TONE_SOFTEN_REPLACEMENTS: [RegExp, string][] = [
   [/\bentire value prop\b/gi, 'core value'],
   [/\bno defensible moat\b/gi, 'harder to defend'],
   [/\bunproven\b/gi, 'still needs testing'],
-  [/\bif false, users bounce to ([^.]+)\b/gi, "if this doesn't hold, users may fall back to $1"],
+  [
+    /\bif false, users bounce to ([^.]+)\b/gi,
+    "if this doesn't hold, users may fall back to $1",
+  ],
   [/\bdominates\b/gi, 'tends to work better'],
   [/\bmust\b/gi, 'worth testing'],
   [/\bfails\b/gi, 'struggles'],
@@ -38,7 +41,9 @@ function bulletsAssumptions(items?: DecisionMemo['assumptions']): string {
   if (!items || !items.length) return ''
   return items
     .map((a) => {
-      const why = a.why_it_matters ? ` — ${softenText(a.why_it_matters.trim())}` : ''
+      const why = a.why_it_matters
+        ? ` — ${softenText(a.why_it_matters.trim())}`
+        : ''
       const confidenceLabel = a.confidence.toLowerCase()
       return `- **${softenText(a.assumption.trim())}**${why} *(${confidenceLabel})*`
     })
@@ -55,7 +60,10 @@ function exampleLines(list: DecisionMemo['examples']['worked']): string {
     .join('\n')
 }
 
-export function decisionMemoToMarkdown(memo: DecisionMemo, options: MarkdownOptions = {}): string {
+export function decisionMemoToMarkdown(
+  memo: DecisionMemo,
+  options: MarkdownOptions = {},
+): string {
   const { checkInDays = 7, winningOutcome } = options
   const out: string[] = []
 
@@ -71,11 +79,13 @@ export function decisionMemoToMarkdown(memo: DecisionMemo, options: MarkdownOpti
     memo.confidence.tier === 'high'
       ? 'Very high confidence'
       : memo.confidence.tier === 'supported'
-      ? 'High confidence'
-      : memo.confidence.tier === 'directional'
-      ? 'Medium confidence'
-      : 'Early signal'
-  out.push(`${confidenceLabel} — ${softenText(memo.confidence.rationale.trim())}`)
+        ? 'High confidence'
+        : memo.confidence.tier === 'directional'
+          ? 'Medium confidence'
+          : 'Early signal'
+  out.push(
+    `${confidenceLabel} — ${softenText(memo.confidence.rationale.trim())}`,
+  )
   out.push('')
 
   const assumptions = bulletsAssumptions(memo.assumptions)
@@ -106,8 +116,10 @@ export function decisionMemoToMarkdown(memo: DecisionMemo, options: MarkdownOpti
 
   if (memo.review_trigger || memo.escape_hatch) {
     out.push('## When to revisit')
-    if (memo.review_trigger) out.push(`**Revisit if:** ${softenText(memo.review_trigger.trim())}`)
-    if (memo.escape_hatch) out.push(`**Switch immediately if:** ${softenText(memo.escape_hatch.trim())}`)
+    if (memo.review_trigger)
+      out.push(`**Revisit if:** ${softenText(memo.review_trigger.trim())}`)
+    if (memo.escape_hatch)
+      out.push(`**Escape hatch:** ${softenText(memo.escape_hatch.trim())}`)
     out.push('')
   }
 
@@ -140,4 +152,3 @@ export function decisionMemoToMarkdown(memo: DecisionMemo, options: MarkdownOpti
 
   return out.join('\n')
 }
-
