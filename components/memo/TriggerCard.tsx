@@ -1,6 +1,6 @@
 'use client'
 
-import { RotateCcw, AlertTriangle } from 'lucide-react'
+// icons removed (unused)
 
 interface TriggerCardProps {
   reviewTrigger: string | null
@@ -11,24 +11,22 @@ export function TriggerCard({ reviewTrigger, escapeHatch }: TriggerCardProps) {
   if (!reviewTrigger && !escapeHatch) return null
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       {reviewTrigger && (
-        <div className="border-l-2 border-slate-300 bg-slate-50 p-4 rounded-r-lg">
-          <p className="text-sm font-medium text-slate-800 flex items-center gap-2">
-            <RotateCcw className="h-4 w-4" />
+        <div>
+          <p className="text-sm font-medium text-zinc-500 uppercase tracking-wide mb-2">
             Revisit if
           </p>
-          <p className="text-sm text-slate-900 mt-1">{reviewTrigger}</p>
+          <p className="text-zinc-300 leading-relaxed">{reviewTrigger}</p>
         </div>
       )}
 
       {escapeHatch && (
-        <div className="border-l-2 border-rose-300 bg-rose-50 p-4 rounded-r-lg">
-          <p className="text-sm font-medium text-rose-800 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4" />
+        <div>
+          <p className="text-sm font-medium text-zinc-500 uppercase tracking-wide mb-2">
             Escape hatch
           </p>
-          <p className="text-sm text-rose-900 mt-1">{escapeHatch}</p>
+          <p className="text-zinc-300 leading-relaxed">{escapeHatch}</p>
         </div>
       )}
     </div>

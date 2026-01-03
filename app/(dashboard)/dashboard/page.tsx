@@ -13,9 +13,10 @@ type DecisionRowType = {
   check_in_outcome: string | null
   winning_outcome?: string | null
   input_context?: Record<string, unknown>
+  outcome?: 'pending' | 'worked' | 'didnt_work' | null
 }
 
-type Stats = { total: number; held: number; pivoted: number; due: number }
+type Stats = { total: number; worked: number; didntWork: number }
 
 async function fetchUsage() {
   try {
@@ -43,17 +44,23 @@ export default async function DashboardPage() {
 
   await fetchUsage()
 
-  let stats: Stats = { total: 0, held: 0, pivoted: 0, due: 0 }
-  const { data: statsData, error: statsError } =
-    await supabase.rpc('get_decision_stats')
-  if (!statsError && Array.isArray(statsData) && statsData[0]) {
-    stats = (statsData[0] as Stats) ?? stats
+  let stats: Stats = { total: 0, worked: 0, didntWork: 0 }
+  const { data: statsData, error: statsError } = await supabase
+    .from('decisions')
+    .select('outcome')
+    .eq('user_id', user.id)
+    .eq('status', 'complete')
+  if (!statsError && Array.isArray(statsData)) {
+    const total = statsData.length
+    const worked = statsData.filter((d) => d.outcome === 'worked').length
+    const didntWork = statsData.filter((d) => d.outcome === 'didnt_work').length
+    stats = { total, worked, didntWork }
   }
 
   const { data: decisions, error } = await supabase
     .from('decisions')
     .select(
-      'id, question, decision_card, status, created_at, check_in_date, check_in_outcome, winning_outcome, input_context',
+      'id, question, decision_card, status, created_at, check_in_date, check_in_outcome, winning_outcome, input_context, outcome',
     )
     .order('created_at', { ascending: false })
 
@@ -95,11 +102,8 @@ export default async function DashboardPage() {
 
         {stats.total > 0 && (
           <p className="text-sm text-zinc-500 mb-6">
-            {stats.total} decision{stats.total !== 1 ? 's' : ''} · {stats.held}{' '}
-            worked · {stats.pivoted} didn&apos;t work
-            {stats.due > 0
-              ? ` · ${stats.due} check-in${stats.due !== 1 ? 's' : ''} due`
-              : ''}
+            {stats.total} decision{stats.total !== 1 ? 's' : ''} ·{' '}
+            {stats.worked} worked · {stats.didntWork} didn&apos;t work
           </p>
         )}
 

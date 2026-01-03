@@ -1,18 +1,16 @@
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
 import Link from 'next/link'
-import { AlertTriangle, ChevronLeft } from 'lucide-react'
-import { DecisionActions } from '@/components/decision-actions'
+import { createClient } from '@/lib/supabase/server'
 import { DecisionMemoView } from '@/components/decision-memo-view'
-import { CheckInPromise } from '@/components/check-in-promise'
 import {
   DecisionMemoSchema,
   type DecisionMemo,
 } from '@/lib/schemas/decision-memo'
 import { toSentenceCase } from '@/lib/utils/format'
-import { ConfidenceChip } from '@/components/decision-memo-view'
-import { DeleteDecisionButton } from '@/components/delete-decision-button'
-import { CopyDocumentButton } from '@/components/copy-document-button'
-import type { DecisionDocument } from '@/lib/utils/copy-as-document'
+import { CommitmentBlock } from '@/components/memo/CommitmentBlock'
+import { DecisionHeaderBar } from '@/components/memo/DecisionHeaderBar'
+import { OutcomeSelector } from '@/components/outcome-selector'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -25,7 +23,7 @@ export default async function DecisionPage({ params }: PageProps) {
   const { data: decision, error } = await supabase
     .from('decisions')
     .select(
-      'id, status, question, decision_memo, confidence_tier, created_at, input_context, check_in_date, check_in_outcome, winning_outcome',
+      'id, status, question, decision_memo, confidence_tier, created_at, input_context, check_in_date, check_in_outcome, winning_outcome, committed_at, accepted_steps, outcome, outcome_marked_at',
     )
     .eq('id', id)
     .maybeSingle()
@@ -113,132 +111,93 @@ export default async function DecisionPage({ params }: PageProps) {
 
   const memo: DecisionMemo = parsed.data
 
-  const decisionDocument: DecisionDocument = {
-    id: decision.id,
-    question: decision.question,
-    created_at: decision.created_at,
-    decision_card: {
-      decision: memo.call,
-      confidence_tier: memo.confidence.tier,
-      confidence_reason: memo.confidence.rationale,
-      reasoning: memo.why_this_call?.join('\n'),
-      assumptions: Array.isArray(memo.assumptions)
-        ? memo.assumptions.map((a) => {
-            if (typeof a === 'string') return a
-            const confidence = a.confidence ? ` (${a.confidence})` : ''
-            const why = a.why_it_matters ? ` - ${a.why_it_matters}` : ''
-            return `${a.assumption}${confidence}${why}`
-          })
-        : [],
-      trade_offs: Array.isArray(memo.trade_offs)
-        ? memo.trade_offs.join('\n')
-        : memo.trade_offs,
-      risks: memo.risks,
-      next_steps: memo.next_steps,
-      review_trigger: memo.review_trigger || undefined,
-      escape_hatch: memo.escape_hatch || undefined,
-      principle: memo.pattern?.principle,
-      where_worked: memo.examples?.worked
-        ?.map((e) => `${e.company}${e.year ? ` (${e.year})` : ''}: ${e.story}`)
-        .join('; '),
-      where_failed: memo.examples?.failed
-        ?.map((e) => `${e.company}${e.year ? ` (${e.year})` : ''}: ${e.story}`)
-        .join('; '),
-      mechanism: memo.pattern?.why_it_works,
+  const confidenceLabel =
+    memo.confidence.tier === 'high'
+      ? 'Very high confidence'
+      : memo.confidence.tier === 'supported'
+        ? 'High confidence'
+        : memo.confidence.tier === 'directional'
+          ? 'Medium confidence'
+          : 'Early signal'
+
+  const createdDate = new Date(decision.created_at).toLocaleDateString(
+    'en-GB',
+    {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
     },
-  }
+  )
+
+  const stageLabel =
+    (memo.meta.stage ?? '').charAt(0).toUpperCase() +
+      (memo.meta.stage ?? '').slice(1) || 'Unknown'
 
   return (
     <main className="min-h-screen bg-zinc-950">
-      <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-8">
-        <article className="bg-zinc-900 border border-zinc-800 rounded-none overflow-hidden">
-          <header className="px-5 py-4 sm:px-6 border-b border-zinc-800 flex items-center justify-between gap-3">
-            <Link
-              href="/dashboard"
-              className="text-sm text-zinc-500 hover:text-zinc-300 flex items-center gap-1 transition-colors"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              All decisions
-            </Link>
-            <div className="flex items-center gap-2">
-              <CopyDocumentButton
-                decision={decisionDocument}
-                className="rounded-none border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
-              />
-              <DecisionActions
-                memo={memo}
-                decisionId={decision.id}
-                buttonSize="sm"
-              />
-              <DeleteDecisionButton decisionId={decision.id} />
-            </div>
-          </header>
+      <article className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+        <DecisionHeaderBar memo={memo} decisionId={decision.id} />
 
-          <div className="px-5 py-6 sm:px-8 sm:py-8 space-y-8">
-            <div className="space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-semibold leading-tight text-zinc-100">
-                {toSentenceCase(memo.question)}
-              </h1>
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-sm">
-                <ConfidenceChip tier={memo.confidence.tier} />
-                <span className="text-zinc-500">
-                  {(memo.meta.stage ?? '').charAt(0).toUpperCase() +
-                    (memo.meta.stage ?? '').slice(1) || 'Unknown'}{' '}
-                  ·{' '}
-                  {new Date(decision.created_at).toLocaleDateString('en-GB', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </span>
-              </div>
-              {memo.confidence.rationale && (
-                <p className="text-base leading-relaxed text-zinc-400">
-                  {memo.confidence.rationale}
-                </p>
-              )}
-            </div>
+        <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-zinc-100 mb-3">
+          {toSentenceCase(memo.question)}
+        </h1>
 
-            {memo.confidence.tier === 'exploratory' && (
-              <div className="rounded-none border-l-4 border-amber-600 bg-amber-950/30 p-4">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-amber-200">
-                      Provisional call
-                    </p>
-                    <p className="text-sm text-amber-300/80">
-                      This is a hypothesis. Run the next step to firm it up.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-zinc-400 mb-4">
+          <span>{confidenceLabel}</span>
+          <span>·</span>
+          <span>{stageLabel}</span>
+          <span>·</span>
+          <span>{createdDate}</span>
+        </div>
 
-            <DecisionMemoView
-              memo={memo}
-              createdAt={decision.created_at}
-              className="bg-transparent border-0 shadow-none p-0"
-            />
+        {memo.confidence.rationale ? (
+          <p className="text-base text-zinc-300 leading-relaxed mb-8">
+            {memo.confidence.rationale}
+          </p>
+        ) : null}
 
-            <div className="border-t border-zinc-800 pt-6">
-              <CheckInPromise
-                decisionId={decision.id}
-                checkInDate={decision.check_in_date ?? null}
-                checkInOutcome={
-                  (decision.check_in_outcome as
-                    | 'pending'
-                    | 'held'
-                    | 'pivoted'
-                    | 'too_early'
-                    | null) ?? 'pending'
-                }
-                winningOutcome={decision.winning_outcome ?? null}
-              />
-            </div>
+        {memo.confidence.tier === 'exploratory' && (
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-zinc-400 mb-2">
+              Provisional call
+            </h3>
+            <p className="text-base text-zinc-300 leading-relaxed">
+              This is a hypothesis. Run the next step to firm it up.
+            </p>
           </div>
-        </article>
-      </div>
+        )}
+
+        <DecisionMemoView memo={memo} />
+
+        {decision.status === 'complete' ? (
+          <OutcomeSelector
+            decisionId={decision.id}
+            currentOutcome={
+              (decision.outcome as
+                | 'pending'
+                | 'worked'
+                | 'didnt_work'
+                | null) ?? null
+            }
+          />
+        ) : null}
+
+        {!decision.committed_at ? (
+          <div className="mt-12 pt-8 border-t border-zinc-800">
+            <CommitmentBlock
+              decisionId={decision.id}
+              nextSteps={memo.next_steps}
+              isCommitted={Boolean(decision.committed_at)}
+              committedAt={decision.committed_at ?? undefined}
+              acceptedSteps={
+                Array.isArray(decision.accepted_steps)
+                  ? (decision.accepted_steps as string[])
+                  : []
+              }
+            />
+          </div>
+        ) : null}
+      </article>
     </main>
   )
 }
