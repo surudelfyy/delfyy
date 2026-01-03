@@ -14,9 +14,6 @@ export function TriggerCard({ reviewTrigger, escapeHatch }: TriggerCardProps) {
     <div className="space-y-6">
       {reviewTrigger && (
         <div>
-          <p className="text-sm font-medium text-zinc-500 uppercase tracking-wide mb-2">
-            Revisit if
-          </p>
           <p className="text-zinc-300 leading-relaxed">{reviewTrigger}</p>
         </div>
       )}

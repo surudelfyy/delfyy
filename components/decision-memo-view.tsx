@@ -29,9 +29,26 @@ export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
         <p className="text-base text-zinc-300 leading-relaxed">{memo.call}</p>
       </section>
 
-      <section>
+      <section className="mt-10">
         <h2 className="text-xl font-semibold text-zinc-100 mb-4">Reasoning</h2>
         <Bullets items={memo.why_this_call} />
+        <div className="mt-6 pt-4 border-t border-zinc-800">
+          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
+            {memo.confidence.tier === 'high'
+              ? 'Very high'
+              : memo.confidence.tier === 'supported'
+                ? 'High'
+                : memo.confidence.tier === 'directional'
+                  ? 'Medium'
+                  : 'Early signal'}{' '}
+            confidence
+          </span>
+          {memo.confidence.rationale ? (
+            <p className="mt-2 text-zinc-400 text-sm">
+              {memo.confidence.rationale}
+            </p>
+          ) : null}
+        </div>
       </section>
 
       <section>
@@ -103,20 +120,18 @@ export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
       </section>
 
       {memo.next_steps?.length ? (
-        <section>
+        <section className="mt-10">
           <h2 className="text-xl font-semibold text-zinc-100 mb-4">
             Next steps
           </h2>
-          <div className="space-y-3">
-            {memo.next_steps.map((step, idx) => (
-              <div key={idx} className="flex items-start gap-3">
-                <span className="text-zinc-500 mt-0.5">☐</span>
-                <p className="text-base text-zinc-300 leading-relaxed">
-                  {step}
-                </p>
-              </div>
+          <ul className="space-y-3">
+            {memo.next_steps.map((step, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="mt-1 w-4 h-4 border border-zinc-600 rounded-sm shrink-0" />
+                <span className="text-zinc-300">{step}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       ) : null}
     </div>

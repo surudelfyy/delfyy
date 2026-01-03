@@ -8,8 +8,9 @@ const outcomeSchema = z.object({
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id: decisionId } = await params
   const supabase = await createClient()
 
   const {
@@ -22,7 +23,7 @@ export async function PATCH(
   }
 
   const idSchema = z.string().uuid()
-  const idResult = idSchema.safeParse(params.id)
+  const idResult = idSchema.safeParse(decisionId)
   if (!idResult.success) {
     return NextResponse.json({ error: 'Invalid decision ID' }, { status: 400 })
   }
@@ -42,7 +43,7 @@ export async function PATCH(
       outcome: parseResult.data.outcome,
       outcome_marked_at: new Date().toISOString(),
     })
-    .eq('id', params.id)
+    .eq('id', decisionId)
     .eq('user_id', user.id)
     .select()
     .single()

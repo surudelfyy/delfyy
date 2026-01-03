@@ -6,7 +6,6 @@ import {
   type DecisionMemo,
 } from '@/lib/schemas/decision-memo'
 import { toSentenceCase } from '@/lib/utils/format'
-import { CommitmentBlock } from '@/components/memo/CommitmentBlock'
 import { DecisionHeaderBar } from '@/components/memo/DecisionHeaderBar'
 import { OutcomeSelector } from '@/components/outcome-selector'
 
@@ -140,19 +139,17 @@ export default async function DecisionPage({ params }: PageProps) {
           {toSentenceCase(memo.question)}
         </h1>
 
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-zinc-400 mb-4">
-          <span>{confidenceLabel}</span>
-          <span>·</span>
-          <span>{stageLabel}</span>
-          <span>·</span>
-          <span>{createdDate}</span>
+        <div className="flex flex-wrap items-center gap-2 mt-3 mb-4">
+          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
+            {confidenceLabel} confidence
+          </span>
+          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
+            {stageLabel}
+          </span>
+          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
+            {createdDate}
+          </span>
         </div>
-
-        {memo.confidence.rationale ? (
-          <p className="text-base text-zinc-300 leading-relaxed mb-8">
-            {memo.confidence.rationale}
-          </p>
-        ) : null}
 
         {memo.confidence.tier === 'exploratory' && (
           <div className="mb-8">
@@ -182,17 +179,17 @@ export default async function DecisionPage({ params }: PageProps) {
 
         {!decision.committed_at ? (
           <div className="mt-12 pt-8 border-t border-zinc-800">
-            <CommitmentBlock
-              decisionId={decision.id}
-              nextSteps={memo.next_steps}
-              isCommitted={Boolean(decision.committed_at)}
-              committedAt={decision.committed_at ?? undefined}
-              acceptedSteps={
-                Array.isArray(decision.accepted_steps)
-                  ? (decision.accepted_steps as string[])
-                  : []
-              }
-            />
+            <p className="text-zinc-500 text-sm text-center mb-4">
+              Committing helps you track what you decided and follow through.
+            </p>
+            <div className="flex items-center justify-center gap-4">
+              <button className="px-6 py-2 border border-zinc-600 text-zinc-100 rounded hover:bg-zinc-800 transition">
+                Commit to decision
+              </button>
+              <button className="text-zinc-500 hover:text-zinc-300 transition">
+                Save for later
+              </button>
+            </div>
           </div>
         ) : null}
       </article>
