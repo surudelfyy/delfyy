@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { StagePills } from '@/components/stage-pills'
 import { DecisionLoading } from '@/components/decision-loading'
 import { LevelHintChips, type LevelHint } from '@/components/level-hint-chips'
+import { ExampleCards } from '@/components/example-cards'
 
 const STEP_ORDER = [
   'classifying',
@@ -19,53 +19,22 @@ const STEP_ORDER = [
 export function DecideClient() {
   const router = useRouter()
   const [question, setQuestion] = useState('')
-  const [contextText, setContextText] = useState('')
-  const [stage, setStage] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
   const [currentStepId, setCurrentStepId] = useState<
     (typeof STEP_ORDER)[number]
   >(STEP_ORDER[0])
   const [error, setError] = useState<string | null>(null)
   const [timedOut, setTimedOut] = useState(false)
-  const [showContext, setShowContext] = useState(false)
   const [questionError, setQuestionError] = useState<string | null>(null)
   const [levelHint, setLevelHint] = useState<LevelHint | null>(null)
   const stepIndexRef = useRef(0)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const questionRef = useRef<HTMLTextAreaElement | null>(null)
-  const contextRef = useRef<HTMLTextAreaElement | null>(null)
-
-  const charCount = contextText.length
-  const charColor =
-    charCount >= 500
-      ? 'text-red-500'
-      : charCount >= 450
-        ? 'text-amber-500'
-        : 'text-zinc-600'
 
   const clearTimers = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = null
   }
-
-  useEffect(() => {
-    const saved =
-      typeof window !== 'undefined'
-        ? localStorage.getItem('decide_context_expanded')
-        : null
-    if (saved === 'true') setShowContext(true)
-    return () => {
-      clearTimers()
-    }
-  }, [])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    localStorage.setItem(
-      'decide_context_expanded',
-      showContext ? 'true' : 'false',
-    )
-  }, [showContext])
 
   const autoResize = (el: HTMLTextAreaElement | null) => {
     if (!el) return
@@ -76,10 +45,6 @@ export function DecideClient() {
   useEffect(() => {
     autoResize(questionRef.current)
   }, [question])
-
-  useEffect(() => {
-    autoResize(contextRef.current)
-  }, [contextText])
 
   const hasValidQuestion = (value: string) => {
     const trimmed = value.trim()
@@ -112,10 +77,6 @@ export function DecideClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question,
-          context: {
-            stage: stage ? stage.toLowerCase() : undefined,
-            freeform: contextText || undefined,
-          },
           user_level_hint: levelHint,
         }),
       })
@@ -190,7 +151,9 @@ export function DecideClient() {
   return (
     <main className="relative min-h-screen bg-zinc-950">
       <header className="flex items-center justify-between px-6 py-4">
-        <div />
+        <div className="text-sm uppercase tracking-wide text-zinc-500">
+          Decide
+        </div>
         <a
           href="/dashboard"
           className="text-sm text-zinc-400 border border-zinc-700 px-3 py-2 hover:border-zinc-500 hover:text-zinc-300"
@@ -199,10 +162,13 @@ export function DecideClient() {
         </a>
       </header>
 
-      <div className="mx-auto max-w-2xl px-6 pb-16">
+      <div className="mx-auto max-w-3xl px-6 pb-16">
         {showForm && (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-zinc-200">
+                What decision are you making?
+              </label>
               <textarea
                 ref={questionRef}
                 value={question}
@@ -217,16 +183,28 @@ export function DecideClient() {
                   }
                 }}
                 maxLength={500}
-                rows={3}
-                className="w-full border-2 border-zinc-700 bg-transparent px-4 py-3 text-base text-zinc-50 focus:border-zinc-50 focus:outline-none resize-none placeholder:text-zinc-600"
-                placeholder="What decision are you stuck on?"
+                rows={4}
+                className="w-full border border-zinc-800 bg-zinc-950 px-4 py-3 text-base text-zinc-50 focus:border-zinc-50 focus:outline-none resize-none placeholder:text-zinc-600"
+                placeholder="e.g. Should we pause feature work to harden reliability right now?"
               />
               <div className="flex items-center justify-between text-xs text-zinc-500">
                 <span>{question.length}/500</span>
                 {questionError && (
-                  <span className="text-rose-600">{questionError}</span>
+                  <span className="text-rose-500">{questionError}</span>
                 )}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm text-zinc-400">Common decisions</p>
+              <ExampleCards
+                selectedCategory={levelHint}
+                onSelect={(q: string) => {
+                  setQuestion(q)
+                  setQuestionError(null)
+                  requestAnimationFrame(() => autoResize(questionRef.current))
+                }}
+              />
             </div>
 
             <LevelHintChips
@@ -235,60 +213,10 @@ export function DecideClient() {
               disabled={processing}
             />
 
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={() => setShowContext((v) => !v)}
-                className="flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-zinc-300"
-              >
-                <span className="inline-block">{showContext ? '▼' : '►'}</span>
-                Add context (optional)
-              </button>
-
-              {showContext && (
-                <div className="space-y-4 border border-zinc-700 p-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-zinc-50">
-                        Where are you?
-                      </span>
-                      <span className="text-xs text-zinc-500">
-                        We&apos;ll infer it if you skip this.
-                      </span>
-                    </div>
-                    <StagePills selected={stage} onSelect={setStage} />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-zinc-50">
-                        Context
-                      </span>
-                      <span className={`text-xs ${charColor}`}>
-                        {charCount} / 500
-                      </span>
-                    </div>
-                    <textarea
-                      ref={contextRef}
-                      value={contextText}
-                      onChange={(e) => {
-                        const next = e.target.value
-                        if (next.length <= 500) setContextText(next)
-                      }}
-                      maxLength={500}
-                      rows={2}
-                      className="w-full border border-zinc-700 bg-transparent px-3 py-2 text-sm text-zinc-50 focus:border-zinc-50 focus:outline-none resize-none placeholder:text-zinc-600"
-                      placeholder="Stage, goal, constraints — whatever shapes this decision."
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
             <button
               type="submit"
               disabled={!hasValidQuestion(question) || processing}
-              className="w-full border-2 border-zinc-50 bg-zinc-50 px-4 py-3 text-zinc-950 text-sm font-semibold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:bg-transparent hover:text-zinc-50 transition-colors"
+              className="w-full border border-zinc-50 bg-zinc-50 px-4 py-3 text-zinc-950 text-sm font-semibold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:bg-transparent hover:text-zinc-50 transition-colors"
             >
               Make decision
             </button>
