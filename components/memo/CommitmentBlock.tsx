@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 
 interface CommitmentBlockProps {
@@ -88,14 +89,23 @@ export function CommitmentBlock({
       </ul>
 
       <div className="mt-12 mb-8 flex justify-center">
-        <button
-          type="button"
-          onClick={handleCommit}
-          disabled={saving}
-          className="px-8 py-3 bg-white text-black font-medium rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? 'Saving...' : 'Commit to this decision'}
-        </button>
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <button
+            type="button"
+            onClick={handleCommit}
+            disabled={saving}
+            className="px-8 py-3 bg-white text-black font-medium rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? 'Saving...' : 'Commit to this decision'}
+          </button>
+
+          <Link
+            href="/decide"
+            className="px-8 py-3 border border-zinc-700 text-zinc-200 font-medium rounded-lg hover:bg-zinc-900 transition-colors"
+          >
+            Decide something else
+          </Link>
+        </div>
       </div>
     </section>
   )
