@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { StagePills } from '@/components/stage-pills'
 import { DecisionLoading } from '@/components/decision-loading'
+import { LevelHintChips, type LevelHint } from '@/components/level-hint-chips'
 
 const STEP_ORDER = [
   'classifying',
@@ -28,6 +29,7 @@ export function DecideClient() {
   const [timedOut, setTimedOut] = useState(false)
   const [showContext, setShowContext] = useState(false)
   const [questionError, setQuestionError] = useState<string | null>(null)
+  const [levelHint, setLevelHint] = useState<LevelHint | null>(null)
   const stepIndexRef = useRef(0)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const questionRef = useRef<HTMLTextAreaElement | null>(null)
@@ -114,6 +116,7 @@ export function DecideClient() {
             stage: stage ? stage.toLowerCase() : undefined,
             freeform: contextText || undefined,
           },
+          user_level_hint: levelHint,
         }),
       })
 
@@ -225,6 +228,12 @@ export function DecideClient() {
                 )}
               </div>
             </div>
+
+            <LevelHintChips
+              value={levelHint}
+              onChange={setLevelHint}
+              disabled={processing}
+            />
 
             <div className="space-y-3">
               <button

@@ -1,15 +1,38 @@
 'use client'
 
 import { Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 const PIPELINE_STEPS = [
-  { id: 'classifying', active: 'Understanding your decision...', done: 'Decision understood' },
-  { id: 'compiling', active: 'Gathering perspectives...', done: 'Perspectives gathered' },
-  { id: 'evaluating', active: 'Evaluating from three angles...', done: 'Evaluated from three angles' },
-  { id: 'synthesising', active: 'Forming recommendation...', done: 'Recommendation formed' },
-  { id: 'matching', active: 'Finding real-world precedents...', done: 'Precedents found' },
-  { id: 'rendering', active: 'Preparing your decision...', done: 'Decision ready' },
+  {
+    id: 'classifying',
+    active: 'Understanding your decision...',
+    done: 'Decision understood',
+  },
+  {
+    id: 'compiling',
+    active: 'Gathering perspectives...',
+    done: 'Perspectives gathered',
+  },
+  {
+    id: 'evaluating',
+    active: 'Evaluating from three angles...',
+    done: 'Evaluated from three angles',
+  },
+  {
+    id: 'synthesising',
+    active: 'Forming recommendation...',
+    done: 'Recommendation formed',
+  },
+  {
+    id: 'matching',
+    active: 'Finding real-world precedents...',
+    done: 'Precedents found',
+  },
+  {
+    id: 'rendering',
+    active: 'Preparing your decision...',
+    done: 'Decision ready',
+  },
 ] as const
 
 interface DecisionLoadingProps {
@@ -17,7 +40,10 @@ interface DecisionLoadingProps {
   currentStep: string
 }
 
-export function DecisionLoading({ question, currentStep }: DecisionLoadingProps) {
+export function DecisionLoading({
+  question,
+  currentStep,
+}: DecisionLoadingProps) {
   const currentStepIndex = PIPELINE_STEPS.findIndex((s) => s.id === currentStep)
 
   return (
@@ -40,7 +66,9 @@ export function DecisionLoading({ question, currentStep }: DecisionLoadingProps)
               ) : (
                 <>
                   <span className="text-zinc-500 select-none">•</span>
-                  <span className="text-sm text-zinc-600 animate-pulse">{step.active}</span>
+                  <span className="text-sm text-zinc-600 animate-pulse">
+                    {step.active}
+                  </span>
                 </>
               )}
             </div>
@@ -50,4 +78,3 @@ export function DecisionLoading({ question, currentStep }: DecisionLoadingProps)
     </div>
   )
 }
-

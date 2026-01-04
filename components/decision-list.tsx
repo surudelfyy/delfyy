@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { OutcomeDropdown } from './outcome-dropdown'
 import Link from 'next/link'
 
 type DecisionRowType = {
@@ -13,45 +14,32 @@ type DecisionRowType = {
   check_in_outcome: string | null
   winning_outcome?: string | null
   input_context?: Record<string, unknown>
+  outcome?: string | null
 }
 
 interface DecisionListProps {
   decisions: DecisionRowType[]
 }
 
-type FilterType = 'all' | 'successful' | 'failed' | 'too_early' | 'pending'
+type FilterType = 'all' | 'successful' | 'failed' | 'pending'
 
-function getOutcomeDisplay(decision: DecisionRowType): {
-  label: string
-  style: string
-} {
-  if (decision.status === 'processing' || decision.status === 'running') {
-    return {
-      label: 'Processing',
-      style: 'border border-zinc-700 text-zinc-500 animate-pulse',
-    }
-  }
-  if (decision.status === 'failed') {
-    return { label: 'Error', style: 'border border-red-800 text-red-400' }
-  }
-  if (decision.check_in_outcome === 'worked') {
-    return { label: 'Successful', style: 'bg-zinc-50 text-zinc-900' }
-  }
-  if (decision.check_in_outcome === 'didnt_work') {
-    return { label: 'Failed', style: 'border border-zinc-700 text-zinc-400' }
-  }
-  if (decision.check_in_outcome === 'too_early') {
-    return { label: 'Too early', style: 'border border-zinc-700 text-zinc-400' }
-  }
-  return { label: 'Pending', style: 'border border-zinc-700 text-zinc-500' }
+const normalizeOutcome = (decision: DecisionRowType): FilterType => {
+  if (decision.status !== 'complete') return 'pending'
+  if (
+    decision.outcome === 'successful' ||
+    decision.check_in_outcome === 'worked'
+  )
+    return 'successful'
+  if (
+    decision.outcome === 'failed' ||
+    decision.check_in_outcome === 'didnt_work'
+  )
+    return 'failed'
+  return 'pending'
 }
 
 function getFilterCategory(decision: DecisionRowType): FilterType {
-  if (decision.status !== 'complete') return 'pending'
-  if (decision.check_in_outcome === 'worked') return 'successful'
-  if (decision.check_in_outcome === 'didnt_work') return 'failed'
-  if (decision.check_in_outcome === 'too_early') return 'too_early'
-  return 'pending'
+  return normalizeOutcome(decision)
 }
 
 export function DecisionList({ decisions }: DecisionListProps) {
@@ -62,12 +50,27 @@ export function DecisionList({ decisions }: DecisionListProps) {
     setItems((prev) => prev.filter((d) => d.id !== id))
   }
 
+  const handleOutcomeUpdate = (
+    id: string,
+    outcome: 'pending' | 'successful' | 'failed',
+  ) => {
+    setItems((prev) =>
+      prev.map((d) =>
+        d.id === id
+          ? {
+              ...d,
+              outcome: outcome === 'pending' ? 'in_progress' : outcome,
+            }
+          : d,
+      ),
+    )
+  }
+
   const counts = {
     all: items.length,
     successful: items.filter((d) => getFilterCategory(d) === 'successful')
       .length,
     failed: items.filter((d) => getFilterCategory(d) === 'failed').length,
-    too_early: items.filter((d) => getFilterCategory(d) === 'too_early').length,
     pending: items.filter((d) => getFilterCategory(d) === 'pending').length,
   }
 
@@ -86,7 +89,6 @@ export function DecisionList({ decisions }: DecisionListProps) {
             { key: 'all', label: 'All' },
             { key: 'successful', label: 'Successful' },
             { key: 'failed', label: 'Failed' },
-            { key: 'too_early', label: 'Too early' },
             { key: 'pending', label: 'Pending' },
           ] as const
         ).map(({ key, label }) => (
@@ -110,6 +112,7 @@ export function DecisionList({ decisions }: DecisionListProps) {
             key={decision.id}
             decision={decision}
             onDeleted={handleDeleted}
+            onOutcomeUpdated={handleOutcomeUpdate}
           />
         ))}
       </div>
@@ -127,9 +130,14 @@ export function DecisionList({ decisions }: DecisionListProps) {
 function DecisionRow({
   decision,
   onDeleted,
+  onOutcomeUpdated,
 }: {
   decision: DecisionRowType
   onDeleted: (_id: string) => void
+  onOutcomeUpdated?: (
+    _id: string,
+    _outcome: 'pending' | 'successful' | 'failed',
+  ) => void
 }) {
   const recommendation =
     typeof decision.decision_card === 'object' &&
@@ -147,7 +155,6 @@ function DecisionRow({
   )
 
   const [isDeleting, setIsDeleting] = useState(false)
-  const outcome = getOutcomeDisplay(decision)
 
   const handleDelete = async () => {
     if (isDeleting) return
@@ -182,9 +189,29 @@ function DecisionRow({
           </div>
 
           <span
-            className={`shrink-0 px-2 py-0.5 text-xs font-medium ${outcome.style}`}
+            className="shrink-0"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+            aria-label="Outcome status"
           >
-            {outcome.label}
+            <OutcomeDropdown
+              decisionId={decision.id}
+              currentOutcome={
+                normalizeOutcome(decision) === 'successful'
+                  ? 'successful'
+                  : normalizeOutcome(decision) === 'failed'
+                    ? 'failed'
+                    : 'in_progress'
+              }
+              onUpdate={(val) =>
+                onOutcomeUpdated?.(
+                  decision.id,
+                  val === 'in_progress' ? 'pending' : val,
+                )
+              }
+            />
           </span>
         </div>
 

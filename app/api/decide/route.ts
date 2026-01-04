@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { runPipeline } from '@/lib/delphi/orchestrator'
-import { sendProgress, sendResult, sendError, startHeartbeat } from '@/lib/utils/sse'
+import { sendProgress, startHeartbeat } from '@/lib/utils/sse'
 import { rateLimit } from '@/lib/utils/rate-limit'
 import { getUserTier } from '@/lib/billing/getUserTier'
-import { enforceDecisionLimits, LimitError } from '@/lib/limits/validate-decision'
+import {
+  enforceDecisionLimits,
+  LimitError,
+} from '@/lib/limits/validate-decision'
 import {
   QUESTION_MAX,
   PER_DECISION_CONTEXT_MAX,
@@ -28,6 +30,10 @@ const RequestSchema = z.object({
       bad_decision_signal: z.string().optional(),
       freeform: z.string().max(PER_DECISION_CONTEXT_MAX).optional(),
     })
+    .optional(),
+  user_level_hint: z
+    .enum(['strategy', 'product', 'design_ux', 'operations'])
+    .nullable()
     .optional(),
   winning_outcome: z.string().max(500).nullish(),
   check_in_date: z.string().datetime().nullish(),
@@ -65,14 +71,22 @@ export async function POST(request: NextRequest) {
   try {
     body = RequestSchema.parse(await request.json())
   } catch {
-    return NextResponse.json({ error: { message: 'Invalid request body' } }, { status: 400 })
+    return NextResponse.json(
+      { error: { message: 'Invalid request body' } },
+      { status: 400 },
+    )
   }
 
   // 4b. Validate question contains letters
   if (!/[A-Za-z]/.test(body.question || '')) {
     return NextResponse.json(
-      { error: { code: 'VALIDATION_INVALID_QUESTION', message: ERROR_MESSAGES.VALIDATION_INVALID_QUESTION } },
-      { status: 400 }
+      {
+        error: {
+          code: 'VALIDATION_INVALID_QUESTION',
+          message: ERROR_MESSAGES.VALIDATION_INVALID_QUESTION,
+        },
+      },
+      { status: 400 },
     )
   }
 
@@ -84,13 +98,19 @@ export async function POST(request: NextRequest) {
     .in('status', ['complete', 'completed'])
 
   if (countError) {
-    return NextResponse.json({ error: { message: 'Failed to check usage' } }, { status: 500 })
+    return NextResponse.json(
+      { error: { message: 'Failed to check usage' } },
+      { status: 500 },
+    )
   }
 
   // 4d. Optional default context from profiles if present (best-effort)
   let defaultContext: string | null = null
   try {
-    const { data: profile } = await supabase.from('profiles').select('default_context').maybeSingle()
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('default_context')
+      .maybeSingle()
     if (profile && typeof profile.default_context === 'string') {
       defaultContext = profile.default_context
     }
@@ -110,9 +130,15 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     if (err instanceof LimitError) {
       const status = err.code === 'LIMIT_PAYWALL' ? 402 : 400
-      return NextResponse.json({ error: { code: err.code, message: err.message } }, { status })
+      return NextResponse.json(
+        { error: { code: err.code, message: err.message } },
+        { status },
+      )
     }
-    return NextResponse.json({ error: { message: 'Validation failed' } }, { status: 400 })
+    return NextResponse.json(
+      { error: { message: 'Validation failed' } },
+      { status: 400 },
+    )
   }
 
   // 5. Idempotency check
@@ -126,7 +152,10 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       if (existing.status === 'running') {
-        return NextResponse.json({ error: 'Decision already in progress', decision_id: existing.id }, { status: 409 })
+        return NextResponse.json(
+          { error: 'Decision already in progress', decision_id: existing.id },
+          { status: 409 },
+        )
       }
       if (existing.status === 'complete') {
         return NextResponse.json({
@@ -141,7 +170,9 @@ export async function POST(request: NextRequest) {
   }
 
   // 6. Combine contexts
-  const combinedFreeform = [defaultContext, body.context?.freeform].filter(Boolean).join('\n\n') || null
+  const combinedFreeform =
+    [defaultContext, body.context?.freeform].filter(Boolean).join('\n\n') ||
+    null
 
   // 7. Create decision row (RLS)
   const { data: decision, error: insertError } = await supabase
@@ -154,6 +185,7 @@ export async function POST(request: NextRequest) {
         ...(body.context || {}),
         freeform: combinedFreeform,
       },
+      user_level_hint: body.user_level_hint ?? null,
       winning_outcome: body.winning_outcome ?? null,
       idempotency_key: body.idempotency_key || null,
     })
@@ -161,7 +193,10 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (insertError || !decision) {
-    return NextResponse.json({ error: 'Failed to create decision' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to create decision' },
+      { status: 500 },
+    )
   }
 
   // 8. Service client for background writes
@@ -198,15 +233,21 @@ export async function POST(request: NextRequest) {
   // 9. Run pipeline background
   ;(async () => {
     try {
-      const result = await runPipeline(decision.id, serviceClient, (step, message) => {
-        void sendProgress(writer, step, message)
-      })
+      const result = await runPipeline(
+        decision.id,
+        serviceClient,
+        (step, message) => {
+          void sendProgress(writer, step, message)
+        },
+      )
 
-      await safeWrite(`event: result\ndata: ${JSON.stringify({ decision_id: result.id })}\n\n`)
+      await safeWrite(
+        `event: result\ndata: ${JSON.stringify({ decision_id: result.id })}\n\n`,
+      )
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Pipeline failed'
       await safeWrite(
-        `event: error\ndata: ${JSON.stringify({ code: 'PIPELINE_FAILED', message })}\n\n`
+        `event: error\ndata: ${JSON.stringify({ code: 'PIPELINE_FAILED', message })}\n\n`,
       )
     } finally {
       clearInterval(heartbeat)
