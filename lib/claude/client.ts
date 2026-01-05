@@ -299,6 +299,15 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
 export { callClaude as callClaudeWithRetry }
 
 // Structured outputs helper (beta)
+type AnthropicMessageCreate = (
+  _args: unknown,
+) => Promise<{ content?: Array<{ type: string; text?: string }> }>
+
+type AnthropicCompat = {
+  messages?: { create: AnthropicMessageCreate }
+  beta?: { messages?: { create: AnthropicMessageCreate } }
+}
+
 export async function callClaudeJSON<T>(args: {
   model: string
   max_tokens: number
@@ -307,21 +316,20 @@ export async function callClaudeJSON<T>(args: {
   schema: Record<string, unknown>
 }): Promise<T> {
   if (!args.model) throw new Error('Claude model is not configured')
-  const client = getAnthropic() as {
-    beta: {
-      messages: {
-        create: (
-          ..._args: unknown[]
-        ) => Promise<{ content?: Array<{ type: string; text?: string }> }>
-      }
-    }
+
+  const client = getAnthropic() as unknown as AnthropicCompat
+  const messagesApi = client.beta?.messages ?? client.messages
+
+  if (!messagesApi?.create) {
+    throw new Error('Anthropic client missing messages.create (SDK mismatch)')
   }
+
   const label = `[CLAUDE_JSON] ${args.model} ${Date.now()}-${Math.random()
     .toString(16)
     .slice(2)}`
   console.time(label)
   try {
-    const res = await client.beta.messages.create({
+    const res = await messagesApi.create({
       model: args.model,
       max_tokens: args.max_tokens,
       betas: ['structured-outputs-2025-11-13'],
