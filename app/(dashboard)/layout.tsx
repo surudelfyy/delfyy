@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { LogoutButton } from '@/components/logout-button'
 import { Logo } from '@/components/logo'
 
 export default async function DashboardLayout({
@@ -23,7 +24,10 @@ export default async function DashboardLayout({
           <Link href="/dashboard" className="flex items-center gap-2">
             <Logo width={100} className="text-foreground" />
           </Link>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <LogoutButton />
+          </div>
         </div>
       </header>
       <main className="px-4 sm:px-6 lg:px-8">
