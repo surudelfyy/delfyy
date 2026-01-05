@@ -11,7 +11,7 @@ export default async function AuthLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (user) redirect('/dashboard')
+  if (user) redirect('/decide')
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">

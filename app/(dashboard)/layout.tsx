@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getUserSubscription } from '@/lib/subscription'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LogoutButton } from '@/components/logout-button'
-import { Logo } from '@/components/logo'
+import { HeaderLogo } from '@/components/header-logo'
 
 export default async function DashboardLayout({
   children,
@@ -24,9 +24,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-background overflow-x-hidden">
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 sm:px-6 py-3">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Logo width={100} className="text-foreground" />
-          </Link>
+          <HeaderLogo />
           <div className="flex items-center gap-2">
             {isPaid && (
               <Link
