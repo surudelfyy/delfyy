@@ -47,10 +47,12 @@ export function DecisionLoading({
   const currentStepIndex = PIPELINE_STEPS.findIndex((s) => s.id === currentStep)
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-semibold text-zinc-900 mb-8">{question}</h1>
+    <div className="max-w-2xl mx-auto px-4 sm:px-0 py-8 sm:py-12">
+      <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-zinc-100 mb-6 sm:mb-8 break-words">
+        {question}
+      </h1>
 
-      <div className="space-y-1.5">
+      <div className="space-y-2 sm:space-y-1.5">
         {PIPELINE_STEPS.map((step, index) => {
           const isComplete = index < currentStepIndex
           const isCurrent = index === currentStepIndex
@@ -60,13 +62,18 @@ export function DecisionLoading({
             <div key={step.id} className="flex items-center gap-2">
               {isComplete ? (
                 <>
-                  <Check className="w-4 h-4 text-zinc-400" strokeWidth={2} />
-                  <span className="text-sm text-zinc-400">{step.done}</span>
+                  <Check
+                    className="w-4 h-4 text-zinc-400 shrink-0"
+                    strokeWidth={2}
+                  />
+                  <span className="font-mono text-sm text-zinc-400">
+                    {step.done}
+                  </span>
                 </>
               ) : (
                 <>
-                  <span className="text-zinc-500 select-none">•</span>
-                  <span className="text-sm text-zinc-600 animate-pulse">
+                  <span className="text-zinc-500 select-none shrink-0">•</span>
+                  <span className="font-mono text-sm text-zinc-300 animate-pulse">
                     {step.active}
                   </span>
                 </>

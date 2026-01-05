@@ -2,33 +2,55 @@
 
 import { AlertTriangle, CheckCircle2, Eye, XCircle } from 'lucide-react'
 import type { DecisionCard } from '@/lib/schemas/decision-card'
-import { cleanText, fixContractions, firstExample } from '@/lib/utils/format-decision-text'
+import {
+  cleanText,
+  fixContractions,
+  firstExample,
+} from '@/lib/utils/format-decision-text'
 
 const tierConfig: Record<string, { label: string; className: string }> = {
   high: { label: 'High confidence', className: 'bg-indigo-900 text-zinc-50' },
   good: { label: 'Good confidence', className: 'bg-indigo-900 text-zinc-50' },
   moderate: { label: 'Moderate', className: 'bg-violet-600 text-zinc-50' },
-  directional: { label: 'Directional', className: 'bg-violet-600 text-zinc-50' },
+  directional: {
+    label: 'Directional',
+    className: 'bg-violet-600 text-zinc-50',
+  },
   exploratory: { label: 'Provisional', className: 'bg-slate-400 text-zinc-50' },
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <p className="text-[13px] font-semibold text-zinc-400 tracking-tight font-serif mb-3">{children}</p>
+  return (
+    <p className="text-[13px] font-semibold text-zinc-400 tracking-tight font-heading mb-3">
+      {children}
+    </p>
+  )
 }
 
 function MemoText({ text }: { text?: string }) {
   if (!text) return null
-  const blocks = text.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean)
+  const blocks = text
+    .split(/\n\s*\n/)
+    .map((b) => b.trim())
+    .filter(Boolean)
   return (
     <div className="space-y-3">
       {blocks.map((block, idx) => {
-        const lines = block.split('\n').map((l) => l.trim()).filter(Boolean)
+        const lines = block
+          .split('\n')
+          .map((l) => l.trim())
+          .filter(Boolean)
         const hasList = lines.some((l) => /^[-•]/.test(l))
         if (hasList) {
           return (
-            <ul key={idx} className="list-disc ml-5 space-y-1 text-zinc-300 leading-relaxed">
+            <ul
+              key={idx}
+              className="list-disc ml-5 space-y-1 text-zinc-300 leading-relaxed"
+            >
               {lines.map((l, i) => (
-                <li key={i}>{cleanText(fixContractions(l.replace(/^[-•]\s*/, '')))}</li>
+                <li key={i}>
+                  {cleanText(fixContractions(l.replace(/^[-•]\s*/, '')))}
+                </li>
               ))}
             </ul>
           )
@@ -59,8 +81,13 @@ interface DecisionCardDisplayProps {
   confidenceTier?: string
 }
 
-export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDisplayProps) {
-  const tier = tierConfig[confidenceTier || card.meta.confidence_tier] || tierConfig.directional
+export function DecisionCardDisplay({
+  card,
+  confidenceTier,
+}: DecisionCardDisplayProps) {
+  const tier =
+    tierConfig[confidenceTier || card.meta.confidence_tier] ||
+    tierConfig.directional
   const decision = cleanText(fixContractions(card.summary.call || ''))
   const confidence = cleanText(fixContractions(card.summary.confidence || ''))
 
@@ -71,17 +98,27 @@ export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDispla
         <div className="bg-zinc-950 rounded-2xl border border-zinc-800 shadow-sm p-8 md:p-10">
           <div className="flex items-center justify-between mb-6">
             <Label>The Call</Label>
-            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${tier.className}`}>{tier.label}</span>
+            <span
+              className={`px-2.5 py-1 rounded-full text-xs font-medium ${tier.className}`}
+            >
+              {tier.label}
+            </span>
           </div>
 
-          <p className="text-[22px] md:text-2xl font-serif font-semibold text-zinc-50 leading-snug tracking-tight mb-4">
+          <p className="font-heading text-[22px] md:text-2xl font-bold text-zinc-50 leading-snug tracking-tight mb-4">
             {decision || 'No recommendation generated'}
           </p>
 
-          {confidence && <p className="text-zinc-500 leading-relaxed text-sm">{confidence}</p>}
+          {confidence && (
+            <p className="text-zinc-500 leading-relaxed text-sm">
+              {confidence}
+            </p>
+          )}
         </div>
 
-        <p className="text-center text-sm text-zinc-600 mt-6">That&apos;s one less thing living in your head.</p>
+        <p className="text-center text-sm text-zinc-600 mt-6">
+          That&apos;s one less thing living in your head.
+        </p>
       </section>
 
       {/* Next Step */}
@@ -89,7 +126,9 @@ export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDispla
         <section>
           <div className="border-l-4 border-blue-400 bg-blue-50/50 rounded-r-xl pl-6 pr-6 py-5">
             <Label>Your Next Step</Label>
-            <p className="text-zinc-50 leading-relaxed">{cleanText(fixContractions(card.summary.do_next))}</p>
+            <p className="text-zinc-50 leading-relaxed">
+              {cleanText(fixContractions(card.summary.do_next))}
+            </p>
           </div>
         </section>
       )}
@@ -99,7 +138,9 @@ export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDispla
         <section className="space-y-8">
           <Label>Why This Call</Label>
           <div>
-            <h3 className="font-serif font-semibold text-zinc-50 tracking-tight mb-2">Change course if</h3>
+            <h3 className="font-heading font-bold text-zinc-50 tracking-tight mb-2">
+              Change course if
+            </h3>
             <MemoText text={card.summary.change_course_if.join('\n')} />
           </div>
         </section>
@@ -119,7 +160,9 @@ export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDispla
           <MemoText text={card.details.watch_for.join('\n')} />
           {card.details.approach && (
             <div>
-              <h3 className="font-serif font-semibold text-zinc-50 tracking-tight mb-2">Approach</h3>
+              <h3 className="font-heading font-bold text-zinc-50 tracking-tight mb-2">
+                Approach
+              </h3>
               <MemoText text={card.details.approach} />
             </div>
           )}
@@ -136,25 +179,30 @@ export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDispla
 
           {card.pattern.principle && (
             <div>
-              <h3 className="font-serif font-semibold text-zinc-50 tracking-tight mb-2">The Pattern</h3>
+              <h3 className="font-heading font-bold text-zinc-50 tracking-tight mb-2">
+                The Pattern
+              </h3>
               <MemoText text={card.pattern.principle} />
             </div>
           )}
 
           {card.pattern.mechanism && (
             <div>
-              <h3 className="font-serif font-semibold text-zinc-50 tracking-tight mb-2">Why It Works</h3>
+              <h3 className="font-heading font-bold text-zinc-50 tracking-tight mb-2">
+                Why It Works
+              </h3>
               <MemoText text={card.pattern.mechanism} />
             </div>
           )}
 
-          {(card.pattern.where_worked.length > 0 || card.pattern.where_failed.length > 0) && (
+          {(card.pattern.where_worked.length > 0 ||
+            card.pattern.where_failed.length > 0) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {card.pattern.where_worked.length > 0 && (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                    <span className="text-[12px] font-semibold text-emerald-700 tracking-tight font-serif">
+                    <span className="text-[12px] font-semibold text-emerald-700 tracking-tight font-heading">
                       Where It Worked
                     </span>
                   </div>
@@ -168,7 +216,7 @@ export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDispla
                 <div className="bg-red-50 border border-red-200 rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <XCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-                    <span className="text-[12px] font-semibold text-red-700 tracking-tight font-serif">
+                    <span className="text-[12px] font-semibold text-red-700 tracking-tight font-heading">
                       Where It Failed
                     </span>
                   </div>
@@ -183,14 +231,17 @@ export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDispla
       )}
 
       {/* Footnotes */}
-      {(card.details.watch_for.length > 0 || card.summary.change_course_if.length > 0) && (
+      {(card.details.watch_for.length > 0 ||
+        card.summary.change_course_if.length > 0) && (
         <section className="border-t border-zinc-900 pt-8 space-y-4">
           {card.details.watch_for.length > 0 && (
             <div className="flex gap-3 text-sm">
               <Eye className="h-4 w-4 text-zinc-600 mt-0.5 flex-shrink-0" />
               <div>
                 <span className="font-medium text-zinc-300">Revisit if: </span>
-                <span className="text-zinc-500">{card.details.watch_for.join(' ')}</span>
+                <span className="text-zinc-500">
+                  {card.details.watch_for.join(' ')}
+                </span>
               </div>
             </div>
           )}
@@ -199,8 +250,12 @@ export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDispla
             <div className="flex gap-3 text-sm">
               <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
               <div>
-                <span className="font-medium text-zinc-300">Change course if: </span>
-                <span className="text-zinc-500">{card.summary.change_course_if.join(' ')}</span>
+                <span className="font-medium text-zinc-300">
+                  Change course if:{' '}
+                </span>
+                <span className="text-zinc-500">
+                  {card.summary.change_course_if.join(' ')}
+                </span>
               </div>
             </div>
           )}
@@ -209,6 +264,3 @@ export function DecisionCardDisplay({ card, confidenceTier }: DecisionCardDispla
     </div>
   )
 }
-
-
-

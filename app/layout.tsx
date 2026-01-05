@@ -1,16 +1,25 @@
 import type { Metadata } from 'next'
-import { Source_Sans_3, Source_Serif_4 } from 'next/font/google'
+import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
-const sourceSans = Source_Sans_3({
-  variable: '--font-sans',
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
+  weight: ['500', '700'],
+  variable: '--font-heading',
   display: 'swap',
 })
 
-const sourceSerif = Source_Serif_4({
-  variable: '--font-serif',
+const inter = Inter({
   subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
   display: 'swap',
 })
 
@@ -29,10 +38,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="bg-zinc-950">
-      <body
-        className={`${sourceSans.variable} ${sourceSerif.variable} font-sans bg-zinc-950 text-zinc-50 min-h-screen antialiased`}
-      >
+    <html
+      lang="en"
+      className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} bg-zinc-950 overflow-x-hidden`}
+    >
+      <body className="font-body bg-zinc-950 text-zinc-100 min-h-screen antialiased overflow-x-hidden">
         {children}
       </body>
     </html>

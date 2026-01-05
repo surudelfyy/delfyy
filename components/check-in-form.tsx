@@ -67,7 +67,9 @@ export function CheckInForm({ decisionId }: CheckInFormProps) {
         throw new Error(data.error || 'Failed to save check-in')
       }
 
-      router.push(`/decisions/${decisionId}/check-in/complete?outcome=${selectedOutcome}`)
+      router.push(
+        `/decisions/${decisionId}/check-in/complete?outcome=${selectedOutcome}`,
+      )
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setIsSubmitting(false)
@@ -82,8 +84,10 @@ export function CheckInForm({ decisionId }: CheckInFormProps) {
           {outcomes.map((outcome) => (
             <label
               key={outcome.value}
-              className={`flex cursor-pointer items-start gap-4 rounded-lg border-2 p-4 transition-all duration-150 ${
-                selectedOutcome === outcome.value ? outcome.selectedClass : outcome.defaultClass
+              className={`flex cursor-pointer items-start gap-4 rounded-sm border-2 p-4 transition-all duration-150 ${
+                selectedOutcome === outcome.value
+                  ? outcome.selectedClass
+                  : outcome.defaultClass
               }`}
             >
               <input
@@ -99,7 +103,9 @@ export function CheckInForm({ decisionId }: CheckInFormProps) {
               </span>
               <div>
                 <p className="font-medium">{outcome.label}</p>
-                <p className="text-sm text-muted-foreground">{outcome.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {outcome.description}
+                </p>
               </div>
             </label>
           ))}
@@ -108,7 +114,8 @@ export function CheckInForm({ decisionId }: CheckInFormProps) {
 
       <div className="mb-6">
         <label htmlFor="note" className="mb-2 block text-sm font-medium">
-          Add a note <span className="font-normal text-muted-foreground">(optional)</span>
+          Add a note{' '}
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </label>
         <textarea
           id="note"
@@ -120,12 +127,17 @@ export function CheckInForm({ decisionId }: CheckInFormProps) {
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
         />
         {note.length > 0 && (
-          <p className="mt-1 text-right text-xs text-muted-foreground">{note.length}/1000</p>
+          <p className="mt-1 text-right text-xs text-muted-foreground">
+            {note.length}/1000
+          </p>
         )}
       </div>
 
       {error && (
-        <div className="mb-6 rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <div
+          className="mb-6 rounded-md bg-red-50 p-3 text-sm text-red-700"
+          role="alert"
+        >
           {error}
         </div>
       )}
@@ -140,4 +152,3 @@ export function CheckInForm({ decisionId }: CheckInFormProps) {
     </form>
   )
 }
-

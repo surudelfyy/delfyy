@@ -49,9 +49,11 @@ export default async function CheckInPage({ params }: PageProps) {
         ← Back to decision
       </a>
 
-      <h1 className="mb-8 text-2xl font-semibold tracking-tight">Check in</h1>
+      <h1 className="font-heading mb-8 text-2xl font-bold tracking-tight">
+        Check in
+      </h1>
 
-      <div className="mb-8 rounded-lg border bg-card p-6">
+      <div className="mb-8 rounded-sm border bg-card p-6">
         <p className="mb-2 text-sm text-muted-foreground">You decided:</p>
         <p className="text-lg font-medium">
           {recommendation || 'Your decision'}

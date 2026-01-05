@@ -65,7 +65,9 @@ export function OutcomeSelector({
 
   return (
     <section className="mt-10">
-      <h2 className="text-xl font-semibold text-zinc-100 mb-2">Outcome</h2>
+      <h2 className="font-heading text-xl font-bold tracking-tight text-zinc-100 mb-2">
+        Outcome
+      </h2>
       <p className="text-sm text-zinc-500 mb-4">Did this decision work out?</p>
       <div className="flex flex-wrap gap-2">
         {btn('successful', 'Successful')}

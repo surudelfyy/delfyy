@@ -11,29 +11,25 @@ export default async function DecidePage() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950">
-      <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center px-6 py-16 sm:py-20">
-        <div className="flex flex-col items-center gap-6 text-center">
-          <Image
-            src="/delfyylogo.svg"
-            alt="Delfyy"
-            width={120}
-            height={44}
-            priority
-          />
-          <h1 className="text-3xl font-semibold text-zinc-100">
-            What decision are you stuck on?
-          </h1>
-          <p className="text-sm text-zinc-500 max-w-xl">
-            A simple, focused intake. No dropdowns, no clutter — just describe
-            the decision.
-          </p>
-        </div>
-
-        <div className="mt-12 w-full">
-          <DecideInputShell />
-        </div>
+    <div className="min-h-[calc(100vh-64px)] flex flex-col items-center py-8 sm:py-16">
+      <div className="flex flex-col items-center gap-4 sm:gap-6 text-center w-full max-w-2xl">
+        <Image
+          src="/delfyylogo.svg"
+          alt="Delfyy"
+          width={120}
+          height={22}
+          style={{ height: 'auto' }}
+          priority
+          className="sm:w-[140px]"
+        />
+        <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-zinc-100">
+          What decision are you stuck on?
+        </h1>
       </div>
-    </main>
+
+      <div className="mt-6 sm:mt-12 w-full max-w-2xl">
+        <DecideInputShell />
+      </div>
+    </div>
   )
 }

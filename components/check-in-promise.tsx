@@ -7,7 +7,12 @@ interface CheckInPromiseProps {
   winningOutcome: string | null
 }
 
-export function CheckInPromise({ decisionId, checkInDate, checkInOutcome, winningOutcome }: CheckInPromiseProps) {
+export function CheckInPromise({
+  decisionId,
+  checkInDate,
+  checkInOutcome,
+  winningOutcome,
+}: CheckInPromiseProps) {
   if (!checkInDate) {
     return null
   }
@@ -54,10 +59,14 @@ export function CheckInPromise({ decisionId, checkInDate, checkInOutcome, winnin
     if (!config) return null
 
     return (
-      <div className={`rounded-lg border p-4 ${config.bgColor} ${config.borderColor}`}>
+      <div
+        className={`rounded-sm border p-4 ${config.bgColor} ${config.borderColor}`}
+      >
         <div className="flex items-center gap-2">
           <span className={`text-lg ${config.textColor}`}>{config.icon}</span>
-          <span className={`font-medium ${config.textColor}`}>{config.text}</span>
+          <span className={`font-medium ${config.textColor}`}>
+            {config.text}
+          </span>
         </div>
       </div>
     )
@@ -65,12 +74,14 @@ export function CheckInPromise({ decisionId, checkInDate, checkInOutcome, winnin
 
   if (isPast || diffDays <= 0) {
     return (
-      <div className="rounded-lg border-2 border-amber-400 bg-amber-50 p-4">
+      <div className="rounded-sm border-2 border-amber-400 bg-amber-50 p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-medium text-amber-800">Check-in due</p>
             {winningOutcome && (
-              <p className="mt-1 text-sm text-amber-700">You said winning = &quot;{winningOutcome}&quot;</p>
+              <p className="mt-1 text-sm text-amber-700">
+                You said winning = &quot;{winningOutcome}&quot;
+              </p>
             )}
           </div>
           <a
@@ -85,10 +96,15 @@ export function CheckInPromise({ decisionId, checkInDate, checkInOutcome, winnin
   }
 
   return (
-    <div className="rounded-lg border border-border bg-muted/30 p-4">
+    <div className="rounded-sm border border-border bg-muted/30 p-4">
       <div className="flex items-start gap-3">
         <div className="rounded-full bg-primary/10 p-2" aria-hidden="true">
-          <svg className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className="h-4 w-4 text-primary"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -100,11 +116,12 @@ export function CheckInPromise({ decisionId, checkInDate, checkInOutcome, winnin
         <div>
           <p className="text-sm text-muted-foreground">Check-in: {formatted}</p>
           {winningOutcome && (
-            <p className="mt-1 text-sm text-muted-foreground">Success: &quot;{winningOutcome}&quot;</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Success: &quot;{winningOutcome}&quot;
+            </p>
           )}
         </div>
       </div>
     </div>
   )
 }
-

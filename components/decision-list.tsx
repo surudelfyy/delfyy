@@ -83,7 +83,7 @@ export function DecisionList({ decisions }: DecisionListProps) {
 
   return (
     <div>
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex gap-2 mb-4 sm:mb-6 flex-wrap">
         {(
           [
             { key: 'all', label: 'All' },
@@ -95,7 +95,7 @@ export function DecisionList({ decisions }: DecisionListProps) {
           <button
             key={key}
             onClick={() => setFilter(key)}
-            className={`px-3 py-1.5 text-sm transition-colors ${
+            className={`px-2 sm:px-3 py-1.5 text-xs sm:text-sm transition-colors rounded-sm ${
               filter === key
                 ? 'bg-zinc-50 text-zinc-900'
                 : 'border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-300'
@@ -118,7 +118,7 @@ export function DecisionList({ decisions }: DecisionListProps) {
       </div>
 
       {filteredItems.length === 0 && (
-        <p className="text-sm text-zinc-500 py-8 text-center">
+        <p className="text-xs sm:text-sm text-zinc-500 py-6 sm:py-8 text-center">
           No {filter === 'all' ? 'decisions' : filter.replace('_', ' ')}{' '}
           decisions
         </p>
@@ -174,15 +174,15 @@ function DecisionRow({
   }
 
   return (
-    <div className="py-4">
+    <div className="py-3 sm:py-4">
       <Link href={`/decisions/${decision.id}`} className="block group">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-3 sm:gap-4">
           <div className="flex-1 min-w-0">
-            <p className="text-base text-zinc-50 leading-snug group-hover:underline">
+            <p className="text-sm sm:text-base text-zinc-50 leading-snug group-hover:underline break-words">
               {recommendation || decision.question}
             </p>
             {recommendation && (
-              <p className="mt-1 text-sm text-zinc-500 line-clamp-1">
+              <p className="mt-1 text-xs sm:text-sm text-zinc-500 line-clamp-1">
                 {decision.question}
               </p>
             )}
@@ -215,7 +215,7 @@ function DecisionRow({
           </span>
         </div>
 
-        <div className="flex items-center justify-between mt-2 text-sm">
+        <div className="flex items-center justify-between mt-2 text-xs sm:text-sm">
           <p className="text-zinc-600">{createdDate}</p>
           <button
             type="button"

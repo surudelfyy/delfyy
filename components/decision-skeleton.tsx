@@ -6,7 +6,7 @@ function SkeletonLine({ width = 'w-full' }: { width?: string }) {
 
 function SkeletonCard() {
   return (
-    <div className="p-4 rounded-lg border border-zinc-800 bg-zinc-950 space-y-2">
+    <div className="p-4 rounded-sm border border-zinc-800 bg-zinc-950 space-y-2">
       <div className="h-3 w-20 bg-zinc-800 rounded animate-pulse" />
       <SkeletonLine />
       <SkeletonLine width="w-3/4" />
@@ -49,5 +49,3 @@ export function DecisionSkeleton() {
     </div>
   )
 }
-
-

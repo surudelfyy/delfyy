@@ -72,32 +72,32 @@ export function DecisionHeaderBar({
   }
 
   return (
-    <header className="flex items-center justify-between py-4 mb-6">
+    <header className="flex items-center justify-between py-3 sm:py-4 mb-4 sm:mb-6">
       <Link
         href="/dashboard"
-        className="flex items-center gap-2 text-zinc-400 hover:text-zinc-100 transition-colors"
+        className="flex items-center gap-1 sm:gap-2 text-zinc-400 hover:text-zinc-100 transition-colors"
         aria-label="Back to dashboard"
       >
         <ChevronLeft className="w-5 h-5" />
-        <span>Dashboard</span>
+        <span className="text-sm sm:text-base">Dashboard</span>
       </Link>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <button
           onClick={copyAsMarkdown}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-zinc-800 hover:bg-zinc-700 rounded transition-colors"
+          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-zinc-800 hover:bg-zinc-700 rounded-sm transition-colors"
           title="Copy document"
           aria-label="Copy document"
         >
           {copied ? (
             <>
               <Check className="w-4 h-4 text-green-400" />
-              <span className="text-green-400">Copied</span>
+              <span className="text-green-400 hidden sm:inline">Copied</span>
             </>
           ) : (
             <>
               <Copy className="w-4 h-4" />
-              <span>Copy document</span>
+              <span className="hidden sm:inline">Copy</span>
             </>
           )}
         </button>

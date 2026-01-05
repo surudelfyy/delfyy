@@ -33,9 +33,9 @@ export default async function DecisionPage({ params }: PageProps) {
 
   if (error || !decision) {
     return (
-      <main className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-[50vh] flex items-center justify-center px-4">
         <div className="text-center space-y-3">
-          <div className="text-xl font-semibold text-zinc-50">
+          <div className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-50">
             Decision not found
           </div>
           <p className="text-sm text-zinc-400">
@@ -48,17 +48,17 @@ export default async function DecisionPage({ params }: PageProps) {
             Back to dashboard
           </Link>
         </div>
-      </main>
+      </div>
     )
   }
 
   if (decision.status === 'running') {
     return (
-      <main className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-[50vh] flex items-center justify-center px-4">
         <div className="text-center">
           <div className="inline-flex items-center gap-2 text-zinc-500 mb-4">
             <div className="h-4 w-4 border-2 border-zinc-700 border-t-zinc-600 rounded-full animate-spin" />
-            <span>Still processing...</span>
+            <span className="text-sm">Still processing...</span>
           </div>
           <p className="text-sm text-zinc-600">
             <Link href="/dashboard" className="underline hover:text-zinc-400">
@@ -66,15 +66,15 @@ export default async function DecisionPage({ params }: PageProps) {
             </Link>
           </p>
         </div>
-      </main>
+      </div>
     )
   }
 
   if (decision.status === 'failed') {
     return (
-      <main className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-[50vh] flex items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-red-600 mb-4">
+          <p className="text-red-600 mb-4 text-sm sm:text-base">
             This decision couldn&apos;t be completed.
           </p>
           <Link
@@ -84,7 +84,7 @@ export default async function DecisionPage({ params }: PageProps) {
             Try again
           </Link>
         </div>
-      </main>
+      </div>
     )
   }
 
@@ -147,66 +147,66 @@ export default async function DecisionPage({ params }: PageProps) {
       : 'bg-zinc-900 border-zinc-800'
 
   return (
-    <main className="min-h-screen bg-zinc-950">
-      <article className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-        <DecisionHeaderBar
-          memo={memo}
-          decisionId={decision.id}
-          createdAt={decision.created_at}
-          outcome={
-            (decision.outcome as 'successful' | 'failed' | null | undefined) ??
-            null
-          }
-          stage={memo.meta.stage ?? null}
-        />
+    <article className="max-w-2xl mx-auto py-4 sm:py-8">
+      <DecisionHeaderBar
+        memo={memo}
+        decisionId={decision.id}
+        createdAt={decision.created_at}
+        outcome={
+          (decision.outcome as 'successful' | 'failed' | null | undefined) ??
+          null
+        }
+        stage={memo.meta.stage ?? null}
+      />
 
-        <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-zinc-100 mb-3">
-          {toSentenceCase(memo.question)}
-        </h1>
+      <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight leading-tight text-zinc-100 mb-3 break-words">
+        {toSentenceCase(memo.question)}
+      </h1>
 
-        <div className="flex flex-wrap items-center gap-2 mt-3 mb-4">
-          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
-            {confidenceLabel}
+      <div className="flex flex-wrap items-center gap-2 mt-3 mb-4">
+        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded-sm uppercase tracking-wide whitespace-nowrap">
+          {confidenceLabel}
+        </span>
+        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded-sm uppercase tracking-wide whitespace-nowrap">
+          {stageLabel}
+        </span>
+        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded-sm uppercase tracking-wide whitespace-nowrap">
+          {createdDate}
+        </span>
+        {outcomeLabel ? (
+          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded-sm uppercase tracking-wide whitespace-nowrap">
+            {outcomeLabel}
           </span>
-          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
-            {stageLabel}
-          </span>
-          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
-            {createdDate}
-          </span>
-          {outcomeLabel ? (
-            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded uppercase tracking-wide">
-              {outcomeLabel}
-            </span>
-          ) : null}
+        ) : null}
+      </div>
+
+      {memo.confidence.rationale ? (
+        <div
+          className={cn('mt-4 mb-6 p-3 sm:p-4 rounded-sm border', bannerStyle)}
+        >
+          <p className="text-zinc-400 text-sm leading-relaxed">
+            {memo.confidence.rationale}
+          </p>
         </div>
+      ) : null}
 
-        {memo.confidence.rationale ? (
-          <div className={cn('mt-4 mb-6 p-4 rounded-lg border', bannerStyle)}>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              {memo.confidence.rationale}
-            </p>
-          </div>
-        ) : null}
+      <DecisionMemoView memo={memo} />
 
-        <DecisionMemoView memo={memo} />
-
-        {!decision.committed_at ? (
-          <div className="mt-12 pt-8 border-t border-zinc-800">
-            <CommitmentBlock
-              decisionId={decision.id}
-              nextSteps={memo.next_steps}
-              isCommitted={Boolean(decision.committed_at)}
-              committedAt={decision.committed_at ?? undefined}
-              acceptedSteps={
-                Array.isArray(decision.accepted_steps)
-                  ? (decision.accepted_steps as string[])
-                  : []
-              }
-            />
-          </div>
-        ) : null}
-      </article>
-    </main>
+      {!decision.committed_at ? (
+        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-zinc-800">
+          <CommitmentBlock
+            decisionId={decision.id}
+            nextSteps={memo.next_steps}
+            isCommitted={Boolean(decision.committed_at)}
+            committedAt={decision.committed_at ?? undefined}
+            acceptedSteps={
+              Array.isArray(decision.accepted_steps)
+                ? (decision.accepted_steps as string[])
+                : []
+            }
+          />
+        </div>
+      ) : null}
+    </article>
   )
 }

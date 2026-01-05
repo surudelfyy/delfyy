@@ -7,7 +7,10 @@ interface PageProps {
   searchParams: { outcome?: string }
 }
 
-export default async function CheckInCompletePage({ params, searchParams }: PageProps) {
+export default async function CheckInCompletePage({
+  params,
+  searchParams,
+}: PageProps) {
   const supabase = await createClient()
 
   const {
@@ -30,10 +33,15 @@ export default async function CheckInCompletePage({ params, searchParams }: Page
     .select('id, check_in_outcome, status')
     .eq('user_id', user.id)
 
-  const completedDecisions = decisions?.filter((d) => d.status === 'complete') || []
+  const completedDecisions =
+    decisions?.filter((d) => d.status === 'complete') || []
   const totalDecisions = completedDecisions.length
-  const heldCount = completedDecisions.filter((d) => d.check_in_outcome === 'held').length
-  const pivotedCount = completedDecisions.filter((d) => d.check_in_outcome === 'pivoted').length
+  const heldCount = completedDecisions.filter(
+    (d) => d.check_in_outcome === 'held',
+  ).length
+  const pivotedCount = completedDecisions.filter(
+    (d) => d.check_in_outcome === 'pivoted',
+  ).length
 
   const outcomeContent = {
     held: {
@@ -69,12 +77,16 @@ export default async function CheckInCompletePage({ params, searchParams }: Page
         {content.icon}
       </div>
 
-      <h1 className="mb-2 text-2xl font-semibold">{content.title}</h1>
+      <h1 className="font-heading mb-2 text-2xl font-bold tracking-tight">
+        {content.title}
+      </h1>
       <p className="mb-8 text-muted-foreground">{content.subtitle}</p>
 
       {totalDecisions > 0 && (
-        <div className="mb-8 rounded-lg border bg-card p-6 text-left">
-          <p className="mb-1 text-sm text-muted-foreground">Your track record</p>
+        <div className="mb-8 rounded-sm border bg-card p-6 text-left">
+          <p className="mb-1 text-sm text-muted-foreground">
+            Your track record
+          </p>
           <p className="text-lg">
             <span className="font-semibold">{totalDecisions}</span>
             {' decision'}
@@ -104,4 +116,3 @@ export default async function CheckInCompletePage({ params, searchParams }: Page
     </div>
   )
 }
-

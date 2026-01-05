@@ -24,12 +24,12 @@ export function TradeOffLine({ tradeOffs }: TradeOffLineProps) {
   if (!items.length) return null
 
   return (
-    <div className="space-y-2 text-base leading-relaxed text-zinc-300">
-      <p className="text-sm text-zinc-500">You&apos;re accepting:</p>
+    <div className="space-y-2 text-sm sm:text-base leading-relaxed text-zinc-300">
+      <p className="text-xs sm:text-sm text-zinc-500">You&apos;re accepting:</p>
       <ul className="space-y-2">
         {items.map((item, i) => (
           <li key={i} className="flex gap-2 text-zinc-300">
-            <span className="text-zinc-500">•</span>
+            <span className="text-zinc-500 shrink-0">•</span>
             <span>{item}</span>
           </li>
         ))}

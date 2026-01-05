@@ -11,7 +11,9 @@ export default async function SignupPage({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">Create an account</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-tight">
+          Create an account
+        </h1>
         <p className="text-zinc-400 mt-2">Get started with Delfyy</p>
       </div>
 
@@ -23,7 +25,10 @@ export default async function SignupPage({
 
       <form className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-zinc-300"
+          >
             Email
           </label>
           <input
@@ -36,7 +41,10 @@ export default async function SignupPage({
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-zinc-300">
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-zinc-300"
+          >
             Password
           </label>
           <input

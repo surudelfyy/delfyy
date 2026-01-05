@@ -1,22 +1,52 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 /* Force dark background on html/body */
 html {
   background-color: #09090b; /* zinc-950 */
   color-scheme: dark;
+  overflow-x: hidden;
 }
 
 body {
   background-color: #09090b; /* zinc-950 */
   color: #fafafa; /* zinc-50 */
   min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Ensure no white flash on load */
-html, body {
+html,
+body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Images and media never overflow */
+img,
+video,
+iframe,
+embed,
+object {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Long words break instead of overflow */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+li,
+td,
+th,
+label {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 /* Selection color */
@@ -77,9 +107,11 @@ html, body {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-body);
   --font-mono: var(--font-mono);
-  --font-serif: var(--font-serif);
+  --font-serif: var(--font-heading);
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -102,8 +134,14 @@ html, body {
 
 @layer utilities {
   @keyframes dot-bounce {
-    0%, 80%, 100% { opacity: 0.3; }
-    40% { opacity: 1; }
+    0%,
+    80%,
+    100% {
+      opacity: 0.3;
+    }
+    40% {
+      opacity: 1;
+    }
   }
   .animate-dot-1 {
     animation: dot-bounce 1.4s ease-in-out infinite;
@@ -116,41 +154,41 @@ html, body {
   }
 
   .memo {
-    @apply font-sans text-[17px] leading-[1.65] text-zinc-300;
+    @apply font-body text-[17px] leading-[1.65] text-zinc-300;
   }
   .memo h1,
   .memo h2,
   .memo h3,
   .memo h4 {
-    @apply font-serif font-semibold tracking-tight text-zinc-50;
+    @apply font-heading font-semibold tracking-tight text-zinc-50;
   }
 
-.decision-prose {
-  max-width: none;
-  line-height: 1.65;
-}
-.decision-prose h2 {
-  margin-top: 3rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-.decision-prose h2:first-of-type {
-  margin-top: 2rem;
-}
-.decision-prose h3 {
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
-}
-.decision-prose p {
-  margin-bottom: 1rem;
-}
-.decision-prose ul {
-  margin-top: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding-left: 1.25rem;
-}
-.decision-prose li {
-  margin-bottom: 0.5rem;
-}
+  .decision-prose {
+    max-width: none;
+    line-height: 1.65;
+  }
+  .decision-prose h2 {
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  .decision-prose h2:first-of-type {
+    margin-top: 2rem;
+  }
+  .decision-prose h3 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  .decision-prose p {
+    margin-bottom: 1rem;
+  }
+  .decision-prose ul {
+    margin-top: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-left: 1.25rem;
+  }
+  .decision-prose li {
+    margin-bottom: 0.5rem;
+  }
 }

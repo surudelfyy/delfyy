@@ -31,12 +31,12 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-md border border-zinc-800 bg-zinc-900 p-6 rounded-none">
-        <h2 className="text-xl font-semibold text-zinc-50 mb-2">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="w-full max-w-md border border-zinc-800 bg-zinc-900 p-4 sm:p-6 rounded-sm">
+        <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-50 mb-2">
           Upgrade to keep deciding
         </h2>
-        <p className="text-sm text-zinc-400 mb-6">
+        <p className="text-sm text-zinc-400 mb-4 sm:mb-6">
           You&apos;ve used your 3 free decisions. Get unlimited decisions
           forever for £99.
         </p>
@@ -44,14 +44,14 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
         <button
           onClick={handleUpgrade}
           disabled={loading}
-          className="w-full bg-zinc-50 text-zinc-900 py-3 font-semibold border border-zinc-50 rounded-none hover:bg-transparent hover:text-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-zinc-50 text-zinc-900 py-3 text-sm sm:text-base font-semibold border border-zinc-50 rounded-sm hover:bg-transparent hover:text-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Loading...' : 'Get Lifetime Access — £99'}
         </button>
 
         <button
           onClick={onClose}
-          className="w-full mt-3 text-sm text-zinc-400 hover:text-zinc-200"
+          className="w-full mt-3 py-2 text-sm text-zinc-400 hover:text-zinc-200"
         >
           Maybe later
         </button>

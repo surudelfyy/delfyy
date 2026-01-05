@@ -174,25 +174,33 @@ export async function POST(request: NextRequest) {
     [defaultContext, body.context?.freeform].filter(Boolean).join('\n\n') ||
     null
 
+  const input_context = {
+    ...(body.context || {}),
+    freeform: combinedFreeform,
+    user_level_hint: body.user_level_hint ?? null,
+    winning_outcome: body.winning_outcome ?? null,
+    check_in_date: body.check_in_date ?? null,
+  }
+
   // 7. Create decision row (RLS)
   const { data: decision, error: insertError } = await supabase
     .from('decisions')
     .insert({
       user_id: user.id,
       status: 'running',
+      outcome: 'in_progress',
       question: body.question,
-      input_context: {
-        ...(body.context || {}),
-        freeform: combinedFreeform,
-      },
-      user_level_hint: body.user_level_hint ?? null,
-      winning_outcome: body.winning_outcome ?? null,
+      input_context,
+      check_in_outcome: 'pending',
       idempotency_key: body.idempotency_key || null,
     })
     .select('id')
     .single()
 
   if (insertError || !decision) {
+    if (insertError) {
+      console.error('Supabase insertError:', insertError)
+    }
     return NextResponse.json(
       { error: 'Failed to create decision' },
       { status: 500 },

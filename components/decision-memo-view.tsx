@@ -9,10 +9,10 @@ interface DecisionMemoViewProps {
 function Bullets({ items }: { items: string[] }) {
   if (!items?.length) return null
   return (
-    <ul className="space-y-2 text-base text-zinc-300 leading-relaxed">
+    <ul className="space-y-2 text-sm sm:text-base text-zinc-300 leading-relaxed">
       {items.map((item, idx) => (
         <li key={idx} className="flex gap-2">
-          <span className="text-zinc-500">•</span>
+          <span className="text-zinc-500 shrink-0">•</span>
           <span>{item}</span>
         </li>
       ))}
@@ -22,60 +22,74 @@ function Bullets({ items }: { items: string[] }) {
 
 export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12">
       <section>
-        <h2 className="text-xl font-semibold text-zinc-100 mb-4">Decision</h2>
-        <p className="text-base text-zinc-300 leading-relaxed">{memo.call}</p>
+        <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-100 mb-3 sm:mb-4">
+          Decision
+        </h2>
+        <p className="text-sm sm:text-base text-zinc-300 leading-relaxed">
+          {memo.call}
+        </p>
       </section>
 
-      <hr className="border-zinc-800 my-10" />
+      <hr className="border-zinc-800 my-6 sm:my-10" />
 
-      <section className="mt-10">
-        <h2 className="text-xl font-semibold text-zinc-100 mb-4">Reasoning</h2>
+      <section>
+        <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-100 mb-3 sm:mb-4">
+          Reasoning
+        </h2>
         <Bullets items={memo.why_this_call} />
       </section>
 
-      <hr className="border-zinc-800 my-10" />
+      <hr className="border-zinc-800 my-6 sm:my-10" />
 
-      <section className="mt-10">
-        <h2 className="text-xl font-semibold text-zinc-100 mb-4">
+      <section>
+        <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-100 mb-3 sm:mb-4">
           Assumptions
         </h2>
-        <ul className="space-y-6">
+        <ul className="space-y-4 sm:space-y-6">
           {memo.assumptions.map((item, i) => (
             <li key={i} className="space-y-1">
               <div>
-                <span className="inline-flex items-center px-2 py-0.5 text-xs font-bold bg-zinc-100 text-zinc-900 rounded uppercase tracking-wide">
+                <span className="inline-flex items-center px-2 py-0.5 text-xs font-bold bg-zinc-100 text-zinc-900 rounded-sm uppercase tracking-wide">
                   {item.confidence}
                 </span>
               </div>
-              <p className="text-zinc-100">{item.assumption}</p>
+              <p className="text-sm sm:text-base text-zinc-100">
+                {item.assumption}
+              </p>
               {item.why_it_matters ? (
-                <p className="text-zinc-500 text-sm">{item.why_it_matters}</p>
+                <p className="text-zinc-500 text-xs sm:text-sm">
+                  {item.why_it_matters}
+                </p>
               ) : null}
             </li>
           ))}
         </ul>
       </section>
 
-      <hr className="border-zinc-800 my-10" />
+      <hr className="border-zinc-800 my-6 sm:my-10" />
 
       <section>
-        <h2 className="text-xl font-semibold text-zinc-100 mb-4">Trade-offs</h2>
+        <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-100 mb-3 sm:mb-4">
+          Trade-offs
+        </h2>
         <TradeOffLine tradeOffs={memo.trade_offs} />
       </section>
 
-      <hr className="border-zinc-800 my-10" />
+      <hr className="border-zinc-800 my-6 sm:my-10" />
 
       <section>
-        <h2 className="text-xl font-semibold text-zinc-100 mb-4">Risks</h2>
+        <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-100 mb-3 sm:mb-4">
+          Risks
+        </h2>
         <Bullets items={memo.risks} />
       </section>
 
-      <hr className="border-zinc-800 my-10" />
+      <hr className="border-zinc-800 my-6 sm:my-10" />
 
       <section>
-        <h2 className="text-xl font-semibold text-zinc-100 mb-4">
+        <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-100 mb-3 sm:mb-4">
           When to revisit
         </h2>
         <TriggerCard
@@ -84,21 +98,23 @@ export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
         />
       </section>
 
-      <hr className="border-zinc-800 my-10" />
+      <hr className="border-zinc-800 my-6 sm:my-10" />
 
-      <section className="mt-10">
-        <h2 className="text-xl font-semibold text-zinc-100 mb-4">
+      <section>
+        <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-100 mb-3 sm:mb-4">
           Real-world case studies
         </h2>
 
-        <p className="text-zinc-300 mb-6">{memo.pattern.principle}</p>
+        <p className="text-sm sm:text-base text-zinc-300 mb-4 sm:mb-6">
+          {memo.pattern.principle}
+        </p>
 
-        <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wide mb-3">
+        <h3 className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-wide mb-2 sm:mb-3">
           What worked
         </h3>
-        <div className="space-y-4 mb-6">
+        <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
           {memo.examples.worked.map((e, i) => (
-            <p key={i} className="text-zinc-300">
+            <p key={i} className="text-sm sm:text-base text-zinc-300">
               <span className="font-semibold text-zinc-100">{e.company}</span>
               {e.year ? (
                 <span className="text-zinc-500"> ({e.year})</span>
@@ -108,12 +124,12 @@ export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
           ))}
         </div>
 
-        <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wide mb-3">
+        <h3 className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-wide mb-2 sm:mb-3">
           What failed
         </h3>
-        <div className="space-y-4 mb-6">
+        <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
           {memo.examples.failed.map((e, i) => (
-            <p key={i} className="text-zinc-300">
+            <p key={i} className="text-sm sm:text-base text-zinc-300">
               <span className="font-semibold text-zinc-100">{e.company}</span>
               {e.year ? (
                 <span className="text-zinc-500"> ({e.year})</span>
@@ -124,7 +140,9 @@ export function DecisionMemoView({ memo }: DecisionMemoViewProps) {
         </div>
 
         {memo.pattern.why_it_works && (
-          <p className="text-zinc-500 italic">{memo.pattern.why_it_works}</p>
+          <p className="text-xs sm:text-sm text-zinc-500 italic">
+            {memo.pattern.why_it_works}
+          </p>
         )}
       </section>
     </div>

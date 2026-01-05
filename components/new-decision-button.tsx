@@ -3,7 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-type Usage = { tier: 'free' | 'paid'; completedDecisions: number; limit: number } | null
+type Usage = {
+  tier: 'free' | 'paid'
+  completedDecisions: number
+  limit: number
+} | null
 
 interface NewDecisionButtonProps {
   usage: Usage
@@ -41,12 +45,15 @@ export function NewDecisionButton({ usage }: NewDecisionButtonProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-md rounded-2xl bg-zinc-950 p-6 shadow-xl space-y-4">
             <div className="space-y-2">
-              <h2 className="text-xl font-semibold text-zinc-50">Upgrade to keep deciding</h2>
+              <h2 className="font-heading text-xl font-bold tracking-tight text-zinc-50">
+                Upgrade to keep deciding
+              </h2>
               <p className="text-sm text-zinc-400">
-                You’ve used your 3 free decisions. Upgrade to create unlimited decisions.
+                You’ve used your 3 free decisions. Upgrade to create unlimited
+                decisions.
               </p>
             </div>
-            <div className="rounded-lg bg-zinc-900 border border-zinc-800 p-3 text-sm text-zinc-100">
+            <div className="rounded-sm bg-zinc-900 border border-zinc-800 p-3 text-sm text-zinc-100">
               £85/year
             </div>
             <div className="flex gap-2 justify-end">
@@ -70,4 +77,3 @@ export function NewDecisionButton({ usage }: NewDecisionButtonProps) {
     </>
   )
 }
-
