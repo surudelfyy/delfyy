@@ -15,7 +15,7 @@ import type { PatternMatcherOutput } from '@/lib/schemas/pattern-matcher'
 export async function runPipeline(
   decisionId: string,
   supabase: SupabaseClient,
-  onProgress: (step: string, message: string) => void
+  onProgress: (_step: string, _message: string) => void,
 ): Promise<DecisionRow> {
   const { data: decision, error } = await supabase
     .from('decisions')
@@ -38,7 +38,10 @@ export async function runPipeline(
         question: decision.question,
         context: (decision.input_context as Record<string, unknown>) ?? {},
       })
-      await supabase.from('decisions').update({ classifier_output: classifierOutput }).eq('id', decisionId)
+      await supabase
+        .from('decisions')
+        .update({ classifier_output: classifierOutput })
+        .eq('id', decisionId)
     } finally {
       console.timeEnd('1-classifier')
     }
@@ -62,9 +65,12 @@ export async function runPipeline(
           input_context: decision.input_context,
           classifier_output: classifierOutput,
         },
-        lensPacks
+        lensPacks,
       )
-      await supabase.from('decisions').update({ lens_outputs: lensOutputs }).eq('id', decisionId)
+      await supabase
+        .from('decisions')
+        .update({ lens_outputs: lensOutputs })
+        .eq('id', decisionId)
     } finally {
       console.timeEnd('3-lenses')
     }
@@ -74,7 +80,10 @@ export async function runPipeline(
     try {
       onProgress('governing', 'Checking confidence...')
       governorOutput = runEvidenceGovernor({ lensOutputs, classifierOutput })
-      await supabase.from('decisions').update({ governor_output: governorOutput }).eq('id', decisionId)
+      await supabase
+        .from('decisions')
+        .update({ governor_output: governorOutput })
+        .eq('id', decisionId)
     } finally {
       console.timeEnd('4-governor')
     }
@@ -88,9 +97,12 @@ export async function runPipeline(
       decisionMemo = await synthesise(
         { question: decision.question, input_context: decision.input_context },
         lensOutputs,
-        governorOutput
+        governorOutput,
       )
-      await supabase.from('decisions').update({ decision_memo: decisionMemo }).eq('id', decisionId)
+      await supabase
+        .from('decisions')
+        .update({ decision_memo: decisionMemo })
+        .eq('id', decisionId)
     } finally {
       console.timeEnd('5-synthesiser')
     }
@@ -102,10 +114,10 @@ export async function runPipeline(
       const exampleAtoms = atoms.filter((a) => a.type === 'Example')
       console.log(
         '[MATCH INPUT DEBUG] firstExampleAtomFull',
-        JSON.stringify(exampleAtoms[0] ?? null, null, 2).slice(0, 2000)
+        JSON.stringify(exampleAtoms[0] ?? null, null, 2).slice(0, 2000),
       )
       const typeCounts = atoms.reduce<Record<string, number>>((acc, a) => {
-        const t = String((a as any).type)
+        const t = String((a as Record<string, unknown>).type)
         acc[t] = (acc[t] ?? 0) + 1
         return acc
       }, {})
@@ -116,7 +128,6 @@ export async function runPipeline(
         typeCounts,
         uniqueTypes: Object.keys(typeCounts),
       })
-      const topReasons: { reason: string; because: string }[] = []
       const result = await matchPatterns({
         classifierOutput,
         recommendedChoice: decisionMemo.call,
@@ -155,7 +166,11 @@ export async function runPipeline(
       console.timeEnd('7-render')
     }
 
-    const { data: final } = await supabase.from('decisions').select('*').eq('id', decisionId).single()
+    const { data: final } = await supabase
+      .from('decisions')
+      .select('*')
+      .eq('id', decisionId)
+      .single()
     return final as DecisionRow
   } catch (err) {
     await supabase
@@ -165,4 +180,3 @@ export async function runPipeline(
     throw err
   }
 }
-

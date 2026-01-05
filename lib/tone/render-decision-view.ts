@@ -9,11 +9,16 @@ type RenderDecisionViewInput = {
 }
 
 function replaceHeading(line: string): string {
-  if (line.startsWith('## The Call')) return '## ' + getLabel('the-call', 'calm-founder', 'app')
-  if (line.startsWith('## Do next')) return '## ' + getLabel('do-next', 'calm-founder', 'app')
-  if (line.startsWith('## Why this call')) return '## ' + getLabel('why-this-call', 'calm-founder', 'app')
-  if (line.startsWith('## Decision Guardrails')) return '## ' + getLabel('decision-guardrails', 'calm-founder', 'app')
-  if (line.startsWith('## The Pattern')) return '## ' + getLabel('the-pattern', 'calm-founder', 'app')
+  if (line.startsWith('## The Call'))
+    return '## ' + getLabel('the-call', 'calm-founder', 'app')
+  if (line.startsWith('## Do next'))
+    return '## ' + getLabel('do-next', 'calm-founder', 'app')
+  if (line.startsWith('## Why this call'))
+    return '## ' + getLabel('why-this-call', 'calm-founder', 'app')
+  if (line.startsWith('## Decision Guardrails'))
+    return '## ' + getLabel('decision-guardrails', 'calm-founder', 'app')
+  if (line.startsWith('## The Pattern'))
+    return '## ' + getLabel('the-pattern', 'calm-founder', 'app')
   if (line.startsWith('## Meta')) return ''
   return line
 }
@@ -28,15 +33,17 @@ function rewriteConfidence(line: string): string {
     tier === 'directional'
       ? getLabel('confidence-tier-directional', 'calm-founder', 'app')
       : tier === 'supported'
-      ? getLabel('confidence-tier-supported', 'calm-founder', 'app')
-      : tier === 'high'
-      ? getLabel('confidence-tier-high', 'calm-founder', 'app')
-      : getLabel('confidence-tier-default', 'calm-founder', 'app')
+        ? getLabel('confidence-tier-supported', 'calm-founder', 'app')
+        : tier === 'high'
+          ? getLabel('confidence-tier-high', 'calm-founder', 'app')
+          : getLabel('confidence-tier-default', 'calm-founder', 'app')
   // Preserve any dash-separated rationale
   return `${label}${rest}`
 }
 
-export function renderDecisionView({ memoMarkdown, tone, channel }: RenderDecisionViewInput): { markdown: string } {
+export function renderDecisionView({ memoMarkdown }: RenderDecisionViewInput): {
+  markdown: string
+} {
   const lines = memoMarkdown.split('\n')
   const output: string[] = []
 
@@ -69,4 +76,3 @@ export function renderDecisionView({ memoMarkdown, tone, channel }: RenderDecisi
 
   return { markdown: output.join('\n') }
 }
-

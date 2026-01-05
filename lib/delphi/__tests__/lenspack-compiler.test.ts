@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  compileLensPacks,
-  type LensPackCompilerInput,
-  type ScoredAtom,
-} from '../lenspack-compiler'
+import { compileLensPacks } from '../lenspack-compiler'
 import type { ConceptAtom } from '@/lib/schemas/atoms'
 import type { ClassifierOutput } from '@/lib/schemas/classifier'
 
@@ -11,7 +7,9 @@ import type { ClassifierOutput } from '@/lib/schemas/classifier'
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeAtom(overrides: Partial<ConceptAtom> & { id: string }): ConceptAtom {
+function makeAtom(
+  overrides: Partial<ConceptAtom> & { id: string },
+): ConceptAtom {
   return {
     id: overrides.id,
     source: overrides.source ?? 'test',
@@ -33,7 +31,9 @@ function makeAtom(overrides: Partial<ConceptAtom> & { id: string }): ConceptAtom
   }
 }
 
-function makeClassifier(overrides: Partial<ClassifierOutput> = {}): ClassifierOutput {
+function makeClassifier(
+  overrides: Partial<ClassifierOutput> = {},
+): ClassifierOutput {
   return {
     level: overrides.level ?? 'Product',
     dimension: overrides.dimension ?? 'Scope',
@@ -230,19 +230,23 @@ describe('Quota enforcement', () => {
     const atoms: ConceptAtom[] = [
       // 5 Signals
       ...Array.from({ length: 5 }, (_, i) =>
-        makeAtom({ id: `signal-${i}`, type: 'Signal', level: 'Product' })
+        makeAtom({ id: `signal-${i}`, type: 'Signal', level: 'Product' }),
       ),
       // 10 Heuristics
       ...Array.from({ length: 10 }, (_, i) =>
-        makeAtom({ id: `heuristic-${i}`, type: 'Heuristic', level: 'Product' })
+        makeAtom({ id: `heuristic-${i}`, type: 'Heuristic', level: 'Product' }),
       ),
       // 7 FailureModes
       ...Array.from({ length: 7 }, (_, i) =>
-        makeAtom({ id: `failuremode-${i}`, type: 'FailureMode', level: 'Product' })
+        makeAtom({
+          id: `failuremode-${i}`,
+          type: 'FailureMode',
+          level: 'Product',
+        }),
       ),
       // 4 Examples
       ...Array.from({ length: 4 }, (_, i) =>
-        makeAtom({ id: `example-${i}`, type: 'Example', level: 'Product' })
+        makeAtom({ id: `example-${i}`, type: 'Example', level: 'Product' }),
       ),
     ]
 
@@ -252,7 +256,9 @@ describe('Quota enforcement', () => {
     for (const pack of result) {
       const signals = pack.atoms.filter((a) => a.type === 'Signal').length
       const heuristics = pack.atoms.filter((a) => a.type === 'Heuristic').length
-      const failureModes = pack.atoms.filter((a) => a.type === 'FailureMode').length
+      const failureModes = pack.atoms.filter(
+        (a) => a.type === 'FailureMode',
+      ).length
       const examples = pack.atoms.filter((a) => a.type === 'Example').length
 
       // Quotas: Signal 2-3, Heuristic 5-8, FailureMode 3-5, Example 1-2
@@ -276,16 +282,20 @@ describe('Pack size', () => {
   it('each pack is between 8 and 12 when enough atoms exist', () => {
     const atoms: ConceptAtom[] = [
       ...Array.from({ length: 5 }, (_, i) =>
-        makeAtom({ id: `signal-${i}`, type: 'Signal', level: 'Product' })
+        makeAtom({ id: `signal-${i}`, type: 'Signal', level: 'Product' }),
       ),
       ...Array.from({ length: 10 }, (_, i) =>
-        makeAtom({ id: `heuristic-${i}`, type: 'Heuristic', level: 'Product' })
+        makeAtom({ id: `heuristic-${i}`, type: 'Heuristic', level: 'Product' }),
       ),
       ...Array.from({ length: 7 }, (_, i) =>
-        makeAtom({ id: `failuremode-${i}`, type: 'FailureMode', level: 'Product' })
+        makeAtom({
+          id: `failuremode-${i}`,
+          type: 'FailureMode',
+          level: 'Product',
+        }),
       ),
       ...Array.from({ length: 4 }, (_, i) =>
-        makeAtom({ id: `example-${i}`, type: 'Example', level: 'Product' })
+        makeAtom({ id: `example-${i}`, type: 'Example', level: 'Product' }),
       ),
     ]
 
@@ -324,11 +334,18 @@ describe('Challenger logic', () => {
       ...Array.from({ length: 12 }, (_, i) =>
         makeAtom({
           id: `customer-${i}`,
-          type: i < 3 ? 'Signal' : i < 8 ? 'Heuristic' : i < 11 ? 'FailureMode' : 'Example',
+          type:
+            i < 3
+              ? 'Signal'
+              : i < 8
+                ? 'Heuristic'
+                : i < 11
+                  ? 'FailureMode'
+                  : 'Example',
           level: 'Product',
           lens: ['Customer'],
           dimension: null,
-        })
+        }),
       ),
       // Business-only atom with HIGH score (challenger)
       makeAtom({
@@ -350,7 +367,9 @@ describe('Challenger logic', () => {
     const customerPack = result.find((p) => p.lens === 'Customer')!
 
     // Customer pack should have the challenger swapped in
-    const hasChallenger = customerPack.atoms.some((a) => a.id === 'business-challenger')
+    const hasChallenger = customerPack.atoms.some(
+      (a) => a.id === 'business-challenger',
+    )
     expect(hasChallenger).toBe(true)
 
     // Count should still be 12 (no net addition)
@@ -363,11 +382,18 @@ describe('Challenger logic', () => {
       ...Array.from({ length: 12 }, (_, i) =>
         makeAtom({
           id: `customer-${i}`,
-          type: i < 3 ? 'Signal' : i < 8 ? 'Heuristic' : i < 11 ? 'FailureMode' : 'Example',
+          type:
+            i < 3
+              ? 'Signal'
+              : i < 8
+                ? 'Heuristic'
+                : i < 11
+                  ? 'FailureMode'
+                  : 'Example',
           level: 'Product',
           lens: ['Customer'],
           dimension: null,
-        })
+        }),
       ),
       // 4 Business-only challengers
       ...Array.from({ length: 4 }, (_, i) =>
@@ -378,7 +404,7 @@ describe('Challenger logic', () => {
           lens: ['Business'],
           dimension: 'Scope',
           strength: 'High',
-        })
+        }),
       ),
     ]
 
@@ -392,7 +418,7 @@ describe('Challenger logic', () => {
 
     // Count challengers in customer pack
     const challengersInPack = customerPack.atoms.filter((a) =>
-      a.id.startsWith('challenger-')
+      a.id.startsWith('challenger-'),
     ).length
 
     // At most 2 challengers should be swapped in
@@ -405,10 +431,17 @@ describe('Challenger logic', () => {
       ...Array.from({ length: 12 }, (_, i) =>
         makeAtom({
           id: `shared-${i}`,
-          type: i < 3 ? 'Signal' : i < 8 ? 'Heuristic' : i < 11 ? 'FailureMode' : 'Example',
+          type:
+            i < 3
+              ? 'Signal'
+              : i < 8
+                ? 'Heuristic'
+                : i < 11
+                  ? 'FailureMode'
+                  : 'Example',
           level: 'Product',
           lens: ['Customer', 'Business'],
-        })
+        }),
       ),
     ]
 
@@ -431,7 +464,7 @@ describe('Challenger logic', () => {
           type: 'Heuristic',
           level: 'Product',
           lens: ['Customer'],
-        })
+        }),
       ),
       // 1 Business challenger with high score
       makeAtom({
@@ -454,7 +487,9 @@ describe('Challenger logic', () => {
 
     // Pack has only 4 atoms, should NOT have challenger
     expect(customerPack.atoms.length).toBe(4)
-    expect(customerPack.atoms.some((a) => a.id === 'business-challenger')).toBe(false)
+    expect(customerPack.atoms.some((a) => a.id === 'business-challenger')).toBe(
+      false,
+    )
   })
 })
 
@@ -479,7 +514,12 @@ describe('Output structure', () => {
 
   it('atoms are sorted by score DESC within each pack', () => {
     const atoms: ConceptAtom[] = [
-      makeAtom({ id: 'low', type: 'Signal', level: 'Product', dimension: null }),
+      makeAtom({
+        id: 'low',
+        type: 'Signal',
+        level: 'Product',
+        dimension: null,
+      }),
       makeAtom({
         id: 'high',
         type: 'Signal',
@@ -505,10 +545,9 @@ describe('Output structure', () => {
     for (const pack of result) {
       for (let i = 1; i < pack.atoms.length; i++) {
         expect(pack.atoms[i - 1].relevance_score).toBeGreaterThanOrEqual(
-          pack.atoms[i].relevance_score
+          pack.atoms[i].relevance_score,
         )
       }
     }
   })
 })
-

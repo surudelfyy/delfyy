@@ -2,11 +2,11 @@ import { callClaudeJSON, CLAUDE_MODEL_HAIKU } from '@/lib/claude/client'
 import type { LensPack } from '@/lib/delphi/lenspack-compiler'
 import { LENS_EVALUATOR_SYSTEM_PROMPT } from '@/prompts/lens-evaluator'
 import type { ClassifierOutput } from '@/lib/schemas/classifier'
-import { LensOutputSchema, LensOutputJsonSchema, type LensOutput } from '@/lib/schemas/lens'
+import { LensOutputJsonSchema, type LensOutput } from '@/lib/schemas/lens'
 
 type DecisionInput = {
   question: string
-  input_context: any
+  input_context: Record<string, unknown> | null
   classifier_output: ClassifierOutput
 }
 
@@ -47,7 +47,7 @@ function buildReferenceNotes(lensPack: LensPack | undefined) {
 
 export async function evaluateLenses(
   decision: DecisionInput,
-  lensPacks: LensPack[]
+  lensPacks: LensPack[],
 ): Promise<LensOutput[]> {
   const packByLens = new Map<LensOutput['lens'], LensPack>()
   for (const pack of lensPacks) {
@@ -89,4 +89,3 @@ export async function evaluateLenses(
 
   return outputs
 }
-

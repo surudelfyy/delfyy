@@ -1,5 +1,18 @@
 import Link from 'next/link'
 import { signup } from '../actions'
+import { Page } from '@/components/layout/page'
+import { Stack } from '@/components/layout/stack'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { H1, Muted } from '@/components/typography'
 
 export default async function SignupPage({
   searchParams,
@@ -9,69 +22,63 @@ export default async function SignupPage({
   const params = await searchParams
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
-        <p className="text-muted-foreground mt-2">Get started with Delfyy</p>
-      </div>
+    <Page width="narrow" className="flex items-center justify-center">
+      <Card className="w-full max-w-md p-6 space-y-6">
+        <CardHeader className="p-0 text-center">
+          <CardTitle>
+            <H1>Create an account</H1>
+          </CardTitle>
+          <CardDescription>
+            <Muted>Get started with Delfyy</Muted>
+          </CardDescription>
+        </CardHeader>
 
-      {params.error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm">
-          {params.error}
-        </div>
-      )}
+        <CardContent className="p-0">
+          <Stack size={4}>
+            {params.error && (
+              <div className="bg-destructive/10 text-destructive p-3 rounded-xl text-sm">
+                {params.error}
+              </div>
+            )}
 
-      <form className="space-y-4">
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-foreground/80"
-          >
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            className="mt-1 block w-full px-3 py-2 border border-border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
-          />
-        </div>
+            <form>
+              <Stack size={4}>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" name="email" type="email" required />
+                </div>
 
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-foreground/80"
-          >
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            minLength={8}
-            className="mt-1 block w-full px-3 py-2 border border-border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
-          />
-          <p className="mt-1 text-xs text-muted-foreground">
-            Minimum 8 characters
-          </p>
-        </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    minLength={8}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Minimum 8 characters
+                  </span>
+                </div>
 
-        <button
-          formAction={signup}
-          className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-        >
-          Create account
-        </button>
-      </form>
+                <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                  <Button formAction={signup} className="w-full sm:w-auto">
+                    Create account
+                  </Button>
+                </div>
+              </Stack>
+            </form>
 
-      <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{' '}
-        <Link href="/login" className="text-primary hover:underline">
-          Sign in
-        </Link>
-      </p>
-    </div>
+            <p className="text-center text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Link href="/login" className="text-primary hover:underline">
+                Sign in
+              </Link>
+            </p>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Page>
   )
 }

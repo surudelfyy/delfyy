@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getUserSubscription } from '@/lib/subscription'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LogoutButton } from '@/components/logout-button'
 import { Logo } from '@/components/logo'
@@ -17,6 +18,8 @@ export default async function DashboardLayout({
 
   if (!user) redirect('/login')
 
+  const { isPaid } = await getUserSubscription(user.id)
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <header className="border-b border-border bg-background">
@@ -25,6 +28,14 @@ export default async function DashboardLayout({
             <Logo width={100} className="text-foreground" />
           </Link>
           <div className="flex items-center gap-2">
+            {isPaid && (
+              <Link
+                href="/settings"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Settings
+              </Link>
+            )}
             <ThemeToggle />
             <LogoutButton />
           </div>

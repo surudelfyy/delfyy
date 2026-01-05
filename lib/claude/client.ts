@@ -73,7 +73,10 @@ type ClaudeCallParams<T> = {
 function stripCodeFences(s: string): string {
   const t = s.trim()
   if (t.startsWith('```')) {
-    return t.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim()
+    return t
+      .replace(/^```[a-zA-Z]*\n?/, '')
+      .replace(/```$/, '')
+      .trim()
   }
   return t
 }
@@ -90,10 +93,18 @@ async function callClaudeOnce<T>(
   schema: ZodSchema<T>,
   temperature: number | undefined,
   maxTokens: number,
-  timeoutMs: number
-): Promise<{ data: T } | { error: 'parse' | 'validation' | 'timeout' | 'api'; rawText?: string; message?: string; status?: number }> {
+  timeoutMs: number,
+): Promise<
+  | { data: T }
+  | {
+      error: 'parse' | 'validation' | 'timeout' | 'api'
+      rawText?: string
+      message?: string
+      status?: number
+    }
+> {
   const controller = new AbortController()
-  let rejectTimeout: ((reason?: unknown) => void) | undefined
+  let rejectTimeout: ((_reason?: unknown) => void) | undefined
   const timeoutPromise = new Promise<never>((_, reject) => {
     rejectTimeout = reject
   })
@@ -114,15 +125,19 @@ async function callClaudeOnce<T>(
         temperature,
         max_tokens: maxTokens,
       },
-      { signal: controller.signal }
+      { signal: controller.signal },
     )
     const response = (await Promise.race([
       responsePromise,
       timeoutPromise,
-    ])) as Awaited<ReturnType<ReturnType<typeof getAnthropic>['messages']['create']>>
+    ])) as Awaited<
+      ReturnType<ReturnType<typeof getAnthropic>['messages']['create']>
+    >
 
     const textContent = response.content
-      .map((block: { type: string; text?: string }) => (block.type === 'text' ? block.text ?? '' : ''))
+      .map((block: { type: string; text?: string }) =>
+        block.type === 'text' ? (block.text ?? '') : '',
+      )
       .join('')
       .trim()
 
@@ -199,7 +214,7 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
       schema,
       temperature,
       maxTokens,
-      timeoutMs
+      timeoutMs,
     )
 
     if ('data' in result) {
@@ -214,11 +229,13 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
     })
 
     // On parse/validation failure, try repair by appending the bad output + repair instruction
-    if ((result.error === 'parse' || result.error === 'validation') && result.rawText) {
+    if (
+      (result.error === 'parse' || result.error === 'validation') &&
+      result.rawText
+    ) {
       lastRawText = result.rawText
 
       if (result.error === 'validation') {
-        // eslint-disable-next-line no-console
         console.log('Raw response:', result.rawText)
       }
 
@@ -241,7 +258,8 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
     // On timeout or API error, retry with backoff
     if (result.error === 'timeout' || result.error === 'api') {
       const retryableStatus =
-        result.status !== undefined && [429, 500, 502, 503, 504].includes(result.status)
+        result.status !== undefined &&
+        [429, 500, 502, 503, 504].includes(result.status)
 
       if (result.error === 'timeout' || retryableStatus) {
         if (attempt < maxRetries) {
@@ -251,7 +269,10 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
       }
 
       if (result.error === 'api') {
-        throw new ClaudeApiError(result.message ?? 'Claude API error', result.status)
+        throw new ClaudeApiError(
+          result.message ?? 'Claude API error',
+          result.status,
+        )
       }
       throw new ClaudeTimeoutError()
     }
@@ -263,7 +284,9 @@ export async function callClaude<T>(params: ClaudeCallParams<T>): Promise<T> {
       }
       if (result.error === 'validation') {
         throw new ClaudeValidationError(
-          lastRawText ? `Validation failed. Raw: ${lastRawText.slice(0, 200)}...` : undefined
+          lastRawText
+            ? `Validation failed. Raw: ${lastRawText.slice(0, 200)}...`
+            : undefined,
         )
       }
     }
@@ -281,10 +304,18 @@ export async function callClaudeJSON<T>(args: {
   max_tokens: number
   system?: string
   messages: Array<{ role: 'user' | 'assistant'; content: string }>
-  schema: any
+  schema: Record<string, unknown>
 }): Promise<T> {
   if (!args.model) throw new Error('Claude model is not configured')
-  const client = getAnthropic() as any
+  const client = getAnthropic() as {
+    beta: {
+      messages: {
+        create: (
+          ..._args: unknown[]
+        ) => Promise<{ content?: Array<{ type: string; text?: string }> }>
+      }
+    }
+  }
   const label = `[CLAUDE_JSON] ${args.model} ${Date.now()}-${Math.random()
     .toString(16)
     .slice(2)}`

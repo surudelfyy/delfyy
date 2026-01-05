@@ -23,7 +23,8 @@ async function main() {
       source: 'Test Source',
       type: 'Example',
       purpose: 'Illustrate',
-      claim: 'Company Y launched free tier first and struggled with conversion.',
+      claim:
+        'Company Y launched free tier first and struggled with conversion.',
       rationale: 'Free users dominated support; paid conversion lagged.',
       lens: ['Business'],
       level: 'Product',
@@ -50,19 +51,22 @@ async function main() {
     },
     recommendedChoice: 'Start paid-only with a clear trial.',
     topReasons: [
-      { reason: 'Cleaner learning', because: 'You learn pricing and willingness to pay faster.' },
-      { reason: 'Lower support load', because: 'You avoid a large low-intent free cohort.' },
+      {
+        reason: 'Cleaner learning',
+        because: 'You learn pricing and willingness to pay faster.',
+      },
+      {
+        reason: 'Lower support load',
+        because: 'You avoid a large low-intent free cohort.',
+      },
     ],
     exampleAtoms,
   })
 
-  // eslint-disable-next-line no-console
   console.log(JSON.stringify(out, null, 2))
 }
 
 main().catch((e) => {
-  // eslint-disable-next-line no-console
   console.error(e)
   process.exit(1)
 })
-

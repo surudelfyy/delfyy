@@ -15,14 +15,13 @@ declare module '@anthropic-ai/sdk' {
 
   export interface ClaudeMessagesClient {
     create: (
-      params: ClaudeMessageCreateParams,
-      options?: { signal?: AbortSignal }
+      _params: ClaudeMessageCreateParams,
+      _options?: { signal?: AbortSignal },
     ) => Promise<{ content: ClaudeMessageContentBlock[] }>
   }
 
   export default class Anthropic {
-    constructor(config: { apiKey?: string })
+    constructor(_config: { apiKey?: string })
     messages: ClaudeMessagesClient
   }
 }
-
