@@ -54,8 +54,8 @@ export function OutcomeSelector({
         aria-pressed={isActive}
         className={`px-4 py-2 text-sm font-medium border rounded-none transition-colors ${
           isActive
-            ? 'border-zinc-500 bg-zinc-900 text-zinc-100'
-            : 'border-zinc-700 text-zinc-300 hover:border-zinc-500'
+            ? 'border-input bg-card text-foreground'
+            : 'border-border text-foreground/80 hover:border-input'
         } ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
       >
         {label}
@@ -65,10 +65,12 @@ export function OutcomeSelector({
 
   return (
     <section className="mt-10">
-      <h2 className="font-heading text-xl font-bold tracking-tight text-zinc-100 mb-2">
+      <h2 className="text-xl font-bold tracking-tight text-foreground mb-2">
         Outcome
       </h2>
-      <p className="text-sm text-zinc-500 mb-4">Did this decision work out?</p>
+      <p className="text-sm text-muted-foreground mb-4">
+        Did this decision work out?
+      </p>
       <div className="flex flex-wrap gap-2">
         {btn('successful', 'Successful')}
         {btn('failed', 'Failed')}

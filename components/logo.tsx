@@ -1,0 +1,52 @@
+interface LogoProps {
+  className?: string
+  width?: number
+  height?: number
+}
+
+export function Logo({ className = '', width = 120, height = 22 }: LogoProps) {
+  // Calculate aspect ratio - original is 373x67
+  const aspectRatio = 373 / 67
+  const calculatedHeight = height || width / aspectRatio
+
+  return (
+    <svg
+      width={width}
+      height={calculatedHeight}
+      viewBox="0 0 373 67"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-label="Delfyy"
+    >
+      <path
+        d="M351.896 66.152V47.048H372.248V66.152H351.896Z"
+        fill="currentColor"
+      />
+      <path
+        d="M335.773 66.048H314.557V40.416L288.349 0H312.733L325.405 21.984H325.789L338.461 0H361.597L335.773 40.416V66.048Z"
+        fill="currentColor"
+      />
+      <path
+        d="M283.854 66.048H262.638V40.416L236.43 0H260.815L273.487 21.984H273.871L286.543 0H309.678L283.854 40.416V66.048Z"
+        fill="currentColor"
+      />
+      <path
+        d="M193.631 0H247.007V15.84H214.847V27.168H242.495V42.336H214.847V66.048H193.631V0Z"
+        fill="currentColor"
+      />
+      <path
+        d="M134.4 0H155.616V49.152H189.504V66.048H134.4V0Z"
+        fill="currentColor"
+      />
+      <path
+        d="M69.9188 0H127.039V15.84H91.1348V24.96H121.855V40.128H91.1348V50.208H127.711V66.048H69.9188V0Z"
+        fill="currentColor"
+      />
+      <path
+        d="M28.608 0C51.712 0 63.264 11.008 63.264 33.024C63.264 55.04 51.712 66.048 28.608 66.048H0V0H28.608ZM21.216 50.208H28.224C37.12 50.208 41.568 45.44 41.568 35.904V30.144C41.568 20.608 37.12 15.84 28.224 15.84H21.216V50.208Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}

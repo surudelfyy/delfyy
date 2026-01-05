@@ -4,7 +4,7 @@ type ChildrenProps = { children: ReactNode }
 
 export function H1({ children }: ChildrenProps) {
   return (
-    <h1 className="font-heading text-2xl md:text-3xl font-bold tracking-tight">
+    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
       {children}
     </h1>
   )
@@ -12,9 +12,7 @@ export function H1({ children }: ChildrenProps) {
 
 export function H2({ children }: ChildrenProps) {
   return (
-    <h2 className="font-heading text-lg md:text-xl font-bold tracking-tight">
-      {children}
-    </h2>
+    <h2 className="text-lg md:text-xl font-bold tracking-tight">{children}</h2>
   )
 }
 

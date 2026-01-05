@@ -35,15 +35,15 @@ export default async function DecisionPage({ params }: PageProps) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center px-4">
         <div className="text-center space-y-3">
-          <div className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-50">
+          <div className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
             Decision not found
           </div>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             We couldn&apos;t load that decision. It may have been removed.
           </p>
           <Link
             href="/dashboard"
-            className="text-sm text-zinc-500 underline hover:text-zinc-300"
+            className="text-sm text-muted-foreground underline hover:text-foreground/80"
           >
             Back to dashboard
           </Link>
@@ -56,12 +56,15 @@ export default async function DecisionPage({ params }: PageProps) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 text-zinc-500 mb-4">
-            <div className="h-4 w-4 border-2 border-zinc-700 border-t-zinc-600 rounded-full animate-spin" />
+          <div className="inline-flex items-center gap-2 text-muted-foreground mb-4">
+            <div className="h-4 w-4 border-2 border-border border-t-input rounded-full animate-spin" />
             <span className="text-sm">Still processing...</span>
           </div>
-          <p className="text-sm text-zinc-600">
-            <Link href="/dashboard" className="underline hover:text-zinc-400">
+          <p className="text-sm text-muted-foreground">
+            <Link
+              href="/dashboard"
+              className="underline hover:text-muted-foreground"
+            >
               Back to dashboard
             </Link>
           </p>
@@ -74,12 +77,12 @@ export default async function DecisionPage({ params }: PageProps) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-red-600 mb-4 text-sm sm:text-base">
+          <p className="text-destructive mb-4 text-sm sm:text-base">
             This decision couldn&apos;t be completed.
           </p>
           <Link
             href="/decide"
-            className="text-sm text-zinc-500 underline hover:text-zinc-300"
+            className="text-sm text-muted-foreground underline hover:text-foreground/80"
           >
             Try again
           </Link>
@@ -91,14 +94,14 @@ export default async function DecisionPage({ params }: PageProps) {
   const parsed = DecisionMemoSchema.safeParse(decision.decision_memo)
   if (!parsed.success) {
     return (
-      <main className="min-h-screen bg-zinc-950">
+      <main className="min-h-screen bg-background">
         <div className="max-w-2xl mx-auto px-6 py-16 text-center">
-          <p className="text-zinc-300 mb-3">
+          <p className="text-foreground/80 mb-3">
             Decision memo is missing or invalid.
           </p>
           <Link
             href="/dashboard"
-            className="text-sm text-zinc-500 hover:text-zinc-300 underline"
+            className="text-sm text-muted-foreground hover:text-foreground/80 underline"
           >
             ← Back to dashboard
           </Link>
@@ -140,11 +143,7 @@ export default async function DecisionPage({ params }: PageProps) {
           ? 'Pending'
           : null
 
-  const bannerStyle =
-    memo.confidence.tier === 'exploratory' ||
-    memo.confidence.tier === 'directional'
-      ? 'bg-zinc-900 border-zinc-800'
-      : 'bg-zinc-900 border-zinc-800'
+  const bannerStyle = 'bg-card border-border'
 
   return (
     <article className="max-w-2xl mx-auto py-4 sm:py-8">
@@ -159,22 +158,22 @@ export default async function DecisionPage({ params }: PageProps) {
         stage={memo.meta.stage ?? null}
       />
 
-      <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight leading-tight text-zinc-100 mb-3 break-words">
+      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight leading-tight text-foreground mb-3 break-words">
         {toSentenceCase(memo.question)}
       </h1>
 
       <div className="flex flex-wrap items-center gap-2 mt-3 mb-4">
-        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded-sm uppercase tracking-wide whitespace-nowrap">
+        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-border text-foreground/80 rounded-xl uppercase tracking-wide whitespace-nowrap">
           {confidenceLabel}
         </span>
-        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded-sm uppercase tracking-wide whitespace-nowrap">
+        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-border text-foreground/80 rounded-xl uppercase tracking-wide whitespace-nowrap">
           {stageLabel}
         </span>
-        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded-sm uppercase tracking-wide whitespace-nowrap">
+        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-border text-foreground/80 rounded-xl uppercase tracking-wide whitespace-nowrap">
           {createdDate}
         </span>
         {outcomeLabel ? (
-          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-zinc-500 text-zinc-300 rounded-sm uppercase tracking-wide whitespace-nowrap">
+          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium border border-border text-foreground/80 rounded-xl uppercase tracking-wide whitespace-nowrap">
             {outcomeLabel}
           </span>
         ) : null}
@@ -182,9 +181,9 @@ export default async function DecisionPage({ params }: PageProps) {
 
       {memo.confidence.rationale ? (
         <div
-          className={cn('mt-4 mb-6 p-3 sm:p-4 rounded-sm border', bannerStyle)}
+          className={cn('mt-4 mb-6 p-3 sm:p-4 rounded-xl border', bannerStyle)}
         >
-          <p className="text-zinc-400 text-sm leading-relaxed">
+          <p className="text-muted-foreground text-sm leading-relaxed">
             {memo.confidence.rationale}
           </p>
         </div>
@@ -193,7 +192,7 @@ export default async function DecisionPage({ params }: PageProps) {
       <DecisionMemoView memo={memo} />
 
       {!decision.committed_at ? (
-        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-zinc-800">
+        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-border">
           <CommitmentBlock
             decisionId={decision.id}
             nextSteps={memo.next_steps}

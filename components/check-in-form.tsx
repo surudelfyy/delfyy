@@ -84,7 +84,7 @@ export function CheckInForm({ decisionId }: CheckInFormProps) {
           {outcomes.map((outcome) => (
             <label
               key={outcome.value}
-              className={`flex cursor-pointer items-start gap-4 rounded-sm border-2 p-4 transition-all duration-150 ${
+              className={`flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all duration-150 ${
                 selectedOutcome === outcome.value
                   ? outcome.selectedClass
                   : outcome.defaultClass
@@ -124,7 +124,7 @@ export function CheckInForm({ decisionId }: CheckInFormProps) {
           placeholder="What did you learn? What would you do differently?"
           rows={3}
           maxLength={1000}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+          className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
         />
         {note.length > 0 && (
           <p className="mt-1 text-right text-xs text-muted-foreground">
@@ -135,7 +135,7 @@ export function CheckInForm({ decisionId }: CheckInFormProps) {
 
       {error && (
         <div
-          className="mb-6 rounded-md bg-red-50 p-3 text-sm text-red-700"
+          className="mb-6 rounded-xl bg-red-50 p-3 text-sm text-red-700"
           role="alert"
         >
           {error}
@@ -145,7 +145,7 @@ export function CheckInForm({ decisionId }: CheckInFormProps) {
       <button
         type="submit"
         disabled={!selectedOutcome || isSubmitting}
-        className="w-full rounded-md bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSubmitting ? 'Saving...' : 'Confirm'}
       </button>

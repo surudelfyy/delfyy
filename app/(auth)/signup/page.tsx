@@ -11,14 +11,12 @@ export default async function SignupPage({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="font-heading text-2xl font-bold tracking-tight">
-          Create an account
-        </h1>
-        <p className="text-zinc-400 mt-2">Get started with Delfyy</p>
+        <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
+        <p className="text-muted-foreground mt-2">Get started with Delfyy</p>
       </div>
 
       {params.error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm">
           {params.error}
         </div>
       )}
@@ -27,7 +25,7 @@ export default async function SignupPage({
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-zinc-300"
+            className="block text-sm font-medium text-foreground/80"
           >
             Email
           </label>
@@ -36,14 +34,14 @@ export default async function SignupPage({
             name="email"
             type="email"
             required
-            className="mt-1 block w-full px-3 py-2 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           />
         </div>
 
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-zinc-300"
+            className="block text-sm font-medium text-foreground/80"
           >
             Password
           </label>
@@ -53,22 +51,24 @@ export default async function SignupPage({
             type="password"
             required
             minLength={8}
-            className="mt-1 block w-full px-3 py-2 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           />
-          <p className="mt-1 text-xs text-zinc-500">Minimum 8 characters</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Minimum 8 characters
+          </p>
         </div>
 
         <button
           formAction={signup}
-          className="w-full py-2 px-4 bg-blue-600 text-zinc-950 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
           Create account
         </button>
       </form>
 
-      <p className="text-center text-sm text-zinc-400">
+      <p className="text-center text-sm text-muted-foreground">
         Already have an account?{' '}
-        <Link href="/login" className="text-blue-600 hover:underline">
+        <Link href="/login" className="text-primary hover:underline">
           Sign in
         </Link>
       </p>

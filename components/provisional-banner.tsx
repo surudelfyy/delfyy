@@ -4,9 +4,9 @@ import { AlertTriangle } from 'lucide-react'
 
 export function ProvisionalBanner() {
   return (
-    <div className="bg-amber-50/50 border border-amber-200/60 rounded-sm p-4 mb-6">
+    <div className="bg-amber-50/50 border border-amber-200/60 rounded-xl p-4 mb-6">
       <div className="flex items-start gap-3">
-        <div className="p-1.5 bg-amber-100 rounded-md">
+        <div className="p-1.5 bg-amber-100 rounded-xl">
           <AlertTriangle className="h-4 w-4 text-amber-600" />
         </div>
         <div>

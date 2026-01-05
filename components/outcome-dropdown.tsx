@@ -21,19 +21,19 @@ const OUTCOME_OPTIONS: Array<{
     value: 'successful',
     label: 'Successful',
     icon: Check,
-    activeClass: 'border border-zinc-500 text-zinc-100 bg-zinc-800',
+    activeClass: 'border border-ring text-foreground bg-accent',
   },
   {
     value: 'failed',
     label: 'Failed',
     icon: X,
-    activeClass: 'border border-zinc-700 text-zinc-300 bg-zinc-900',
+    activeClass: 'border border-border text-muted-foreground bg-secondary',
   },
   {
     value: 'in_progress',
     label: 'Pending',
     icon: Circle,
-    activeClass: 'border border-zinc-700 text-zinc-400 bg-zinc-900',
+    activeClass: 'border border-border text-muted-foreground bg-secondary',
   },
 ]
 
@@ -112,7 +112,7 @@ export function OutcomeDropdown({
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
-        className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-sm hover:bg-zinc-700 transition-colors ${
+        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-sm hover:bg-accent transition-colors ${
           currentOption.activeClass
         } ${isLoading ? 'opacity-70 cursor-wait' : 'cursor-pointer'}`}
       >
@@ -124,7 +124,7 @@ export function OutcomeDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-44 bg-zinc-900 border border-zinc-700 rounded shadow-lg z-20">
+        <div className="absolute top-full left-0 mt-2 w-44 bg-popover border border-border rounded-xl z-20">
           {OUTCOME_OPTIONS.map((opt) => {
             const Icon = opt.icon
             const isActive = opt.value === outcome
@@ -133,14 +133,14 @@ export function OutcomeDropdown({
                 key={opt.value}
                 type="button"
                 onClick={() => updateOutcome(opt.value)}
-                className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800 transition-colors ${
-                  isActive ? 'bg-zinc-800' : ''
+                className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-popover-foreground hover:bg-accent transition-all duration-150 ${
+                  isActive ? 'bg-accent' : ''
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{opt.label}</span>
                 {isActive && (
-                  <Check className="w-3.5 h-3.5 text-zinc-300 ml-auto" />
+                  <Check className="w-3.5 h-3.5 text-muted-foreground ml-auto" />
                 )}
               </button>
             )

@@ -53,14 +53,14 @@ export function CommitmentBlock({
         })
     return (
       <section className="mt-6 sm:mt-10">
-        <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-100 mb-3 sm:mb-4">
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground mb-3 sm:mb-4">
           Next steps
         </h2>
         <ul className="space-y-2 sm:space-y-3">
           {nextSteps.map((step, i) => (
             <li
               key={i}
-              className="text-sm sm:text-base text-zinc-300 leading-relaxed pl-3 sm:pl-4 border-l-2 border-zinc-700"
+              className="text-sm sm:text-base text-foreground/80 leading-relaxed pl-3 sm:pl-4 border-l-2 border-border"
             >
               {step}
             </li>
@@ -68,7 +68,7 @@ export function CommitmentBlock({
         </ul>
 
         <div className="mt-8 sm:mt-12 mb-6 sm:mb-8 flex justify-center">
-          <div className="flex items-center gap-2 text-zinc-500">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <span className="text-xs sm:text-sm">Committed {date}</span>
           </div>
         </div>
@@ -78,14 +78,14 @@ export function CommitmentBlock({
 
   return (
     <section className="mt-6 sm:mt-10">
-      <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-zinc-100 mb-3 sm:mb-4">
+      <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground mb-3 sm:mb-4">
         Next steps
       </h2>
       <ul className="space-y-2 sm:space-y-3">
         {nextSteps.map((step, i) => (
           <li
             key={i}
-            className="text-sm sm:text-base text-zinc-300 leading-relaxed pl-3 sm:pl-4 border-l-2 border-zinc-700"
+            className="text-sm sm:text-base text-foreground/80 leading-relaxed pl-3 sm:pl-4 border-l-2 border-border"
           >
             {step}
           </li>
@@ -98,14 +98,14 @@ export function CommitmentBlock({
             type="button"
             onClick={handleCommit}
             disabled={saving}
-            className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-white text-black text-sm sm:text-base font-medium rounded-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1 h-11 pl-5 pr-4 bg-primary text-primary-foreground shadow-sm text-sm font-medium rounded-xl hover:bg-primary/90 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : 'Commit to this decision'}
           </button>
 
           <Link
             href="/decide"
-            className="w-full sm:w-auto text-center px-6 sm:px-8 py-3 border border-zinc-700 text-zinc-200 text-sm sm:text-base font-medium rounded-sm hover:bg-zinc-900 transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1 h-11 pl-5 pr-4 bg-secondary text-secondary-foreground border border-border shadow-sm text-sm font-medium rounded-xl hover:bg-accent transition-colors duration-150"
           >
             Decide something else
           </Link>

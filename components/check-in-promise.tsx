@@ -60,7 +60,7 @@ export function CheckInPromise({
 
     return (
       <div
-        className={`rounded-sm border p-4 ${config.bgColor} ${config.borderColor}`}
+        className={`rounded-xl border p-4 ${config.bgColor} ${config.borderColor}`}
       >
         <div className="flex items-center gap-2">
           <span className={`text-lg ${config.textColor}`}>{config.icon}</span>
@@ -74,7 +74,7 @@ export function CheckInPromise({
 
   if (isPast || diffDays <= 0) {
     return (
-      <div className="rounded-sm border-2 border-amber-400 bg-amber-50 p-4">
+      <div className="rounded-xl border-2 border-amber-400 bg-amber-50 p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-medium text-amber-800">Check-in due</p>
@@ -86,7 +86,7 @@ export function CheckInPromise({
           </div>
           <a
             href={`/decisions/${decisionId}/check-in`}
-            className="inline-flex items-center justify-center rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-zinc-950 transition-colors hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+            className="inline-flex items-center justify-center rounded-xl bg-amber-600 px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
           >
             Check in now →
           </a>
@@ -96,7 +96,7 @@ export function CheckInPromise({
   }
 
   return (
-    <div className="rounded-sm border border-border bg-muted/30 p-4">
+    <div className="rounded-xl border border-border bg-muted/30 p-4">
       <div className="flex items-start gap-3">
         <div className="rounded-full bg-primary/10 p-2" aria-hidden="true">
           <svg

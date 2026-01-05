@@ -49,9 +49,9 @@ export function LevelHintChips({
 
   return (
     <div className="space-y-3">
-      <div className="text-sm text-zinc-400">
+      <div className="text-sm text-muted-foreground">
         What&apos;s this about?{' '}
-        <span className="text-zinc-500">(optional)</span>
+        <span className="text-muted-foreground">(optional)</span>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -66,15 +66,15 @@ export function LevelHintChips({
               disabled={disabled}
               className={cn(
                 'flex flex-col items-start border px-3 py-2 text-left transition-colors',
-                'focus:outline-none focus:ring-2 focus:ring-zinc-500',
+                'focus:outline-none focus:ring-2 focus:ring-ring',
                 isSelected
-                  ? 'bg-zinc-800 border-zinc-500 text-zinc-100'
-                  : 'bg-transparent border-zinc-700 text-zinc-300 hover:bg-zinc-900',
+                  ? 'bg-muted border-input text-foreground'
+                  : 'bg-transparent border-border text-foreground/80 hover:bg-card',
                 disabled && 'opacity-50 cursor-not-allowed',
               )}
             >
               <span className="text-sm font-medium">{opt.label}</span>
-              <span className="mt-0.5 text-xs text-zinc-500">
+              <span className="mt-0.5 text-xs text-muted-foreground">
                 {opt.subtext}
               </span>
             </button>
@@ -82,11 +82,11 @@ export function LevelHintChips({
         })}
       </div>
 
-      <p className="text-xs text-zinc-500">
+      <p className="text-xs text-muted-foreground">
         Marketing &amp; Sales? Usually{' '}
-        <span className="text-zinc-400">Strategy</span> (go-to-market, pricing)
-        or <span className="text-zinc-400">Operations</span> (pipeline,
-        partnerships).
+        <span className="text-muted-foreground">Strategy</span> (go-to-market,
+        pricing) or <span className="text-muted-foreground">Operations</span>{' '}
+        (pipeline, partnerships).
       </p>
     </div>
   )

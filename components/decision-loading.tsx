@@ -48,7 +48,7 @@ export function DecisionLoading({
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-0 py-8 sm:py-12">
-      <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-zinc-100 mb-6 sm:mb-8 break-words">
+      <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mb-6 sm:mb-8 break-words">
         {question}
       </h1>
 
@@ -63,17 +63,19 @@ export function DecisionLoading({
               {isComplete ? (
                 <>
                   <Check
-                    className="w-4 h-4 text-zinc-400 shrink-0"
+                    className="w-4 h-4 text-muted-foreground shrink-0"
                     strokeWidth={2}
                   />
-                  <span className="font-mono text-sm text-zinc-400">
+                  <span className="font-mono text-sm text-muted-foreground">
                     {step.done}
                   </span>
                 </>
               ) : (
                 <>
-                  <span className="text-zinc-500 select-none shrink-0">•</span>
-                  <span className="font-mono text-sm text-zinc-300 animate-pulse">
+                  <span className="text-muted-foreground select-none shrink-0">
+                    •
+                  </span>
+                  <span className="font-mono text-sm text-foreground animate-pulse">
                     {step.active}
                   </span>
                 </>

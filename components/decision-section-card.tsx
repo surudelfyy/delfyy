@@ -17,19 +17,19 @@ export function DecisionSectionCard({
 
   return (
     <div
-      className={`p-4 rounded-sm border transition-all ${
+      className={`p-4 rounded-xl border transition-all ${
         action
           ? 'bg-blue-950/30 border-blue-800/60'
           : highlight
-            ? 'bg-zinc-900 border-zinc-800'
-            : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'
+            ? 'bg-card border-border'
+            : 'bg-background border-border hover:border-input'
       }`}
     >
-      <p className="text-[11px] font-semibold text-zinc-600 uppercase tracking-wider mb-2">
+      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
         {label}
       </p>
       <p
-        className={`leading-relaxed ${action ? 'text-blue-200' : 'text-zinc-100'} ${
+        className={`leading-relaxed ${action ? 'text-blue-200' : 'text-foreground'} ${
           highlight ? 'font-medium' : ''
         }`}
       >

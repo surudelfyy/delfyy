@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Logo } from '@/components/logo'
 
 export default async function DashboardLayout({
   children,
@@ -16,19 +17,13 @@ export default async function DashboardLayout({
   if (!user) redirect('/login')
 
   return (
-    <div className="min-h-screen bg-zinc-950 overflow-x-hidden">
-      <header className="border-b border-zinc-800 bg-zinc-950">
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <header className="border-b border-border bg-background">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 sm:px-6 py-3">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <Image
-              src="/delfyylogo.svg"
-              alt="Delfyy"
-              width={100}
-              height={18}
-              className="h-auto"
-              priority
-            />
+            <Logo width={100} className="text-foreground" />
           </Link>
+          <ThemeToggle />
         </div>
       </header>
       <main className="px-4 sm:px-6 lg:px-8">

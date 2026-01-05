@@ -77,13 +77,13 @@ export default async function CheckInCompletePage({
         {content.icon}
       </div>
 
-      <h1 className="font-heading mb-2 text-2xl font-bold tracking-tight">
+      <h1 className="mb-2 text-2xl font-bold tracking-tight">
         {content.title}
       </h1>
       <p className="mb-8 text-muted-foreground">{content.subtitle}</p>
 
       {totalDecisions > 0 && (
-        <div className="mb-8 rounded-sm border bg-card p-6 text-left">
+        <div className="mb-8 rounded-xl border bg-card p-6 text-left">
           <p className="mb-1 text-sm text-muted-foreground">
             Your track record
           </p>
@@ -102,13 +102,13 @@ export default async function CheckInCompletePage({
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
         <Link
           href="/decide"
-          className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
           Make another decision
         </Link>
         <Link
           href="/dashboard"
-          className="inline-flex items-center justify-center rounded-md border border-input bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="inline-flex items-center justify-center rounded-xl border border-input bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
           Back to dashboard
         </Link>

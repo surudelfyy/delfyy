@@ -15,12 +15,20 @@ interface DecisionActionsProps {
   buttonSize?: ButtonSize
 }
 
-export function DecisionActions({ memo, decisionId, buttonSize = 'default' }: DecisionActionsProps) {
+export function DecisionActions({
+  memo,
+  decisionId,
+  buttonSize = 'default',
+}: DecisionActionsProps) {
   const [copiedMarkdown, setCopiedMarkdown] = useState(false)
 
   const buildMarkdown = () => {
     const base = decisionMemoToMarkdown(memo)
-    return renderDecisionView({ memoMarkdown: base, tone: 'calm-founder', channel: 'markdown' }).markdown
+    return renderDecisionView({
+      memoMarkdown: base,
+      tone: 'calm-founder',
+      channel: 'markdown',
+    }).markdown
   }
 
   const downloadMarkdown = () => {
@@ -60,7 +68,12 @@ export function DecisionActions({ memo, decisionId, buttonSize = 'default' }: De
 
   return (
     <div className="relative group inline-flex items-center gap-2">
-      <Button variant="outline" size={buttonSize} onClick={copyDecision} className="gap-2">
+      <Button
+        variant="outline"
+        size={buttonSize}
+        onClick={copyDecision}
+        className="gap-2"
+      >
         {copiedMarkdown ? (
           <>
             <Check className="h-4 w-4 text-green-600" />
@@ -73,12 +86,15 @@ export function DecisionActions({ memo, decisionId, buttonSize = 'default' }: De
           </>
         )}
       </Button>
-      <Button variant="ghost" size={buttonSize} onClick={downloadMarkdown} className="gap-2 text-zinc-400">
+      <Button
+        variant="ghost"
+        size={buttonSize}
+        onClick={downloadMarkdown}
+        className="gap-2 text-muted-foreground"
+      >
         <Copy className="h-4 w-4" />
         Download .md
       </Button>
     </div>
   )
 }
-
-

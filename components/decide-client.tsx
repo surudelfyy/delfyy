@@ -149,14 +149,14 @@ export function DecideClient() {
   const showStatus = processing && !error
 
   return (
-    <main className="relative min-h-screen bg-zinc-950">
+    <main className="relative min-h-screen bg-background">
       <header className="flex items-center justify-between px-6 py-4">
-        <div className="text-sm uppercase tracking-wide text-zinc-500">
+        <div className="text-sm uppercase tracking-wide text-muted-foreground">
           Decide
         </div>
         <a
           href="/dashboard"
-          className="text-sm text-zinc-400 border border-zinc-700 px-3 py-2 hover:border-zinc-500 hover:text-zinc-300"
+          className="text-sm text-muted-foreground border border-border px-3 py-2 hover:border-input hover:text-foreground"
         >
           Cancel
         </a>
@@ -166,7 +166,7 @@ export function DecideClient() {
         {showForm && (
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="space-y-3">
-              <label className="block text-sm font-semibold text-zinc-200">
+              <label className="block text-sm font-semibold text-foreground/90">
                 What decision are you making?
               </label>
               <textarea
@@ -184,19 +184,19 @@ export function DecideClient() {
                 }}
                 maxLength={500}
                 rows={4}
-                className="w-full border border-zinc-800 bg-zinc-950 px-4 py-3 text-base text-zinc-50 focus:border-zinc-50 focus:outline-none resize-none placeholder:text-zinc-600"
+                className="w-full border border-border bg-background px-4 py-3 text-base text-foreground focus:border-foreground focus:outline-none resize-none placeholder:text-muted-foreground"
                 placeholder="e.g. Should we pause feature work to harden reliability right now?"
               />
-              <div className="flex items-center justify-between text-xs text-zinc-500">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>{question.length}/500</span>
                 {questionError && (
-                  <span className="text-rose-500">{questionError}</span>
+                  <span className="text-destructive">{questionError}</span>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm text-zinc-400">Common decisions</p>
+              <p className="text-sm text-muted-foreground">Common decisions</p>
               <ExampleCards
                 selectedCategory={levelHint}
                 onSelect={(q: string) => {
@@ -216,7 +216,7 @@ export function DecideClient() {
             <button
               type="submit"
               disabled={!hasValidQuestion(question) || processing}
-              className="w-full border border-zinc-50 bg-zinc-50 px-4 py-3 text-zinc-950 text-sm font-semibold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:bg-transparent hover:text-zinc-50 transition-colors"
+              className="w-full border border-foreground bg-foreground px-4 py-3 text-background text-sm font-semibold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:bg-transparent hover:text-foreground transition-colors"
             >
               Make decision
             </button>
@@ -230,7 +230,7 @@ export function DecideClient() {
               currentStep={currentStepId}
             />
             {timedOut && (
-              <div className="text-sm text-zinc-500">
+              <div className="text-sm text-muted-foreground">
                 This is taking longer than usual.
                 <button
                   type="button"
@@ -251,13 +251,13 @@ export function DecideClient() {
         {error && (
           <div className="mt-6 text-center space-y-3">
             <div className="text-3xl">⚠️</div>
-            <div className="text-lg font-semibold text-zinc-50">
+            <div className="text-lg font-semibold text-foreground">
               Something went wrong.
             </div>
-            <div className="text-sm text-zinc-300">{error}</div>
+            <div className="text-sm text-foreground/80">{error}</div>
             <button
               type="button"
-              className="border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 hover:border-zinc-50 hover:text-zinc-50"
+              className="border border-border px-4 py-2 text-sm font-medium text-foreground/80 hover:border-foreground hover:text-foreground"
               onClick={() => {
                 setError(null)
                 setProcessing(false)

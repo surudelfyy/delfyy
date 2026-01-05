@@ -90,19 +90,19 @@ export default async function DashboardPage() {
   return (
     <div className="py-4 sm:py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-        <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-zinc-50">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
           Decisions
         </h1>
         <Link
           href="/decide"
-          className="bg-zinc-50 text-zinc-950 text-sm font-medium px-4 py-2 sm:py-2 rounded-sm border border-zinc-50 hover:bg-zinc-200 text-center sm:text-left whitespace-nowrap"
+          className="inline-flex items-center justify-center gap-1 h-11 pl-5 pr-4 bg-primary text-primary-foreground border border-primary shadow-sm text-sm font-medium rounded-xl hover:bg-primary/90 transition-colors duration-150"
         >
           + New decision
         </Link>
       </div>
 
       {stats.total > 0 && (
-        <p className="text-xs sm:text-sm text-zinc-500 mb-4 sm:mb-6">
+        <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6">
           {stats.total} decision{stats.total !== 1 ? 's' : ''} · {stats.worked}{' '}
           successful · {stats.didntWork} failed
         </p>
@@ -111,13 +111,13 @@ export default async function DashboardPage() {
       {sortedDecisions.length > 0 ? (
         <DecisionList decisions={sortedDecisions as DecisionRowType[]} />
       ) : (
-        <div className="border border-dashed border-zinc-800 py-8 sm:py-12 text-center rounded-sm">
-          <p className="mb-4 text-zinc-500 text-sm sm:text-base">
+        <div className="border border-dashed border-border py-8 sm:py-12 text-center rounded-xl">
+          <p className="mb-4 text-muted-foreground text-sm sm:text-base">
             No decisions yet
           </p>
           <Link
             href="/decide"
-            className="text-zinc-50 hover:underline text-sm sm:text-base"
+            className="text-foreground hover:underline text-sm sm:text-base"
           >
             Make your first decision →
           </Link>

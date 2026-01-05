@@ -9,19 +9,28 @@ import {
 } from '@/lib/utils/format-decision-text'
 
 const tierConfig: Record<string, { label: string; className: string }> = {
-  high: { label: 'High confidence', className: 'bg-indigo-900 text-zinc-50' },
-  good: { label: 'Good confidence', className: 'bg-indigo-900 text-zinc-50' },
-  moderate: { label: 'Moderate', className: 'bg-violet-600 text-zinc-50' },
+  high: {
+    label: 'High confidence',
+    className: 'bg-indigo-900 text-foreground',
+  },
+  good: {
+    label: 'Good confidence',
+    className: 'bg-indigo-900 text-foreground',
+  },
+  moderate: { label: 'Moderate', className: 'bg-violet-600 text-foreground' },
   directional: {
     label: 'Directional',
-    className: 'bg-violet-600 text-zinc-50',
+    className: 'bg-violet-600 text-foreground',
   },
-  exploratory: { label: 'Provisional', className: 'bg-slate-400 text-zinc-50' },
+  exploratory: {
+    label: 'Provisional',
+    className: 'bg-slate-400 text-foreground',
+  },
 }
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[13px] font-semibold text-zinc-400 tracking-tight font-heading mb-3">
+    <p className="text-[13px] font-semibold text-muted-foreground tracking-tight mb-3">
       {children}
     </p>
   )
@@ -45,7 +54,7 @@ function MemoText({ text }: { text?: string }) {
           return (
             <ul
               key={idx}
-              className="list-disc ml-5 space-y-1 text-zinc-300 leading-relaxed"
+              className="list-disc ml-5 space-y-1 text-foreground/80 leading-relaxed"
             >
               {lines.map((l, i) => (
                 <li key={i}>
@@ -59,7 +68,7 @@ function MemoText({ text }: { text?: string }) {
           return (
             <div key={idx} className="space-y-2">
               {lines.map((l, i) => (
-                <p key={i} className="text-zinc-300 leading-relaxed">
+                <p key={i} className="text-foreground/80 leading-relaxed">
                   {cleanText(fixContractions(l))}
                 </p>
               ))}
@@ -67,7 +76,7 @@ function MemoText({ text }: { text?: string }) {
           )
         }
         return (
-          <p key={idx} className="text-zinc-300 leading-relaxed">
+          <p key={idx} className="text-foreground/80 leading-relaxed">
             {cleanText(fixContractions(block))}
           </p>
         )
@@ -95,7 +104,7 @@ export function DecisionCardDisplay({
     <div className="memo space-y-16">
       {/* Hero: The Call */}
       <section>
-        <div className="bg-zinc-950 rounded-2xl border border-zinc-800 shadow-sm p-8 md:p-10">
+        <div className="bg-background rounded-xl border border-border shadow-sm p-8 md:p-10">
           <div className="flex items-center justify-between mb-6">
             <Label>The Call</Label>
             <span
@@ -105,18 +114,18 @@ export function DecisionCardDisplay({
             </span>
           </div>
 
-          <p className="font-heading text-[22px] md:text-2xl font-bold text-zinc-50 leading-snug tracking-tight mb-4">
+          <p className="text-[22px] md:text-2xl font-bold text-foreground leading-snug tracking-tight mb-4">
             {decision || 'No recommendation generated'}
           </p>
 
           {confidence && (
-            <p className="text-zinc-500 leading-relaxed text-sm">
+            <p className="text-muted-foreground leading-relaxed text-sm">
               {confidence}
             </p>
           )}
         </div>
 
-        <p className="text-center text-sm text-zinc-600 mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           That&apos;s one less thing living in your head.
         </p>
       </section>
@@ -126,7 +135,7 @@ export function DecisionCardDisplay({
         <section>
           <div className="border-l-4 border-blue-400 bg-blue-50/50 rounded-r-xl pl-6 pr-6 py-5">
             <Label>Your Next Step</Label>
-            <p className="text-zinc-50 leading-relaxed">
+            <p className="text-foreground leading-relaxed">
               {cleanText(fixContractions(card.summary.do_next))}
             </p>
           </div>
@@ -138,7 +147,7 @@ export function DecisionCardDisplay({
         <section className="space-y-8">
           <Label>Why This Call</Label>
           <div>
-            <h3 className="font-heading font-bold text-zinc-50 tracking-tight mb-2">
+            <h3 className="font-bold text-foreground tracking-tight mb-2">
               Change course if
             </h3>
             <MemoText text={card.summary.change_course_if.join('\n')} />
@@ -160,7 +169,7 @@ export function DecisionCardDisplay({
           <MemoText text={card.details.watch_for.join('\n')} />
           {card.details.approach && (
             <div>
-              <h3 className="font-heading font-bold text-zinc-50 tracking-tight mb-2">
+              <h3 className="font-bold text-foreground tracking-tight mb-2">
                 Approach
               </h3>
               <MemoText text={card.details.approach} />
@@ -179,7 +188,7 @@ export function DecisionCardDisplay({
 
           {card.pattern.principle && (
             <div>
-              <h3 className="font-heading font-bold text-zinc-50 tracking-tight mb-2">
+              <h3 className="font-bold text-foreground tracking-tight mb-2">
                 The Pattern
               </h3>
               <MemoText text={card.pattern.principle} />
@@ -188,7 +197,7 @@ export function DecisionCardDisplay({
 
           {card.pattern.mechanism && (
             <div>
-              <h3 className="font-heading font-bold text-zinc-50 tracking-tight mb-2">
+              <h3 className="font-bold text-foreground tracking-tight mb-2">
                 Why It Works
               </h3>
               <MemoText text={card.pattern.mechanism} />
@@ -202,7 +211,7 @@ export function DecisionCardDisplay({
                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                    <span className="text-[12px] font-semibold text-emerald-700 tracking-tight font-heading">
+                    <span className="text-[12px] font-semibold text-emerald-700 tracking-tight">
                       Where It Worked
                     </span>
                   </div>
@@ -216,7 +225,7 @@ export function DecisionCardDisplay({
                 <div className="bg-red-50 border border-red-200 rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <XCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-                    <span className="text-[12px] font-semibold text-red-700 tracking-tight font-heading">
+                    <span className="text-[12px] font-semibold text-red-700 tracking-tight">
                       Where It Failed
                     </span>
                   </div>
@@ -233,13 +242,15 @@ export function DecisionCardDisplay({
       {/* Footnotes */}
       {(card.details.watch_for.length > 0 ||
         card.summary.change_course_if.length > 0) && (
-        <section className="border-t border-zinc-900 pt-8 space-y-4">
+        <section className="border-t border-border pt-8 space-y-4">
           {card.details.watch_for.length > 0 && (
             <div className="flex gap-3 text-sm">
-              <Eye className="h-4 w-4 text-zinc-600 mt-0.5 flex-shrink-0" />
+              <Eye className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
               <div>
-                <span className="font-medium text-zinc-300">Revisit if: </span>
-                <span className="text-zinc-500">
+                <span className="font-medium text-foreground/80">
+                  Revisit if:{' '}
+                </span>
+                <span className="text-muted-foreground">
                   {card.details.watch_for.join(' ')}
                 </span>
               </div>
@@ -250,10 +261,10 @@ export function DecisionCardDisplay({
             <div className="flex gap-3 text-sm">
               <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
               <div>
-                <span className="font-medium text-zinc-300">
+                <span className="font-medium text-foreground/80">
                   Change course if:{' '}
                 </span>
-                <span className="text-zinc-500">
+                <span className="text-muted-foreground">
                   {card.summary.change_course_if.join(' ')}
                 </span>
               </div>

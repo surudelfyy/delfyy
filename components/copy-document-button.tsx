@@ -2,7 +2,10 @@
 
 import { useState } from 'react'
 import { Copy, Check } from 'lucide-react'
-import { copyAsDocument, type DecisionDocument } from '@/lib/utils/copy-as-document'
+import {
+  copyAsDocument,
+  type DecisionDocument,
+} from '@/lib/utils/copy-as-document'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -11,7 +14,10 @@ interface CopyDocumentButtonProps {
   className?: string
 }
 
-export function CopyDocumentButton({ decision, className }: CopyDocumentButtonProps) {
+export function CopyDocumentButton({
+  decision,
+  className,
+}: CopyDocumentButtonProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -30,8 +36,8 @@ export function CopyDocumentButton({ decision, className }: CopyDocumentButtonPr
     <button
       onClick={handleCopy}
       className={cn(
-        'flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-50 transition-colors',
-        className
+        'flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors',
+        className,
       )}
     >
       {copied ? (
@@ -48,4 +54,3 @@ export function CopyDocumentButton({ decision, className }: CopyDocumentButtonPr
     </button>
   )
 }
-

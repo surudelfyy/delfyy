@@ -57,8 +57,8 @@ export function ExampleCards({
             onSelect(question)
           }}
           className={cn(
-            'bg-zinc-900 border border-zinc-800 p-4 text-left',
-            'hover:border-zinc-600 transition-colors rounded-sm text-sm text-zinc-200',
+            'bg-card border border-border p-4 text-left',
+            'hover:border-input transition-colors rounded-xl text-sm text-foreground/90',
             disabled && 'opacity-50 pointer-events-none cursor-not-allowed',
           )}
         >

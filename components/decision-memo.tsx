@@ -8,11 +8,10 @@ interface DecisionMemoProps {
 
 export function DecisionMemo({ markdown }: DecisionMemoProps) {
   return (
-    <div className="bg-zinc-950 border border-zinc-800 shadow-sm rounded-2xl p-6 md:p-10 max-w-[820px] w-full mx-auto">
+    <div className="bg-background border border-border shadow-sm rounded-xl p-6 md:p-10 max-w-[820px] w-full mx-auto">
       <div className="decision-prose memo">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
       </div>
     </div>
   )
 }
-

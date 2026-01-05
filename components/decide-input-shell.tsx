@@ -2,49 +2,60 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DecisionLoading } from './decision-loading'
 
-const CATEGORY_LABELS = ['Strategy', 'Product', 'Feature', 'Operating'] as const
+const CATEGORY_LABELS = [
+  'Strategy',
+  'Product',
+  'Design & UX',
+  'Operations',
+] as const
 type CategoryLabel = (typeof CATEGORY_LABELS)[number]
 type LevelHint = 'strategy' | 'product' | 'design_ux' | 'operations'
 
 const LABEL_TO_HINT: Record<CategoryLabel, LevelHint> = {
   Strategy: 'strategy',
   Product: 'product',
-  Feature: 'design_ux',
-  Operating: 'operations',
-}
-
-const EXAMPLE_QUESTIONS: Record<LevelHint, string[]> = {
-  strategy: [
-    'Who should I target first?',
-    'Free tier or paid-only?',
-    'Pivot or persist?',
-  ],
-  product: [
-    'What feature should I build next?',
-    'Launch now or keep building?',
-    'MVP or full product first?',
-  ],
-  design_ux: [
-    'Should the default be on or off?',
-    'Simplify the flow or add guidance?',
-    'Reduce steps or add more clarity?',
-  ],
-  operations: [
-    'Should I hire or outsource?',
-    'Handle support myself or hire?',
-    'Quit my job or stay employed?',
-  ],
+  'Design & UX': 'design_ux',
+  Operations: 'operations',
 }
 
 const PLACEHOLDERS = [
+  'What decision are you stuck on?',
+  'Should I charge from day one or offer a free tier?',
   'Who should I target first?',
-  'What feature should I build next?',
-  'Should the default be on or off?',
   'Should I hire or outsource?',
 ] as const
+
+const EXAMPLE_QUESTIONS: Record<CategoryLabel | 'default', string[]> = {
+  Strategy: [
+    'Should I raise or bootstrap?',
+    'Free tier or paid-only?',
+    'Pivot or persist?',
+  ],
+  Product: [
+    'Launch now or keep building?',
+    'Build feature X or fix onboarding?',
+    'MVP or full product first?',
+  ],
+  'Design & UX': [
+    'User interviews or analytics first?',
+    'Simplify the flow or add guidance?',
+    'Test with 5 users or launch and learn?',
+  ],
+  Operations: [
+    'Hire my first dev or outsource?',
+    'Handle support myself or hire?',
+    'Quit my job or stay employed?',
+  ],
+  default: [
+    'Should I raise or bootstrap?',
+    'Free tier or paid-only?',
+    'Pivot or persist?',
+  ],
+}
 
 export function DecideInputShell() {
   const router = useRouter()
@@ -205,9 +216,6 @@ export function DecideInputShell() {
     }
   }, [placeholderIndex, isFocused, question])
 
-  const counterColor =
-    question.length > 480 ? 'text-amber-500' : 'text-zinc-500'
-
   const handleCategory = (category: CategoryLabel) => {
     setSelectedCategory((prev) => (prev === category ? null : category))
   }
@@ -222,11 +230,19 @@ export function DecideInputShell() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="space-y-2">
+    <div>
+      {/* Main container */}
+      <div
+        className={cn(
+          'bg-card border border-border rounded-xl',
+          'p-4 sm:p-6',
+          'transition-all duration-150',
+          'focus-within:border-ring',
+        )}
+      >
+        {/* Textarea */}
         <textarea
           id="decision-input"
-          aria-describedby={question.length > 400 ? 'char-count' : undefined}
           value={question}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
@@ -238,94 +254,124 @@ export function DecideInputShell() {
             setIsFocused(false)
           }}
           placeholder={placeholder}
-          className="w-full bg-zinc-900 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 placeholder:italic p-3 sm:p-4 text-sm sm:text-base resize-none focus:outline-none focus:border-zinc-500 rounded-sm min-h-[100px] sm:min-h-[120px] disabled:opacity-60 disabled:pointer-events-none"
+          className="w-full min-h-[120px] bg-transparent border-none focus:ring-0 focus:outline-none text-foreground placeholder:text-muted-foreground text-base sm:text-lg resize-none"
           maxLength={500}
           disabled={isSubmitting}
         />
-      </div>
 
-      {question.length > 400 && (
-        <div id="char-count" className={`text-xs ${counterColor}`}>
-          {question.length} of 500 characters used
+        {/* Character counter */}
+        <div className="text-sm text-muted-foreground text-right">
+          {question.length}/500
         </div>
-      )}
 
-      {error && (
-        <div className="text-sm text-rose-500 p-3 bg-rose-900/20 border border-rose-800 rounded-sm">
-          {error}
-        </div>
-      )}
+        {/* Error message */}
+        {error && (
+          <div className="text-sm text-destructive mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-xl">
+            {error}
+          </div>
+        )}
 
-      <div className="space-y-2">
-        <button
-          type="button"
-          onClick={() => void handleSubmit()}
-          disabled={!canSubmit}
-          aria-busy={isSubmitting}
-          aria-disabled={!canSubmit}
-          className="w-full border border-zinc-50 bg-zinc-100 text-zinc-900 px-4 py-3 text-sm sm:text-base font-semibold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:bg-transparent hover:text-zinc-50 transition-colors rounded-sm"
-        >
-          {isSubmitting ? 'Processing...' : 'Get decision'}
-        </button>
-        <div className="font-mono text-xs text-zinc-600 text-center hidden sm:block">
-          ⌘ + Enter
-        </div>
-      </div>
+        {/* Bottom row: chips left, submit right (desktop) */}
+        <div className="mt-4 pt-4 border-t border-border">
+          {/* Desktop layout: chips and button in same row */}
+          <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-4">
+            {/* Category chips */}
+            <div className="flex flex-wrap gap-2">
+              {CATEGORY_LABELS.map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => handleCategory(label)}
+                  className={cn(
+                    'px-4 py-2 text-sm font-medium rounded-full transition-colors duration-150',
+                    selectedCategory === label
+                      ? 'bg-primary text-primary-foreground border border-primary'
+                      : 'bg-secondary text-secondary-foreground border border-border hover:bg-accent',
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
 
-      <div className="space-y-2">
-        <div className="flex flex-wrap gap-2 justify-center">
-          {CATEGORY_LABELS.map((category) => (
+            {/* Submit button - icon only on desktop */}
             <button
-              key={category}
               type="button"
-              onClick={() => handleCategory(category)}
-              role="radio"
-              aria-checked={selectedCategory === category}
+              onClick={() => void handleSubmit()}
+              disabled={!canSubmit}
               className={cn(
-                'px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border transition-colors rounded-sm',
-                selectedCategory === category
-                  ? 'bg-zinc-100 text-zinc-900 border-zinc-100'
-                  : 'bg-transparent text-zinc-400 border-zinc-700 hover:border-zinc-500 hover:text-zinc-300',
+                'h-11 w-11 rounded-xl flex items-center justify-center',
+                'bg-secondary border border-border text-foreground',
+                'hover:bg-accent transition-colors duration-150',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'shrink-0',
+              )}
+              aria-label="Submit decision"
+            >
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Mobile layout: chips then full-width button */}
+          <div className="sm:hidden space-y-4">
+            {/* Category chips */}
+            <div className="flex flex-wrap gap-2">
+              {CATEGORY_LABELS.map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => handleCategory(label)}
+                  className={cn(
+                    'px-4 py-2 text-sm font-medium rounded-full transition-colors duration-150',
+                    selectedCategory === label
+                      ? 'bg-primary text-primary-foreground border border-primary'
+                      : 'bg-secondary text-secondary-foreground border border-border hover:bg-accent',
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Submit button - full width on mobile */}
+            <button
+              type="button"
+              onClick={() => void handleSubmit()}
+              disabled={!canSubmit}
+              className={cn(
+                'h-11 w-full rounded-xl flex items-center justify-center',
+                'bg-secondary border border-border text-foreground font-medium',
+                'hover:bg-accent transition-colors duration-150',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
               )}
             >
-              {category}
+              Get Decision
             </button>
-          ))}
+          </div>
         </div>
       </div>
 
-      <div className="space-y-3">
-        <p className="text-xs sm:text-sm text-zinc-400 text-center sm:text-left">
+      {/* Helper text outside container */}
+      <p className="text-sm text-muted-foreground mt-4 text-center">
+        The more context you give, the better the decision.
+      </p>
+
+      {/* Example question cards */}
+      <div className="mt-6">
+        <p className="text-muted-foreground text-sm mb-3">
           Or try one of these:
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-          {EXAMPLE_QUESTIONS[
-            selectedCategory ? LABEL_TO_HINT[selectedCategory] : 'strategy'
-          ].map((example) => (
+          {EXAMPLE_QUESTIONS[selectedCategory || 'default'].map((q) => (
             <button
-              key={example}
+              key={q}
               type="button"
-              onClick={() => {
-                if (isSubmitting) return
-                setQuestion(example)
-                requestAnimationFrame(() => {
-                  if (typeof window !== 'undefined') {
-                    const el =
-                      document.querySelector<HTMLTextAreaElement>('textarea')
-                    if (el) {
-                      el.style.height = 'auto'
-                      el.style.height = `${el.scrollHeight}px`
-                    }
-                  }
-                })
-              }}
-              className={cn(
-                'bg-zinc-900 border border-zinc-800 p-3 sm:p-4 text-left hover:border-zinc-600 transition-colors rounded-sm text-xs sm:text-sm text-zinc-200',
-                isSubmitting &&
-                  'opacity-50 pointer-events-none cursor-not-allowed',
-              )}
+              onClick={() => setQuestion(q)}
+              className="bg-card border border-border p-4 text-left hover:bg-accent hover:border-ring transition-all duration-150 rounded-xl group"
             >
-              {example}
+              <p className="text-muted-foreground text-sm group-hover:text-foreground transition-colors">
+                {q}
+              </p>
             </button>
           ))}
         </div>

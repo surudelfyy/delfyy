@@ -2,7 +2,13 @@ import Link from 'next/link'
 import { login } from '../actions'
 import { Page } from '@/components/layout/page'
 import { Stack } from '@/components/layout/stack'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -30,13 +36,13 @@ export default async function LoginPage({
         <CardContent className="p-0">
           <Stack size={4}>
             {params.error && (
-              <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm">
+              <div className="bg-destructive/10 text-destructive p-3 rounded-xl text-sm">
                 {params.error}
               </div>
             )}
 
             {params.message && (
-              <div className="bg-green-50 text-green-600 p-3 rounded-md text-sm">
+              <div className="bg-green-50 text-green-600 p-3 rounded-xl text-sm">
                 {params.message}
               </div>
             )}
@@ -50,7 +56,12 @@ export default async function LoginPage({
 
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" name="password" type="password" required />
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                  />
                 </div>
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">

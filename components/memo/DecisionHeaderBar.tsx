@@ -75,7 +75,7 @@ export function DecisionHeaderBar({
     <header className="flex items-center justify-between py-3 sm:py-4 mb-4 sm:mb-6">
       <Link
         href="/dashboard"
-        className="flex items-center gap-1 sm:gap-2 text-zinc-400 hover:text-zinc-100 transition-colors"
+        className="flex items-center gap-1 sm:gap-2 text-muted-foreground hover:text-foreground transition-colors"
         aria-label="Back to dashboard"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -85,7 +85,7 @@ export function DecisionHeaderBar({
       <div className="flex items-center gap-1 sm:gap-2">
         <button
           onClick={copyAsMarkdown}
-          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-zinc-800 hover:bg-zinc-700 rounded-sm transition-colors"
+          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-card hover:bg-muted border border-border rounded-xl transition-all duration-150"
           title="Copy document"
           aria-label="Copy document"
         >
@@ -104,7 +104,7 @@ export function DecisionHeaderBar({
 
         <button
           onClick={exportMarkdown}
-          className="p-2 text-zinc-400 hover:text-zinc-100"
+          className="p-2 text-muted-foreground hover:text-foreground"
           title="Export"
           aria-label="Export"
         >
