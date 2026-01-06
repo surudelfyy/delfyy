@@ -1,26 +1,16 @@
-import { createClient } from '@/lib/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { createClient } from '@/lib/supabase/server'
+import { withAuth } from '@/lib/utils/api-auth'
 
 const outcomeSchema = z.object({
   outcome: z.enum(['in_progress', 'successful', 'failed']),
 })
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id: decisionId } = await params
-  const supabase = await createClient()
+type RouteContext = { params: Promise<{ id: string }> }
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+export const PATCH = withAuth<RouteContext>(async (request, ctx, user) => {
+  const { id: decisionId } = await ctx.params
 
   const idSchema = z.string().uuid()
   const idResult = idSchema.safeParse(decisionId)
@@ -36,6 +26,8 @@ export async function PATCH(
       { status: 400 },
     )
   }
+
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('decisions')
@@ -53,4 +45,4 @@ export async function PATCH(
   }
 
   return NextResponse.json({ success: true, decision: data })
-}
+})

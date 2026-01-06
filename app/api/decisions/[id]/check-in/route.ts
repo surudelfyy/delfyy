@@ -1,6 +1,6 @@
-import type { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { withAuth } from '@/lib/utils/api-auth'
 
 const decisionIdSchema = z.string().uuid()
 
@@ -9,19 +9,10 @@ const checkInSchema = z.object({
   note: z.string().max(1000).optional(),
 })
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient()
+type RouteContext = { params: Promise<{ id: string }> }
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-
-  if (authError || !user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const { id: rawId } = await params
+export const POST = withAuth<RouteContext>(async (request, ctx, user) => {
+  const { id: rawId } = await ctx.params
   const idParsed = decisionIdSchema.safeParse(rawId)
   if (!idParsed.success) {
     return Response.json({ error: 'Invalid decision ID' }, { status: 400 })
@@ -37,8 +28,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const parsed = checkInSchema.safeParse(body)
   if (!parsed.success) {
-    return Response.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
+    return Response.json(
+      { error: 'Invalid request', details: parsed.error.flatten() },
+      { status: 400 },
+    )
   }
+
+  const supabase = await createClient()
 
   const { data: decision, error: fetchError } = await supabase
     .from('decisions')
@@ -50,12 +46,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return Response.json({ error: 'Decision not found' }, { status: 404 })
   }
 
+  // Defense-in-depth: verify ownership even with RLS
   if (decision.user_id !== user.id) {
     return Response.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
   if (decision.check_in_outcome !== 'pending') {
-    return Response.json({ error: 'Check-in already completed' }, { status: 409 })
+    return Response.json(
+      { error: 'Check-in already completed' },
+      { status: 409 },
+    )
   }
 
   const now = new Date().toISOString()
@@ -93,7 +93,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     success: true,
     outcome: parsed.data.outcome,
     extended: parsed.data.outcome === 'too_early',
-    newCheckInDate: parsed.data.outcome === 'too_early' ? (updateData.check_in_date as string) : null,
+    newCheckInDate:
+      parsed.data.outcome === 'too_early'
+        ? (updateData.check_in_date as string)
+        : null,
   })
-}
-
+})

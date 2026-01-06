@@ -1,5 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { withAuth } from '@/lib/utils/api-auth'
 import Stripe from 'stripe'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
@@ -13,7 +14,9 @@ const stripe =
       })
     : null
 
-export async function POST() {
+type RouteContext = { params: Promise<Record<string, string>> }
+
+export const POST = withAuth<RouteContext>(async (_req, _ctx, user) => {
   if (!stripe || !priceId || !appUrl) {
     return NextResponse.json(
       { error: 'Stripe not configured' },
@@ -22,15 +25,6 @@ export async function POST() {
   }
 
   const supabase = await createClient()
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -63,4 +57,4 @@ export async function POST() {
   })
 
   return NextResponse.json({ url: session.url })
-}
+})

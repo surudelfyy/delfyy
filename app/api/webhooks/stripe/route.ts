@@ -43,25 +43,72 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
-  const stripeEvent = event as { data?: { object?: unknown }; type?: string }
+  const stripeEvent = event as {
+    id?: string
+    data?: { object?: unknown }
+    type?: string
+  }
 
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data?.object as {
+      id?: string
       metadata?: { user_id?: string | null }
       customer?: string | null
     }
     const userId = session?.metadata?.user_id
+    const sessionId = session?.id
 
-    if (userId) {
-      await supabase
-        .from('profiles')
-        .update({
-          has_lifetime_access: true,
-          stripe_customer_id: (session.customer as string) ?? null,
-          paid_at: new Date().toISOString(),
-        })
-        .eq('id', userId)
+    // Validate required fields
+    if (!userId) {
+      console.error('[WEBHOOK] Missing user_id in metadata', { sessionId })
+      return NextResponse.json(
+        { error: 'Missing user_id in metadata' },
+        { status: 400 },
+      )
     }
+
+    // Check: User exists?
+    const { data: existingProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, has_lifetime_access')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (profileError) {
+      console.error('[WEBHOOK] Failed to check profile', profileError)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+    }
+
+    if (!existingProfile) {
+      console.error('[WEBHOOK] User not found', { userId, sessionId })
+      return NextResponse.json({ error: 'User not found' }, { status: 400 })
+    }
+
+    // Idempotency: Already has lifetime access?
+    if (existingProfile.has_lifetime_access) {
+      console.log('[WEBHOOK] User already has lifetime access, skipping', {
+        userId,
+        sessionId,
+      })
+      return NextResponse.json({ received: true, status: 'already_processed' })
+    }
+
+    // Grant lifetime access
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        has_lifetime_access: true,
+        stripe_customer_id: (session.customer as string) ?? null,
+        paid_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+
+    if (updateError) {
+      console.error('[WEBHOOK] Failed to grant access', updateError)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+    }
+
+    console.log('[WEBHOOK] Lifetime access granted', { userId, sessionId })
   }
 
   return NextResponse.json({ received: true })

@@ -42,3 +42,4 @@ next-env.d.ts
 
 # internal docs (AI/reviewer reference only)
 docs/architecture.md
+reports/

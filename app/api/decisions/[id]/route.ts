@@ -1,15 +1,15 @@
-import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { withAuth } from '@/lib/utils/api-auth'
 
-// Next.js 16 RouteContext signature
-export async function GET(
-  _req: NextRequest,
-  ctx: { params: Promise<{ id: string }> },
-) {
+type RouteContext = { params: Promise<{ id: string }> }
+
+export const GET = withAuth<RouteContext>(async (_req, ctx, _user) => {
   const { id } = await ctx.params
   const supabase = await createClient()
+
+  // RLS enforces user_id match as defense-in-depth
   const { data: decision, error } = await supabase
     .from('decisions')
     .select(
@@ -23,12 +23,9 @@ export async function GET(
   }
 
   return NextResponse.json(decision)
-}
+})
 
-export async function DELETE(
-  _req: NextRequest,
-  ctx: { params: Promise<{ id: string }> },
-) {
+export const DELETE = withAuth<RouteContext>(async (_req, ctx, user) => {
   const { id: decisionId } = await ctx.params
 
   const parsed = z.string().uuid().safeParse(decisionId)
@@ -37,13 +34,6 @@ export async function DELETE(
   }
 
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
 
   const { error } = await supabase
     .from('decisions')
@@ -57,12 +47,9 @@ export async function DELETE(
   }
 
   return NextResponse.json({ success: true })
-}
+})
 
-export async function PATCH(
-  request: NextRequest,
-  ctx: { params: Promise<{ id: string }> },
-) {
+export const PATCH = withAuth<RouteContext>(async (request, ctx, user) => {
   try {
     const { id: decisionId } = await ctx.params
 
@@ -105,15 +92,6 @@ export async function PATCH(
     }
 
     const supabase = await createClient()
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const committed_at = new Date().toISOString()
 
     const { data, error: updateError } = await supabase
@@ -154,4 +132,4 @@ export async function PATCH(
       { status: 500 },
     )
   }
-}
+})

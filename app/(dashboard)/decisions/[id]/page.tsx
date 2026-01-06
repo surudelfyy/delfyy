@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DecisionMemoView } from '@/components/decision-memo-view'
 import {
@@ -17,6 +18,12 @@ interface PageProps {
 export default async function DecisionPage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
+
+  // Explicit auth check - defense in depth with RLS
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: decision, error } = await supabase
     .from('decisions')

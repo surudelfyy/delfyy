@@ -1,6 +1,7 @@
 'use server'
 
 import { createServiceClient } from '@/lib/supabase/service'
+import { audit } from '@/lib/utils/audit'
 
 export type UserTier = 'free' | 'paid'
 
@@ -9,6 +10,8 @@ type TierResult = { tier: UserTier; reason: string }
 const PAID_STATUSES = ['active', 'trialing', 'past_due']
 
 export async function getUserTier(userId: string): Promise<TierResult> {
+  audit({ action: 'getUserTier', userId, resourceType: 'subscription' })
+
   const supabase = createServiceClient()
 
   try {
@@ -20,7 +23,10 @@ export async function getUserTier(userId: string): Promise<TierResult> {
       .maybeSingle()
 
     if (error) {
-      return { tier: 'free', reason: `subscriptions_error:${error.code || 'unknown'}` }
+      return {
+        tier: 'free',
+        reason: `subscriptions_error:${error.code || 'unknown'}`,
+      }
     }
 
     if (data?.status && PAID_STATUSES.includes(data.status)) {
@@ -33,4 +39,3 @@ export async function getUserTier(userId: string): Promise<TierResult> {
     return { tier: 'free', reason: `subscriptions_exception:${message}` }
   }
 }
-

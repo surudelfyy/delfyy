@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { withAuth } from '@/lib/utils/api-auth'
 import {
   validationError,
-  unauthorizedError,
   payloadTooLargeError,
   badRequestError,
   rateLimitError,
@@ -34,7 +33,9 @@ const BodySchema = z.object({
     .default({}),
 })
 
-export async function POST(request: NextRequest) {
+type RouteContext = { params: Promise<Record<string, string>> }
+
+export const POST = withAuth<RouteContext>(async (request, _ctx, user) => {
   const requestId = crypto.randomUUID()
 
   // 1. Size check
@@ -45,30 +46,20 @@ export async function POST(request: NextRequest) {
     return payloadTooLargeError()
   }
 
-  // 2. Auth check
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return unauthorizedError()
-  }
-
-  // 3. Rate limit (before JSON parse)
+  // 2. Rate limit
   const { success } = await rateLimit(user.id, 10, 60_000)
   if (!success) {
     logRateLimitHit(user.id, request, { requestId })
     return rateLimitError()
   }
 
-  // 4. CSRF/origin validation
+  // 3. CSRF/origin validation
   const originCheck = verifyOrigin(request)
   if (!originCheck.ok) {
     return csrfError()
   }
 
-  // 5. Parse JSON
+  // 4. Parse JSON
   let body: unknown
   try {
     body = await request.json()
@@ -76,14 +67,14 @@ export async function POST(request: NextRequest) {
     return badRequestError('Invalid JSON')
   }
 
-  // 6. Zod validation
+  // 5. Zod validation
   const parsed = BodySchema.safeParse(body)
   if (!parsed.success) {
     logValidationFailure(request, parsed.error, { requestId })
     return validationError(parsed.error)
   }
 
-  // 7. Call classifier (NO idempotency needed for classify)
+  // 6. Call classifier
   try {
     const result = await classify({
       question: parsed.data.question,
@@ -95,7 +86,8 @@ export async function POST(request: NextRequest) {
       headers: { 'X-Request-Id': requestId },
     })
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Classification failed'
+    const errorMessage =
+      error instanceof Error ? error.message : 'Classification failed'
     return internalServerError(errorMessage)
   }
-}
+})

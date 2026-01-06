@@ -2,7 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { PAID_CONTEXT_LIMIT } from '@/lib/subscription'
+import { getUserTier } from '@/lib/billing/getUserTier'
+import { FREE_CONTEXT_LIMIT, PAID_CONTEXT_LIMIT } from '@/lib/subscription'
 
 export async function saveDefaultContext(
   context: string,
@@ -13,8 +14,13 @@ export async function saveDefaultContext(
   } = await supabase.auth.getUser()
 
   if (!user) return { error: 'Not authenticated' }
-  if (context.length > PAID_CONTEXT_LIMIT)
-    return { error: `Max ${PAID_CONTEXT_LIMIT} characters` }
+
+  // Check tier and apply correct limit
+  const { tier } = await getUserTier(user.id)
+  const limit = tier === 'paid' ? PAID_CONTEXT_LIMIT : FREE_CONTEXT_LIMIT
+
+  if (context.length > limit)
+    return { error: `Context exceeds ${limit} character limit` }
 
   const { error } = await supabase.from('profiles').upsert(
     {
